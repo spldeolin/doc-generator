@@ -27,7 +27,7 @@ public class FieldContainer {
 
     private static final int EXPECTED = 27000;
 
-    private final Collection<Path> paths = Lists.newLinkedList();
+    private final Path path;
 
     private final Collection<FieldDeclaration> all = Lists.newLinkedList();
 
@@ -43,7 +43,7 @@ public class FieldContainer {
     /* package-private */ FieldContainer(Path path) {
         CoidContainer coidContainer = ContainerFactory.coidContainer(path);
         long start = System.currentTimeMillis();
-        paths.add(path);
+        this.path = path;
         coidContainer.getByCoidQualifier()
                 .forEach((classQualifier, coid) -> coid.findAll(FieldDeclaration.class).forEach(field -> {
                     all.add(field);
@@ -75,15 +75,6 @@ public class FieldContainer {
             log.warn("FieldContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（FieldContainer.all[{}]）", EXPECTED,
                     all.size());
         }
-    }
-
-    public void putAll(FieldContainer others) {
-        this.paths.addAll(others.paths);
-        this.all.addAll(others.all);
-        this.byFieldVarQualifier.putAll(others.byFieldVarQualifier);
-        this.varByFieldVarQualifier.putAll(others.varByFieldVarQualifier);
-        this.byClassQualifier.putAll(others.byClassQualifier);
-        this.cmtByFieldVarQualifier.putAll(others.cmtByFieldVarQualifier);
     }
 
 }

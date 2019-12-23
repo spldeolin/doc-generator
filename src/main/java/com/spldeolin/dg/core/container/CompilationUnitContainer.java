@@ -30,7 +30,7 @@ public class CompilationUnitContainer {
 
     private static final int EXPECTED = 5500;
 
-    private final Collection<Path> paths = Lists.newLinkedList();
+    private final Path path;
 
     private final Collection<CompilationUnit> all = Lists.newLinkedList();
 
@@ -48,7 +48,7 @@ public class CompilationUnitContainer {
 
     /* package-private */ CompilationUnitContainer(Path path) {
         long start = System.currentTimeMillis();
-        paths.add(path);
+        this.path = path;
         this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(cu -> {
             all.add(cu);
 
@@ -104,16 +104,6 @@ public class CompilationUnitContainer {
             log.error("StaticJavaParser.parse失败", e);
         }
         return result;
-    }
-
-    public void putAll(CompilationUnitContainer others) {
-        this.paths.addAll(others.paths);
-        this.all.addAll(others.all);
-        this.byPrimaryClassQualifier.putAll(others.byPrimaryClassQualifier);
-        this.byPrimaryClassName.putAll(others.byPrimaryClassName);
-        this.byClassQualifier.putAll(others.byClassQualifier);
-        this.byClassName.putAll(others.byClassName);
-        this.byPackageQualifier.putAll(others.byPackageQualifier);
     }
 
     @Value

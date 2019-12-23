@@ -21,7 +21,7 @@ public class EnumContainer {
 
     private static final int EXPECTED = 5200;
 
-    private final Collection<Path> paths = Lists.newLinkedList();
+    private final Path path;
 
     private final Collection<EnumDeclaration> all = Lists.newLinkedList();
 
@@ -36,7 +36,7 @@ public class EnumContainer {
     /* package-private */ EnumContainer(Path path) {
         CompilationUnitContainer cuContainer = ContainerFactory.compilationUnitContainer(path);
         long start = System.currentTimeMillis();
-        paths.add(path);
+        this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
             cu.findAll(EnumDeclaration.class).forEach(enumDeclaration -> {
                 all.add(enumDeclaration);
@@ -55,15 +55,6 @@ public class EnumContainer {
         if (EXPECTED < all.size() + 100) {
             log.warn("EnumContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（EnumContainer.all[{}]）", EXPECTED, all.size());
         }
-    }
-
-    public void putAll(EnumContainer others) {
-        this.paths.addAll(others.paths);
-        this.all.addAll(others.all);
-        this.byEnumQualifier.putAll(others.byEnumQualifier);
-        this.byPackageQualifier.putAll(others.byPackageQualifier);
-        this.byEnumName.putAll(others.byEnumName);
-        this.enumQulifierByEnumName.putAll(others.enumQulifierByEnumName);
     }
 
 }

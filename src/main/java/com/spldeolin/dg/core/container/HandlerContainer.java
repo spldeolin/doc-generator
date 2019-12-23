@@ -20,7 +20,7 @@ public class HandlerContainer {
 
     private static final int EXPECTED = 200;
 
-    private final Collection<Path> paths = Lists.newLinkedList();
+    private final Path path;
 
     private final Collection<MethodDeclaration> all = Lists.newLinkedList();
 
@@ -30,7 +30,7 @@ public class HandlerContainer {
     /* package-private */ HandlerContainer(Path path) {
         CoidContainer coidContainer = ContainerFactory.coidContainer(path);
         long start = System.currentTimeMillis();
-        paths.add(path);
+        this.path = path;
 
         coidContainer.getAll().stream().filter(this::isController).forEach(coid -> {
 
@@ -62,12 +62,6 @@ public class HandlerContainer {
         return method.getAnnotations().stream().anyMatch(anno -> StringUtils
                 .equalsAny(anno.getNameAsString(), "GetMapping", "PostMapping", "PutMapping", "PatchMapping",
                         "DeleteMapping", "RequestMapping"));
-    }
-
-    public void putAll(HandlerContainer others) {
-        this.paths.addAll(others.paths);
-        this.all.addAll(others.all);
-        this.byController.putAll(others.byController);
     }
 
 }
