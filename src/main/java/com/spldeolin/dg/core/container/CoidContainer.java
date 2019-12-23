@@ -36,7 +36,7 @@ public class CoidContainer {
     private final Multimap<String, String> coidQulifierByCoidName = ArrayListMultimap.create(EXPECTED, 1);
 
     /* package-private */ CoidContainer(Path path) {
-        CuContainer cuContainer = ContainerFactory.compilationUnitContainer(path);
+        CuContainer cuContainer = ContainerFactory.cuContainer(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
@@ -60,7 +60,7 @@ public class CoidContainer {
 
     public Multimap<String, ClassOrInterfaceDeclaration> getByPackageQualifier() {
         if (byPackageQualifier.size() == 0) {
-            ContainerFactory.compilationUnitContainer(path).getByPackageQualifier().asMap()
+            ContainerFactory.cuContainer(path).getByPackageQualifier().asMap()
                     .forEach((packageQualifier, cus) -> cus.forEach(cu -> {
                         cu.findAll(ClassOrInterfaceDeclaration.class)
                                 .forEach(coid -> byPackageQualifier.put(packageQualifier, coid));

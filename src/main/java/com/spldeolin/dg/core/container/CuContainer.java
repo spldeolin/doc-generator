@@ -50,7 +50,8 @@ public class CuContainer {
     /* package-private */ CuContainer(Path path) {
         long start = System.currentTimeMillis();
         this.path = path;
-        this.listSoruceRoots(path).forEach(sourceRoot -> all.addAll(this.parseCus(sourceRoot)));
+
+        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all));
 
         log.info("CompilationUnitContainer构建完毕，共从[{}]解析到[{}]个CompilationUnit，耗时[{}]毫秒", path, all.size(),
                 System.currentTimeMillis() - start);
@@ -112,13 +113,12 @@ public class CuContainer {
         return sourceRoots;
     }
 
-    private Collection<CompilationUnit> parseCus(SourceRoot sourceRoot) {
-        Collection<CompilationUnit> result = Lists.newArrayList();
+    private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all) {
         long start = System.currentTimeMillis();
         try {
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse();
             for (ParseResult<CompilationUnit> parseResult : parseResults) {
-                parseResult.ifSuccessful(result::add);
+                parseResult.ifSuccessful(all::add);
                 if (parseResult.getProblems().size() > 0) {
                     log.warn("无法正确被解析，跳过[{}]", parseResult.getProblems());
                 }
@@ -129,7 +129,6 @@ public class CuContainer {
         } catch (IOException e) {
             log.error("StaticJavaParser.parse失败", e);
         }
-        return result;
     }
 
     @Value

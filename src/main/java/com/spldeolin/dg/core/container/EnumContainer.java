@@ -4,25 +4,26 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import lombok.Data;
+import com.spldeolin.dg.core.exception.QualifierAbsentException;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2019-12-06
  */
 @Log4j2
-@Data
 public class EnumContainer {
 
     private static final int EXPECTED = 5200;
 
+    @Getter
     private final Path path;
 
+    @Getter
     private final Collection<EnumDeclaration> all = Lists.newLinkedList();
 
     private final Map<String, EnumDeclaration> byEnumQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
@@ -34,19 +35,11 @@ public class EnumContainer {
     private final Multimap<String, String> enumQulifierByEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
     /* package-private */ EnumContainer(Path path) {
-        CuContainer cuContainer = ContainerFactory.compilationUnitContainer(path);
+        CuContainer cuContainer = ContainerFactory.cuContainer(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-            cu.findAll(EnumDeclaration.class).forEach(enumDeclaration -> {
-                all.add(enumDeclaration);
-
-                String enumQualifier = Joiner.on(".").join(packageQualifier, enumDeclaration.getNameAsString());
-                byEnumQualifier.put(enumQualifier, enumDeclaration);
-                byPackageQualifier.put(packageQualifier, enumDeclaration);
-                byEnumName.put(enumDeclaration.getNameAsString(), enumDeclaration);
-                enumQulifierByEnumName.put(enumDeclaration.getNameAsString(), enumQualifier);
-            });
+            all.addAll(cu.findAll(EnumDeclaration.class));
         }));
 
         log.info("EnumContainer构建完毕，共从[{}]解析到[{}]个EnumDeclaration，耗时[{}]毫秒", path, all.size(),
@@ -55,6 +48,40 @@ public class EnumContainer {
         if (EXPECTED < all.size() + 100) {
             log.warn("EnumContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（EnumContainer.all[{}]）", EXPECTED, all.size());
         }
+    }
+
+    public Map<String, EnumDeclaration> getByEnumQualifier() {
+        if (byEnumQualifier.size() == 0) {
+            all.forEach(enumDeclaration -> byEnumQualifier
+                    .put(enumDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
+                            enumDeclaration));
+        }
+        return byEnumQualifier;
+    }
+
+    public Multimap<String, EnumDeclaration> getByPackageQualifier() {
+        if (byPackageQualifier.size() == 0) {
+            ContainerFactory.cuContainer(path).getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus
+                    .forEach(cu -> cu.findAll(EnumDeclaration.class)
+                            .forEach(enumDeclaration -> byPackageQualifier.put(packageQualifier, enumDeclaration))));
+        }
+        return byPackageQualifier;
+    }
+
+    public Multimap<String, EnumDeclaration> getByEnumName() {
+        if (byEnumName.size() == 0) {
+            all.forEach(enumDeclaration -> byEnumName.put(enumDeclaration.getNameAsString(), enumDeclaration));
+        }
+        return byEnumName;
+    }
+
+    public Multimap<String, String> getEnumQulifierByEnumName() {
+        if (enumQulifierByEnumName.size() == 0) {
+            all.forEach(enumDeclaration -> enumQulifierByEnumName
+                    .put(enumDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
+                            enumDeclaration.getNameAsString()));
+        }
+        return enumQulifierByEnumName;
     }
 
 }

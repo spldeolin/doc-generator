@@ -19,7 +19,7 @@ public class ContainerFactory {
 
     private static final Map<Path, FieldContainer> fieldContainers = Maps.newConcurrentMap();
 
-    public static CuContainer compilationUnitContainer(Path path) {
+    public static CuContainer cuContainer(Path path) {
         CuContainer result = compilationUnitContainers.get(path);
         if (result == null) {
             result = new CuContainer(path);
