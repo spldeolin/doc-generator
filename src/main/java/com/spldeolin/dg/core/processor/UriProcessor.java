@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.extractor.annotation;
+package com.spldeolin.dg.core.processor;
 
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -7,26 +7,12 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * @author Deolin 2019-12-03
+ * @author Deolin 2019-12-23
  */
 @Log4j2
-public class UriExtractor {
+public class UriProcessor {
 
-    private ClassOrInterfaceDeclaration controller;
-
-    private MethodDeclaration handler;
-
-    public UriExtractor controller(ClassOrInterfaceDeclaration controller) {
-        this.controller = controller;
-        return this;
-    }
-
-    public UriExtractor handler(MethodDeclaration handler) {
-        this.handler = handler;
-        return this;
-    }
-
-    public String extract() {
+    public String process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         try {
             StringBuilder sb = new StringBuilder(64);
             controller.getAnnotationByName("RequestMapping").ifPresent(reqMapping -> getUrlPart(reqMapping, sb));
@@ -38,6 +24,7 @@ public class UriExtractor {
             log.info("无法解析URL[{}#{}]", controller.getNameAsString(), handler.getNameAsString());
             return "";
         }
+
     }
 
     private void getUrlPart(AnnotationExpr anno, StringBuilder sb) {
