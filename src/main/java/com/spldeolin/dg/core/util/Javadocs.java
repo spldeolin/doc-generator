@@ -45,7 +45,7 @@ public class Javadocs {
     }
 
     public static String extractFirstSeeTag(NodeWithJavadoc<?> node) {
-        return node.getJavadoc().map(Javadocs::extractFirstLine).orElse("");
+        return node.getJavadoc().map(Javadocs::extractFirstSeeTag).orElse("");
     }
 
     private static String extractFirstLineFromDescription(JavadocDescription description) {
