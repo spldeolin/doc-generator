@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.convert.rap.RapConverter;
 import com.spldeolin.dg.core.container.ContainerFactory;
 import com.spldeolin.dg.core.container.HandlerContainer;
 import com.spldeolin.dg.core.domain.ApiDto;
@@ -27,7 +28,9 @@ public class Boot {
         handlerContainer.getByController().asMap().forEach((controller, handlers) -> handlers
                 .forEach(handler -> apis.add(new ApiProcessor(path).process(controller, handler))));
 
-        log.info(apis);
+        // convert
+        String result = new RapConverter().convert(apis);
+        log.info(result);
     }
 
 }
