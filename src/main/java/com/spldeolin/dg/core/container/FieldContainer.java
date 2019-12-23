@@ -14,8 +14,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.spldeolin.dg.core.exception.ParentAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
-import com.spldeolin.dg.core.extractor.javadoc.JavadocExtractStrategy;
-import com.spldeolin.dg.core.extractor.javadoc.JavadocExtractor;
+import com.spldeolin.dg.core.util.Javadocs;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -63,8 +62,7 @@ public class FieldContainer {
 
                         byFieldVarQualifier.put(fieldVarQulifier, field);
                         varByFieldVarQualifier.put(fieldVarQulifier, variable);
-                        cmtByFieldVarQualifier.put(fieldVarQulifier, new JavadocExtractor().javadoc(field)
-                                .strategy(JavadocExtractStrategy.EXTRACT_FIRST_LINE).extract());
+                        cmtByFieldVarQualifier.put(fieldVarQulifier, Javadocs.extractFirstLine(field));
                     });
 
                     byClassQualifier.put(classQualifier, field);

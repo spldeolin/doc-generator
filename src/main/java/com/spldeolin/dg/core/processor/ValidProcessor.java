@@ -15,8 +15,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.container.ContainerFactory;
 import com.spldeolin.dg.core.enums.ValidEnum;
-import com.spldeolin.dg.core.extractor.javadoc.JavadocExtractStrategy;
-import com.spldeolin.dg.core.extractor.javadoc.JavadocExtractor;
+import com.spldeolin.dg.core.util.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -58,8 +57,7 @@ public class ValidProcessor {
                             if (entry.getArguments().size() > 0) {
                                 // 约定第1个作为参数绑定的value
                                 parts.add(entry.getArgument(0).toString());
-                                parts.add(new JavadocExtractor().javadoc(entry)
-                                        .strategy(JavadocExtractStrategy.EXTRACT_FIRST_LINE).extract());
+                                parts.add(Javadocs.extractFirstLine(entry));
                             } else {
                                 // 类似于 public enum Gender {male, female;}
                             }

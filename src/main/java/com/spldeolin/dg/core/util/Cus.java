@@ -18,14 +18,6 @@ import lombok.extern.log4j.Log4j2;
 public class Cus {
 
     /**
-     * @return 主类/主接口/主枚举 的全限定名
-     */
-    public static String getPrimaryTypeQualifier(CompilationUnit cu) {
-        return cu.getPrimaryType().orElseThrow(PrimaryTypeAbsentException::new).getFullyQualifiedName()
-                .orElseThrow(QualifierAbsentException::new);
-    }
-
-    /**
      * 保存cu到硬盘
      */
     public static void save(CompilationUnit cu) {
