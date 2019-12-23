@@ -19,7 +19,7 @@ public class Boot {
     public static void main(String[] args) {
 
         // collect
-        Path path = Paths.get("input target project path here.");
+        Path path = Paths.get(Conf.PROJECT_PATH);
         HandlerContainer handlerContainer = ContainerFactory.handlerContainer(path);
 
         // process

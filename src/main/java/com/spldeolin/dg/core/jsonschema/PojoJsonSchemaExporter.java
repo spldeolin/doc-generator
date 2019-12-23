@@ -29,6 +29,7 @@ import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.util.Jsons;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -65,7 +66,7 @@ public class PojoJsonSchemaExporter {
 
     private void process() {
         log.info("start process");
-        Path path = Paths.get("input target project path here.");
+        Path path = Paths.get(Conf.PROJECT_PATH);
 
         Collection<PojoJsonSchemaData> pojoJsonSchemas = Lists.newLinkedList();
         Collection<String> serializeCus = Lists.newLinkedList();
@@ -99,7 +100,7 @@ public class PojoJsonSchemaExporter {
             FileUtils.writeLines(serializedCusOutput, serializeCus);
             log.info("serialized CUs has been export into [{}].", serializedCusOutput);
 
-            File jsonSchemaOutput = Paths.get("pojo-schema.json").toFile();
+            File jsonSchemaOutput = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
             FileUtils.writeStringToFile(jsonSchemaOutput, Jsons.toJson(pojoJsonSchemas), StandardCharsets.UTF_8);
             log.info("POJO JSON schema has been export into [{}].", jsonSchemaOutput);
 

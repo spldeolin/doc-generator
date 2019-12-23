@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.google.common.collect.Maps;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.util.Jsons;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,7 +22,7 @@ public class PojoJsonSchemaImporter {
     public static final Map<String, JsonSchema> jsonSchemas;
 
     static {
-        File file = Paths.get("pojo-schema.json").toFile();
+        File file = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
         String json = null;
         try {
             json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
