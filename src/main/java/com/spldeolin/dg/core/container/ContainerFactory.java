@@ -9,7 +9,7 @@ import com.google.common.collect.Maps;
  */
 public class ContainerFactory {
 
-    private static final Map<Path, CompilationUnitContainer> compilationUnitContainers = Maps.newConcurrentMap();
+    private static final Map<Path, CuContainer> compilationUnitContainers = Maps.newConcurrentMap();
 
     private static final Map<Path, CoidContainer> coidContainers = Maps.newConcurrentMap();
 
@@ -19,10 +19,10 @@ public class ContainerFactory {
 
     private static final Map<Path, FieldContainer> fieldContainers = Maps.newConcurrentMap();
 
-    public static CompilationUnitContainer compilationUnitContainer(Path path) {
-        CompilationUnitContainer result = compilationUnitContainers.get(path);
+    public static CuContainer compilationUnitContainer(Path path) {
+        CuContainer result = compilationUnitContainers.get(path);
         if (result == null) {
-            result = new CompilationUnitContainer(path);
+            result = new CuContainer(path);
             compilationUnitContainers.put(path, result);
         }
         return result;

@@ -34,7 +34,7 @@ public class EnumContainer {
     private final Multimap<String, String> enumQulifierByEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
     /* package-private */ EnumContainer(Path path) {
-        CompilationUnitContainer cuContainer = ContainerFactory.compilationUnitContainer(path);
+        CuContainer cuContainer = ContainerFactory.compilationUnitContainer(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {

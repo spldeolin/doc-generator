@@ -17,7 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
-import lombok.Data;
+import lombok.Getter;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 
@@ -25,13 +25,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-06
  */
 @Log4j2
-@Data
-public class CompilationUnitContainer {
+public class CuContainer {
 
     private static final int EXPECTED = 5500;
 
+    @Getter
     private final Path path;
 
+    @Getter
     private final Collection<CompilationUnit> all = Lists.newLinkedList();
 
     private final Map<String, CompilationUnit> byPrimaryClassQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
@@ -46,38 +47,63 @@ public class CompilationUnitContainer {
 
     private final Collection<Report> reports = Sets.newTreeSet();
 
-    /* package-private */ CompilationUnitContainer(Path path) {
+    /* package-private */ CuContainer(Path path) {
         long start = System.currentTimeMillis();
         this.path = path;
-        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(cu -> {
-            all.add(cu);
-
-            // 忽略没有主类的cu
-            cu.getPrimaryType().ifPresent(primaryType -> {
-                byPrimaryClassQualifier
-                        .put(primaryType.getFullyQualifiedName().orElseThrow(PrimaryTypeAbsentException::new), cu);
-                byPrimaryClassName.put(primaryType.getNameAsString(), cu);
-            });
-
-            // 忽略没有type的cu（一般是整个被注释了）
-            cu.getTypes().forEach(type -> {
-                byClassQualifier.put(type.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new), cu);
-                byClassName.put(type.getNameAsString(), cu);
-            });
-
-            // 忽略没有package的cu（一般是整个被注释了）
-            cu.getPackageDeclaration().ifPresent(pkg -> byPackageQualifier.put(pkg.getNameAsString(), cu));
-        }));
+        this.listSoruceRoots(path).forEach(sourceRoot -> all.addAll(this.parseCus(sourceRoot)));
 
         log.info("CompilationUnitContainer构建完毕，共从[{}]解析到[{}]个CompilationUnit，耗时[{}]毫秒", path, all.size(),
                 System.currentTimeMillis() - start);
         reports.forEach(report -> log.info("\t[{}]模块耗时[{}]毫秒", report.getPath(), report.getElapsed()));
 
-
         if (EXPECTED < all.size() + 100) {
             log.warn("CompilationUnitContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（CompilationUnitContainer.all[{}]）",
                     EXPECTED, all.size());
         }
+    }
+
+    public Map<String, CompilationUnit> getByPrimaryClassQualifier() {
+        if (byPrimaryClassQualifier.size() == 0) {
+            // 忽略没有主类的cu
+            all.forEach(cu -> cu.getPrimaryType().ifPresent(primaryType -> byPrimaryClassQualifier
+                    .put(primaryType.getFullyQualifiedName().orElseThrow(PrimaryTypeAbsentException::new), cu)));
+        }
+        return byPrimaryClassQualifier;
+    }
+
+    public Multimap<String, CompilationUnit> getByPrimaryClassName() {
+        if (byPrimaryClassName.size() == 0) {
+            // 忽略没有主类的cu
+            all.forEach(cu -> cu.getPrimaryType()
+                    .ifPresent(primaryType -> byPrimaryClassName.put(primaryType.getNameAsString(), cu)));
+        }
+        return byPrimaryClassName;
+    }
+
+    public Multimap<String, CompilationUnit> getByClassQualifier() {
+        if (byClassQualifier.size() == 0) {
+            // 忽略没有type的cu（一般是整个被注释了）
+            all.forEach(cu -> cu.getTypes().forEach(type -> byClassQualifier
+                    .put(type.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new), cu)));
+        }
+        return byClassQualifier;
+    }
+
+    public Multimap<String, CompilationUnit> getByClassName() {
+        if (byClassName.size() == 0) {
+            // 忽略没有type的cu（一般是整个被注释了）
+            all.forEach(cu -> cu.getTypes().forEach(type -> byClassName.put(type.getNameAsString(), cu)));
+        }
+        return byClassName;
+    }
+
+    public Multimap<String, CompilationUnit> getByPackageQualifier() {
+        if (byPackageQualifier.size() == 0) {
+            // 忽略没有package的cu（一般是整个被注释了）
+            all.forEach(cu -> cu.getPackageDeclaration()
+                    .ifPresent(pkg -> byPackageQualifier.put(pkg.getNameAsString(), cu)));
+        }
+        return byPackageQualifier;
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
