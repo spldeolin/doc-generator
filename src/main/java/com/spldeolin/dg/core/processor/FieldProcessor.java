@@ -20,13 +20,13 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.container.ContainerFactory;
-import com.spldeolin.dg.core.domain.ApiDto;
-import com.spldeolin.dg.core.domain.FieldDto;
-import com.spldeolin.dg.core.enums.NumberFormat;
+import com.spldeolin.dg.core.domain.ApiDomain;
+import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
-import com.spldeolin.dg.core.enums.StringFormat;
-import com.spldeolin.dg.core.enums.TypeName;
+import com.spldeolin.dg.core.enums.StringFormatType;
+import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.jsonschema.PojoJsonSchemaImporter;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
@@ -48,17 +48,17 @@ public class FieldProcessor {
         this.path = path;
     }
 
-    public Collection<FieldDto> processUriPathFields(NodeList<Parameter> parameters) {
+    public Collection<FieldDomain> processUriPathFields(NodeList<Parameter> parameters) {
         // ignore now
         return Lists.newArrayList();
     }
 
-    public Collection<FieldDto> processUriQueryFields(NodeList<Parameter> parameters) {
+    public Collection<FieldDomain> processUriQueryFields(NodeList<Parameter> parameters) {
         // ignore now
         return Lists.newArrayList();
     }
 
-    public void processRequestBody(NodeList<Parameter> parameters, ApiDto api) {
+    public void processRequestBody(NodeList<Parameter> parameters, ApiDomain api) {
         String parameterTypeName = getRequestBodyTypeName(parameters);
         if (parameterTypeName == null) {
             return;
@@ -73,13 +73,13 @@ public class FieldProcessor {
 
         // requestBodyFields
         tryGetClassQulifier(parameterTypeName).ifPresent(parameterTypeQulifier -> {
-            Pair<Collection<FieldDto>, Collection<FieldDto>> pair = parseZeroFloorFields(parameterTypeQulifier, false);
+            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(parameterTypeQulifier, false);
             api.setRequestBodyFileds(pair.getLeft());
             api.setRequestBodyFiledsFlatly(pair.getRight());
         });
     }
 
-    public void processResponseBody(String resultTypeName, ApiDto api) {
+    public void processResponseBody(String resultTypeName, ApiDomain api) {
         // responseBodyType
         if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
             api.setResponseBodyType(ResponseBodyType.objectArray);
@@ -92,7 +92,7 @@ public class FieldProcessor {
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {
-            Pair<Collection<FieldDto>, Collection<FieldDto>> pair = parseZeroFloorFields(resultTypeQulifier, true);
+            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(resultTypeQulifier, true);
             api.setResponseBodyFields(pair.getLeft());
             api.setResponseBodyFieldsFlatly(pair.getRight());
         });
@@ -127,35 +127,35 @@ public class FieldProcessor {
         return componentType;
     }
 
-    private Pair<Collection<FieldDto>, Collection<FieldDto>> parseZeroFloorFields(String classQulifier,
+    private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
-        List<FieldDto> flatList = Lists.newArrayList();
+        List<FieldDomain> flatList = Lists.newArrayList();
         ObjectSchema zeroSchema = PojoJsonSchemaImporter.getJsonSchema(classQulifier).asObjectSchema();
-        Collection<FieldDto> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDto(), flatList).getFields();
+        Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList).getFields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.setParentField(null));
 
         if (isResponseBody) {
             flatList.forEach(fieldDto -> {
                 fieldDto.setNullable(null);
-                fieldDto.setValids(null);
+                fieldDto.setValidators(null);
             });
         }
 
         return Pair.of(zeroFloorFields, flatList);
     }
 
-    private FieldDto parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, FieldDto parent,
-            List<FieldDto> flatList) {
+    private FieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, FieldDomain parent,
+            List<FieldDomain> flatList) {
         if (isObjectInArray) {
-            parent.setTypeName(TypeName.objectArray);
+            parent.setJsonType(JsonType.objectArray);
         } else {
-            parent.setTypeName(TypeName.object);
+            parent.setJsonType(JsonType.object);
         }
 
 
-        List<FieldDto> children = Lists.newArrayList();
+        List<FieldDomain> children = Lists.newArrayList();
         schema.getProperties().forEach((childFieldName, childSchema) -> {
-            FieldDto childFieldDto = new FieldDto();
+            FieldDomain childFieldDto = new FieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
             FieldDeclaration fieldDeclaration = ContainerFactory.fieldContainer(path).getByFieldVarQualifier()
@@ -185,10 +185,10 @@ public class FieldProcessor {
                 childFieldDto.setNullable(false);
             }
 
-            childFieldDto.setValids(new ValidProcessor(path).process(fieldDeclaration));
+            childFieldDto.setValidators(new ValidProcessor(path).process(fieldDeclaration));
 
             if (childSchema.isValueTypeSchema()) {
-                childFieldDto.setTypeName(calcValueDataType(childSchema.asValueTypeSchema(), false));
+                childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
             } else if (childSchema.isObjectSchema()) {
                 parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto, flatList);
             } else if (childSchema.isArraySchema()) {
@@ -204,7 +204,7 @@ public class FieldProcessor {
 
                 JsonSchema eleSchema = aSchema.getItems().asSingleItems().getSchema();
                 if (eleSchema.isValueTypeSchema()) {
-                    childFieldDto.setTypeName(calcValueDataType(eleSchema.asValueTypeSchema(), true));
+                    childFieldDto.setJsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
                 } else if (eleSchema.isObjectSchema()) {
                     parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto, flatList);
                 } else {
@@ -216,19 +216,19 @@ public class FieldProcessor {
                 return;
             }
 
-            if (childFieldDto.getTypeName() == TypeName.number) {
+            if (childFieldDto.getJsonType() == JsonType.number) {
                 String javaType = ContainerFactory.fieldContainer(path).getVarByFieldVarQualifier()
                         .get(fieldVarQualifier).getTypeAsString();
                 childFieldDto.setNumberFormat(calcNumberFormat(javaType));
             }
 
-            if (childFieldDto.getTypeName() == TypeName.string) {
-                childFieldDto.setStringFormat(StringFormat.normal.getValue());
+            if (childFieldDto.getJsonType() == JsonType.string) {
+                childFieldDto.setStringFormat(StringFormatType.normal.getValue());
                 fieldDeclaration.getAnnotationByClass(JsonFormat.class)
                         .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                             if (pair.getNameAsString().equals("pattern")) {
                                 childFieldDto.setStringFormat(
-                                        String.format(StringFormat.datetime.getValue(), pair.getValue()));
+                                        String.format(StringFormatType.datetime.getValue(), pair.getValue()));
                             }
                         }));
             }
@@ -243,37 +243,37 @@ public class FieldProcessor {
     }
 
 
-    private TypeName calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
+    private JsonType calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
         if (vSchema.isNumberSchema()) {
             if (isValueInArray) {
-                return TypeName.numberArray;
+                return JsonType.numberArray;
             } else {
-                return TypeName.number;
+                return JsonType.number;
             }
         } else if (vSchema.isStringSchema()) {
             if (isValueInArray) {
-                return TypeName.stringArray;
+                return JsonType.stringArray;
             } else {
-                return TypeName.string;
+                return JsonType.string;
             }
         } else if (vSchema.isBooleanSchema()) {
             if (isValueInArray) {
-                return TypeName.booleanArray;
+                return JsonType.booleanArray;
             } else {
-                return TypeName.bool;
+                return JsonType.bool;
             }
         } else {
             throw new IllegalArgumentException(vSchema.toString());
         }
     }
 
-    private NumberFormat calcNumberFormat(String javaTypeName) {
+    private NumberFormatType calcNumberFormat(String javaTypeName) {
         if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Float", "Double", "BigDecimal")) {
-            return NumberFormat.f1oat;
+            return NumberFormatType.f1oat;
         } else if (StringUtils.equalsAnyIgnoreCase(javaTypeName, "Long", "BigInteger")) {
-            return NumberFormat.int64;
+            return NumberFormatType.int64;
         } else {
-            return NumberFormat.int32;
+            return NumberFormatType.int32;
         }
     }
 

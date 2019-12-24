@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.convert.rap.RapConverter;
 import com.spldeolin.dg.core.container.ContainerFactory;
 import com.spldeolin.dg.core.container.HandlerContainer;
-import com.spldeolin.dg.core.domain.ApiDto;
+import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.processor.ApiProcessor;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,7 +24,7 @@ public class Boot {
         HandlerContainer handlerContainer = ContainerFactory.handlerContainer(path);
 
         // process
-        Collection<ApiDto> apis = Lists.newLinkedList();
+        Collection<ApiDomain> apis = Lists.newLinkedList();
         handlerContainer.getByController().asMap().forEach((controller, handlers) -> handlers
                 .forEach(handler -> apis.add(new ApiProcessor(path).process(controller, handler))));
 

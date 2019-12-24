@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum ValidEnum {
+public enum ValidatorType {
 
     notBlank("必须有非空格字符"),
 

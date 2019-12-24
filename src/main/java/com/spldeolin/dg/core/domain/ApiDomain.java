@@ -9,26 +9,26 @@ import lombok.Data;
  * @author Deolin 2019-12-02
  */
 @Data
-public class ApiDto {
+public class ApiDomain {
 
     private String uri;
 
     private String description;
 
-    private Collection<FieldDto> uriPathFields;
+    private Collection<FieldDomain> uriPathFields;
 
-    private Collection<FieldDto> uriQueryFields;
+    private Collection<FieldDomain> uriQueryFields;
 
     private RequestBodyType requestBodyType;
 
-    private Collection<FieldDto> requestBodyFileds;
+    private Collection<FieldDomain> requestBodyFileds;
 
-    private Collection<FieldDto> requestBodyFiledsFlatly;
+    private Collection<FieldDomain> requestBodyFiledsFlatly;
 
     private ResponseBodyType responseBodyType;
 
-    private Collection<FieldDto> responseBodyFields;
+    private Collection<FieldDomain> responseBodyFields;
 
-    private Collection<FieldDto> responseBodyFieldsFlatly;
+    private Collection<FieldDomain> responseBodyFieldsFlatly;
 
 }

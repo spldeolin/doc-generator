@@ -8,13 +8,11 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum NumberFormat {
+public enum StringFormatType {
 
-    int32("int32"),
+    normal("normal"),
 
-    int64("int64"),
-
-    f1oat("float");
+    datetime("datetime(%s)");
 
     private String value;
 

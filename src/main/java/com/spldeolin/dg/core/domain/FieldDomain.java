@@ -1,10 +1,8 @@
 package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
-import org.apache.commons.lang3.tuple.Pair;
-import com.spldeolin.dg.core.enums.NumberFormat;
-import com.spldeolin.dg.core.enums.TypeName;
-import com.spldeolin.dg.core.enums.ValidEnum;
+import com.spldeolin.dg.core.enums.NumberFormatType;
+import com.spldeolin.dg.core.enums.JsonType;
 import lombok.Data;
 import lombok.ToString;
 
@@ -13,29 +11,29 @@ import lombok.ToString;
  */
 @Data
 @ToString(exclude = {"parentField"}) // StackOverflowError
-public class FieldDto {
+public class FieldDomain {
 
-    private FieldDto parentField;
+    private FieldDomain parentField;
 
     private String fieldName;
 
     /**
-     * @see TypeName
-     * @see ApiDto#getUriPathFields() string, number, boolean
-     * @see ApiDto#getUriQueryFields() string, number, boolean
+     * @see JsonType
+     * @see ApiDomain#getUriPathFields() string, number, boolean
+     * @see ApiDomain#getUriQueryFields() string, number, boolean
      */
-    private TypeName typeName;
+    private JsonType jsonType;
 
     private String stringFormat;
 
-    private NumberFormat numberFormat;
+    private NumberFormatType numberFormat;
 
     /**
      * notNull absent & notEmpty absent & notBlank absent = TRUE
      */
     private Boolean nullable;
 
-    private Collection<Pair<ValidEnum, String>> valids;
+    private Collection<ValidatorDomain> validators;
 
     private String description;
 
@@ -43,6 +41,6 @@ public class FieldDto {
      * com.topaiebiz.rapgen2.enums.TypeName#object
      * com.topaiebiz.rapgen2.enums.TypeName#objectArray
      */
-    private Collection<FieldDto> fields;
+    private Collection<FieldDomain> fields;
 
 }

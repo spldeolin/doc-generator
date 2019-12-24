@@ -3,8 +3,8 @@ package com.spldeolin.dg.convert.rap;
 import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.domain.ApiDto;
-import com.spldeolin.dg.core.domain.FieldDto;
+import com.spldeolin.dg.core.domain.ApiDomain;
+import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.util.Jsons;
 
 /**
@@ -12,7 +12,7 @@ import com.spldeolin.dg.core.util.Jsons;
  */
 public class RapConverter {
 
-    public String convert(Collection<ApiDto> apis) {
+    public String convert(Collection<ApiDomain> apis) {
         String json = Jsons.toJson(convertApis(apis));
 
         StringBuilder sb = new StringBuilder(json.length());
@@ -27,7 +27,7 @@ public class RapConverter {
         return sb.toString();
     }
 
-    private Collection<ActionListDto> convertApis(Collection<ApiDto> apis) {
+    private Collection<ActionListDto> convertApis(Collection<ApiDomain> apis) {
         Collection<ActionListDto> actions = Lists.newLinkedList();
         apis.forEach(api -> {
             ActionListDto action = ActionListDto.build(api);
@@ -39,12 +39,12 @@ public class RapConverter {
         return actions;
     }
 
-    private List<ParameterListDto> convertFields(Collection<FieldDto> fields) {
+    private List<ParameterListDto> convertFields(Collection<FieldDomain> fields) {
         List<ParameterListDto> firstFloor = Lists.newArrayList();
         if (fields == null) {
             return Lists.newArrayList();
         }
-        for (FieldDto field : fields) {
+        for (FieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
             if (field.getFields() != null && field.getFields().size() > 0) {
                 this.convertFields(field.getFields(), child);
@@ -54,9 +54,9 @@ public class RapConverter {
         return firstFloor;
     }
 
-    private void convertFields(Collection<FieldDto> fields, ParameterListDto parent) {
+    private void convertFields(Collection<FieldDomain> fields, ParameterListDto parent) {
         List<ParameterListDto> childrent = Lists.newArrayList();
-        for (FieldDto field : fields) {
+        for (FieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
             if (field.getFields() != null && field.getFields().size() > 0) {
                 this.convertFields(field.getFields(), child);

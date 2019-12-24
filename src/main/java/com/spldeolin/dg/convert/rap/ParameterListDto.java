@@ -2,12 +2,11 @@ package com.spldeolin.dg.convert.rap;
 
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.domain.FieldDto;
-import com.spldeolin.dg.core.enums.StringFormat;
-import com.spldeolin.dg.core.enums.ValidEnum;
+import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.ValidatorDomain;
+import com.spldeolin.dg.core.enums.StringFormatType;
 import lombok.Data;
 
 /**
@@ -32,21 +31,21 @@ public class ParameterListDto {
     private String validator;
 
     /**
-     * @see RapDataTypeEnum
+     * @see RapJsonType
      */
     private String dataType;
 
-    public static ParameterListDto build(FieldDto fieldDto) {
+    public static ParameterListDto build(FieldDomain fieldDto) {
         ParameterListDto result = new ParameterListDto();
         result.setId(-2333L);
         result.setIdentifier(fieldDto.getFieldName());
         result.setName(fieldDto.getDescription());
         result.setValidator("");
-        result.setDataType(RapDataTypeEnum.convert(fieldDto.getTypeName()).getName());
+        result.setDataType(RapJsonType.convert(fieldDto.getJsonType()).getName());
         result.setParameterList(Lists.newArrayList());
 
         StringBuilder remark = new StringBuilder(64);
-        if (fieldDto.getStringFormat() != null && !StringFormat.normal.getValue().equals(fieldDto.getStringFormat())) {
+        if (fieldDto.getStringFormat() != null && !StringFormatType.normal.getValue().equals(fieldDto.getStringFormat())) {
             remark.append("格式：");
             remark.append(fieldDto.getStringFormat());
             remark.append("　");
@@ -62,12 +61,12 @@ public class ParameterListDto {
             remark.append("　");
         }
 
-        Collection<Pair<ValidEnum, String>> valids = fieldDto.getValids();
-        if (valids != null && valids.size() > 0) {
+        Collection<ValidatorDomain> validators = fieldDto.getValidators();
+        if (validators != null && validators.size() > 0) {
             Collection<String> parts = Lists.newLinkedList();
-            valids.forEach(pair -> {
-                parts.add(pair.getLeft().getDescription());
-                parts.add(pair.getRight());
+            validators.forEach(validator -> {
+                parts.add(validator.getValidatorType().getDescription());
+                parts.add(validator.getNote());
             });
             Joiner.on("　").skipNulls().appendTo(remark, parts);
         }

@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.domain.ApiDto;
+import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.util.Javadocs;
 
 /**
@@ -18,11 +18,11 @@ public class ApiProcessor {
         this.path = path;
     }
 
-    public ApiDto process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         FieldProcessor fieldProcessor = new FieldProcessor(path);
         String resultTypeName = Javadocs.extractFirstSeeTag(handler);
 
-        ApiDto api = new ApiDto();
+        ApiDomain api = new ApiDomain();
         api.setUri(new UriProcessor().process(controller, handler));
         api.setDescription(Javadocs.extractFirstLine(handler));
         api.setUriPathFields(Lists.newArrayList());

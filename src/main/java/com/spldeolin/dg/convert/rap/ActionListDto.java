@@ -2,7 +2,7 @@ package com.spldeolin.dg.convert.rap;
 
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.domain.ApiDto;
+import com.spldeolin.dg.core.domain.ApiDomain;
 import lombok.Data;
 
 /**
@@ -29,7 +29,7 @@ public class ActionListDto {
 
     private List<ParameterListDto> responseParameterList;
 
-    public static ActionListDto build(ApiDto apiDto) {
+    public static ActionListDto build(ApiDomain apiDto) {
         ActionListDto result = new ActionListDto();
         result.setPageId(389L);
         result.setId(-2333L);
