@@ -185,7 +185,7 @@ public class FieldProcessor {
                 childFieldDto.setNullable(false);
             }
 
-            childFieldDto.setValidators(new ValidProcessor(path).process(fieldDeclaration));
+            childFieldDto.setValidators(new ValidatorProcessor(path).process(fieldDeclaration));
 
             if (childSchema.isValueTypeSchema()) {
                 childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));

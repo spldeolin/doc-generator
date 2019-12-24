@@ -37,11 +37,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-09
  */
 @Log4j2
-public class ValidProcessor {
+public class ValidatorProcessor {
 
     private final Path path;
 
-    public ValidProcessor(Path path) {
+    public ValidatorProcessor(Path path) {
         this.path = path;
     }
 
