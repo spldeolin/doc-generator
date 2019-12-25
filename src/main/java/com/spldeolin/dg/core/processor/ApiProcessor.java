@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.util.Javadocs;
 
@@ -20,7 +21,7 @@ public class ApiProcessor {
 
     public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         FieldProcessor fieldProcessor = new FieldProcessor(path);
-        String resultTypeName = Javadocs.extractFirstSeeTag(handler);
+        String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
 
         ApiDomain api = new ApiDomain();
         api.setUri(new UriProcessor().process(controller, handler));
