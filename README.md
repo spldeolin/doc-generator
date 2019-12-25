@@ -1,6 +1,8 @@
 # *Doc Generator*
 
-a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generator
+a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generator.
+
+*Doc Generator* works via AST and Standard Javadoc without any code pollution.
 
 
 
@@ -23,3 +25,4 @@ a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generato
 ## CONTRIBUTION
 
 Any PR, star, suggestion would be greatly appreciated.
+
