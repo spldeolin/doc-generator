@@ -2,6 +2,7 @@ package com.spldeolin.dg.core.lcbi;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,16 @@ public class UriProcessor {
             HandlerMappingDto handlerMapping = new HandlerMappingDto();
             Set<RequestMethod> httpMethods = requestMappingInfo.getMethodsCondition().getMethods();
             Set<String> uris = requestMappingInfo.getPatternsCondition().getPatterns();
-            handlerMapping.setMethodQualifierByToString(method.toString());
+
+            StringBuilder sb = new StringBuilder(64);
+            sb.append(method.getDeclaringClass().getName());
+            sb.append(".");
+            sb.append(method.getName());
+            sb.append("(");
+            Arrays.stream(method.getParameterTypes()).map(Class::getName).forEach(sb::append);
+            sb.append(")");
+
+            handlerMapping.setMethodQualifier(sb.toString());
             handlerMapping.setHttpMethod(Iterables.getFirst(httpMethods, RequestMethod.GET).name());
             handlerMapping.setUri(Iterables.getFirst(uris, ""));
             result.add(handlerMapping);

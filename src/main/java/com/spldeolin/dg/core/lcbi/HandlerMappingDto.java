@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class HandlerMappingDto {
 
-    private String methodQualifierByToString;
+    private String methodQualifier;
 
     private String httpMethod;
 

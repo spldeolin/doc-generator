@@ -65,10 +65,10 @@ public class LoadClassBasedInfoExporter {
         this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(
                 cu -> cu.findAll(ClassOrInterfaceDeclaration.class)
                         .forEach(coid -> coid.getFullyQualifiedName().ifPresent(pojoQualifier -> {
-                            log.info(pojoQualifier);
-                            String qualifierForClassLoader = qualifierForClassLoader(coid);
 
                             if (coid.getAnnotationByName("Data").isPresent()) {
+                                log.info(pojoQualifier);
+                                String qualifierForClassLoader = qualifierForClassLoader(coid);
                                 SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
                                 try {
                                     om.acceptJsonFormatVisitor(Class.forName(qualifierForClassLoader), sfw);
@@ -82,6 +82,8 @@ public class LoadClassBasedInfoExporter {
                             }
 
                             if (coid.getAnnotationByName("RestController").isPresent()) {
+                                log.info(pojoQualifier);
+                                String qualifierForClassLoader = qualifierForClassLoader(coid);
                                 try {
                                     handlerMappings
                                             .addAll(new UriProcessor().process(Class.forName(qualifierForClassLoader)));
