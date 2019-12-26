@@ -49,8 +49,8 @@ public class LoadClassBasedInfoImporter {
         handlerUris = Maps.newHashMapWithExpectedSize(pojoSchemaList.size());
         handlerHttpMethods = Maps.newHashMapWithExpectedSize(pojoSchemaList.size());
         handlerMappingList.forEach(one -> {
-            handlerUris.put(one.getMethodQualifierByToString(), one.getUri());
-            handlerHttpMethods.put(one.getMethodQualifierByToString(), one.getHttpMethod());
+            handlerUris.put(one.getMethodQualifier(), one.getUri());
+            handlerHttpMethods.put(one.getMethodQualifier(), one.getHttpMethod());
         });
     }
 
