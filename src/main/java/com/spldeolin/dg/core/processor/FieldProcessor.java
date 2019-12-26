@@ -27,7 +27,7 @@ import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.enums.JsonType;
-import com.spldeolin.dg.core.jsonschema.PojoJsonSchemaImporter;
+import com.spldeolin.dg.core.lcbi.LoadClassBasedInfoImporter;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
 
@@ -130,7 +130,7 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        ObjectSchema zeroSchema = PojoJsonSchemaImporter.getJsonSchema(classQulifier).asObjectSchema();
+        ObjectSchema zeroSchema = LoadClassBasedInfoImporter.getJsonSchema(classQulifier).asObjectSchema();
         Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList).getFields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.setParentField(null));
 

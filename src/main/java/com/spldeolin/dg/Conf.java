@@ -15,6 +15,8 @@ public class Conf {
 
     public static final String POJO_SCHEMA_PATH = "input pojo-schema.json path exporting from target project";
 
+    public static final String HANDLER_MAPPING_PATH = "input pojo-schema.json path exporting from target project";
+
     public static final HandlerResultTypeExtractStrategy HOW_TO_FIND_RESULT_TYPE =
             HandlerResultTypeExtractStrategy.FIRST_SEE_TAG_CONTENT;
 

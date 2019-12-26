@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.jsonschema;
+package com.spldeolin.dg.core.lcbi;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-16
  */
 @Log4j2
-public class PojoJsonSchemaExporter {
+public class LoadClassBasedInfoExporter {
 
     Collection<Report> reports = Sets.newTreeSet();
 
@@ -49,7 +49,7 @@ public class PojoJsonSchemaExporter {
     private final ObjectMapper om = new ObjectMapper();
 
     public static void main(String[] args) {
-        new PojoJsonSchemaExporter().process();
+        new LoadClassBasedInfoExporter().process();
     }
 
     /*
@@ -60,45 +60,69 @@ public class PojoJsonSchemaExporter {
         log.info("start process");
         Path path = Paths.get(Conf.PROJECT_PATH);
 
-        Collection<PojoJsonSchemaData> pojoJsonSchemas = Lists.newLinkedList();
-        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(cu -> {
-            cu.findAll(ClassOrInterfaceDeclaration.class).stream()
-                    .filter(coid -> coid.getAnnotationByName("Data").isPresent())
-                    .forEach(coid -> coid.getFullyQualifiedName().ifPresent(pojoQualifier -> {
-                        log.info(pojoQualifier);
+        Collection<PojoSchemaDto> pojoJsonSchemas = Lists.newLinkedList();
+        Collection<HandlerMappingDto> handlerMappings = Lists.newLinkedList();
+        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(
+                cu -> cu.findAll(ClassOrInterfaceDeclaration.class)
+                        .forEach(coid -> coid.getFullyQualifiedName().ifPresent(pojoQualifier -> {
+                            log.info(pojoQualifier);
+                            String qualifierForClassLoader = qualifierForClassLoader(coid);
 
-                        SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
-                        StringBuilder qualifierForClassLoader = new StringBuilder(64);
-                        this.classForQualifier(qualifierForClassLoader, coid);
-                        try {
-                            om.acceptJsonFormatVisitor(Class.forName(qualifierForClassLoader.toString()), sfw);
-                        } catch (ClassNotFoundException e) {
-                            log.warn("Class.forName({})", qualifierForClassLoader.toString());
-                        } catch (JsonMappingException e) {
-                            log.warn("om.acceptJsonFormatVisitor(Class.forName({}))", pojoQualifier, e);
-                        }
-                        pojoJsonSchemas.add(new PojoJsonSchemaData(pojoQualifier, sfw.finalSchema()));
-                    }));
-        }));
+                            if (coid.getAnnotationByName("Data").isPresent()) {
+                                SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
+                                try {
+                                    om.acceptJsonFormatVisitor(Class.forName(qualifierForClassLoader), sfw);
+                                } catch (ClassNotFoundException e) {
+                                    log.warn("Class.forName({})", qualifierForClassLoader);
+                                } catch (JsonMappingException e) {
+                                    log.warn("om.acceptJsonFormatVisitor(Class.forName({}))", pojoQualifier, e);
+                                }
+                                pojoJsonSchemas.add(new PojoSchemaDto().setPojoQualifier(pojoQualifier)
+                                        .setJsonSchema(sfw.finalSchema()));
+                            }
+
+                            if (coid.getAnnotationByName("RestController").isPresent()) {
+                                try {
+                                    handlerMappings
+                                            .addAll(new UriProcessor().process(Class.forName(qualifierForClassLoader)));
+                                } catch (ClassNotFoundException e) {
+                                    log.warn("Class.forName({})", qualifierForClassLoader);
+                                }
+                            }
+                        }))));
 
         log.info("{} CU(pojo) has been parsed and taken {} ms complete.", pojoJsonSchemas.size(),
                 sw.elapsed(TimeUnit.MILLISECONDS));
         reports.forEach(report -> log.info("\t{} took [{}]ms.", report.getPath(), report.getElapsed()));
 
 
-        File jsonSchemaOutput = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
+        File jsonSchemaOutput = new File(Conf.POJO_SCHEMA_PATH);
         try {
             FileUtils.writeStringToFile(jsonSchemaOutput, Jsons.toJson(pojoJsonSchemas), StandardCharsets.UTF_8);
-            log.info("POJO JSON schema has been export into [{}].", jsonSchemaOutput);
+            log.info("POJO schema has been export into [{}].", jsonSchemaOutput);
+        } catch (IOException e) {
+            log.error("FileUtils.writeStringToFile", e);
+        }
+
+        File handlerMappingOutput = new File(Conf.HANDLER_MAPPING_PATH);
+        try {
+            FileUtils.writeStringToFile(handlerMappingOutput, Jsons.toJson(handlerMappings), StandardCharsets.UTF_8);
+            log.info("Handler mapping has been export into [{}].", handlerMappingOutput);
         } catch (IOException e) {
             log.error("FileUtils.writeStringToFile", e);
         }
     }
 
-    private void classForQualifier(StringBuilder qualifier, TypeDeclaration<?> node) {
+    private String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {
+        StringBuilder qualifierForClassLoader = new StringBuilder(64);
+        qualifierForClassLoader(qualifierForClassLoader, coid);
+        return qualifierForClassLoader.toString();
+    }
+
+    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
         node.getParentNode().ifPresent(parent -> {
             if (parent instanceof TypeDeclaration) {
-                classForQualifier(qualifier, (TypeDeclaration<?>) parent);
+                qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
                 qualifier.append("$");
                 qualifier.append(node.getNameAsString());
             } else {
