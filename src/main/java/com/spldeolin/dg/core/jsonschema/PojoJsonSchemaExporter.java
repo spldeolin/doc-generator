@@ -2,28 +2,20 @@ package com.spldeolin.dg.core.jsonschema;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.json.Json;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonGeneratorFactory;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.serialization.JavaParserJsonSerializer;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.Stopwatch;
@@ -69,9 +61,7 @@ public class PojoJsonSchemaExporter {
         Path path = Paths.get(Conf.PROJECT_PATH);
 
         Collection<PojoJsonSchemaData> pojoJsonSchemas = Lists.newLinkedList();
-        Collection<String> serializeCus = Lists.newLinkedList();
         this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot).forEach(cu -> {
-//            serializeCus.add(serialize(cu));
             cu.findAll(ClassOrInterfaceDeclaration.class).stream()
                     .filter(coid -> coid.getAnnotationByName("Data").isPresent())
                     .forEach(coid -> coid.getFullyQualifiedName().ifPresent(pojoQualifier -> {
@@ -95,15 +85,11 @@ public class PojoJsonSchemaExporter {
                 sw.elapsed(TimeUnit.MILLISECONDS));
         reports.forEach(report -> log.info("\t{} took [{}]ms.", report.getPath(), report.getElapsed()));
 
-        try {
-            File serializedCusOutput = Paths.get("/Users/deolin/Documents/serialized-cus.json").toFile();
-            FileUtils.writeLines(serializedCusOutput, serializeCus);
-            log.info("serialized CUs has been export into [{}].", serializedCusOutput);
 
-            File jsonSchemaOutput = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
+        File jsonSchemaOutput = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
+        try {
             FileUtils.writeStringToFile(jsonSchemaOutput, Jsons.toJson(pojoJsonSchemas), StandardCharsets.UTF_8);
             log.info("POJO JSON schema has been export into [{}].", jsonSchemaOutput);
-
         } catch (IOException e) {
             log.error("FileUtils.writeStringToFile", e);
         }
@@ -146,17 +132,6 @@ public class PojoJsonSchemaExporter {
             log.error("StaticJavaParser.parse失败", e);
         }
         return result;
-    }
-
-    private String serialize(Node node) {
-        Map<String, ?> config = new HashMap<>();
-        JsonGeneratorFactory generatorFactory = Json.createGeneratorFactory(config);
-        JavaParserJsonSerializer serializer = new JavaParserJsonSerializer();
-        StringWriter jsonWriter = new StringWriter();
-        try (JsonGenerator generator = generatorFactory.createGenerator(jsonWriter)) {
-            serializer.serialize(node, generator);
-        }
-        return jsonWriter.toString();
     }
 
     @Value
