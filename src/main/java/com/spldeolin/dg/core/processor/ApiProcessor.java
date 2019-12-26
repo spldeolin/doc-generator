@@ -23,7 +23,7 @@ public class ApiProcessor {
         this.path = path;
     }
 
-    public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    public ApiDomain process(MethodDeclaration handler) {
         FieldProcessor fieldProcessor = new FieldProcessor(path);
         String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
 
