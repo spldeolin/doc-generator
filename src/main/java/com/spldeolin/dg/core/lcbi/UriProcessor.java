@@ -4,14 +4,17 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -46,7 +49,9 @@ public class UriProcessor {
             sb.append(".");
             sb.append(method.getName());
             sb.append("(");
-            Arrays.stream(method.getParameterTypes()).map(Class::getName).forEach(sb::append);
+            List<String> parameterTypeQualifier = Arrays.stream(method.getParameterTypes()).map(Class::getName)
+                    .collect(Collectors.toList());
+            Joiner.on(",").appendTo(sb, parameterTypeQualifier);
             sb.append(")");
 
             handlerMapping.setMethodQualifier(sb.toString());
