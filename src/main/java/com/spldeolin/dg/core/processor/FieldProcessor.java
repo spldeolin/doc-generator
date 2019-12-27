@@ -19,14 +19,15 @@ import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.container.ContainerFactory;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
-import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.lcbi.LoadClassBasedInfoImporter;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
@@ -73,7 +74,8 @@ public class FieldProcessor {
 
         // requestBodyFields
         tryGetClassQulifier(parameterTypeName).ifPresent(parameterTypeQulifier -> {
-            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(parameterTypeQulifier, false);
+            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(parameterTypeQulifier,
+                    false);
             api.setRequestBodyFileds(pair.getLeft());
             api.setRequestBodyFiledsFlatly(pair.getRight());
         });
@@ -92,7 +94,8 @@ public class FieldProcessor {
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {
-            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(resultTypeQulifier, true);
+            Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(resultTypeQulifier,
+                    true);
             api.setResponseBodyFields(pair.getLeft());
             api.setResponseBodyFieldsFlatly(pair.getRight());
         });
@@ -130,8 +133,14 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        ObjectSchema zeroSchema = LoadClassBasedInfoImporter.getJsonSchema(classQulifier).asObjectSchema();
-        Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList).getFields();
+        JsonSchema jsonSchema = LoadClassBasedInfoImporter.getJsonSchema(classQulifier);
+        if (jsonSchema == null) {
+            log.warn("文件[{}]中找不到[{}]", Conf.POJO_SCHEMA_PATH, classQulifier);
+            return Pair.of(Lists.newArrayList(), Lists.newArrayList());
+        }
+        ObjectSchema zeroSchema = jsonSchema.asObjectSchema();
+        Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList)
+                .getFields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.setParentField(null));
 
         if (isResponseBody) {
@@ -171,8 +180,7 @@ public class FieldProcessor {
 
             childFieldDto.setFieldName(childFieldName);
 
-            String comment = ContainerFactory.fieldContainer(path).getCmtByFieldVarQualifier()
-                    .get(fieldVarQualifier);
+            String comment = ContainerFactory.fieldContainer(path).getCmtByFieldVarQualifier().get(fieldVarQualifier);
             if (StringUtils.isBlank(comment)) {
                 log.warn("comment absent [{}]", fieldVarQualifier);
             }
