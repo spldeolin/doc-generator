@@ -3,20 +3,24 @@ package com.spldeolin.dg.core.container;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
+import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
+import com.spldeolin.dg.core.lcbi.SpringBootJarClassLoaderBuilder;
 import lombok.Getter;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -108,9 +112,17 @@ public class CuContainer {
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
-        Collection<SourceRoot> sourceRoots = new SymbolSolverCollectionStrategy().collect(path).getSourceRoots();
-        sourceRoots.add(new SourceRoot(path));
-        return sourceRoots;
+        ProjectRoot projectRoot;
+        try {
+            ClassLoader classLoader = new SpringBootJarClassLoaderBuilder(Conf.SPRING_BOOT_FAT_JAR_PATH)
+                    .build();
+            projectRoot = new ClassLoaderCollectionStrategy(classLoader).collect(path);
+        } catch (IOException e) {
+            log.error(e);
+            projectRoot = new SymbolSolverCollectionStrategy().collect(path);
+        }
+        projectRoot.addSourceRoot(path);
+        return projectRoot.getSourceRoots();
     }
 
     private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all) {

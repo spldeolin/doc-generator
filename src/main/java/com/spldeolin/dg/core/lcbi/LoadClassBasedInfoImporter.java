@@ -26,7 +26,7 @@ public class LoadClassBasedInfoImporter {
     private static final Map<String, String> handlerHttpMethods;
 
     static {
-        File file = Paths.get(Conf.POJO_SCHEMA_PATH).toFile();
+        File file = Conf.POJO_SCHEMA_PATH.toFile();
         String json = null;
         try {
             json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
@@ -38,7 +38,7 @@ public class LoadClassBasedInfoImporter {
         jsonSchemas = Maps.newHashMapWithExpectedSize(pojoSchemaList.size());
         pojoSchemaList.forEach(one -> jsonSchemas.put(one.getPojoQualifier(), one.getJsonSchema()));
 
-        file = Paths.get(Conf.HANDLER_MAPPING_PATH).toFile();
+        file = Conf.HANDLER_MAPPING_PATH.toFile();
         try {
             json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             log.info("handler mapping has been import from [{}].", file);

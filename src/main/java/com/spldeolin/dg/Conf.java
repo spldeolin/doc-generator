@@ -1,5 +1,7 @@
 package com.spldeolin.dg;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import com.spldeolin.dg.core.handlerresult.HandlerResultTypeExtractStrategy;
 
 /**
@@ -11,11 +13,13 @@ public class Conf {
 
     }
 
-    public static final String PROJECT_PATH = "input target project path here.";
+    public static final Path PROJECT_PATH = Paths.get("");
 
-    public static final String POJO_SCHEMA_PATH = "input pojo-schema.json path exporting from target project";
+    public static final Path POJO_SCHEMA_PATH = Paths.get("");
 
-    public static final String HANDLER_MAPPING_PATH = "input pojo-schema.json path exporting from target project";
+    public static final Path HANDLER_MAPPING_PATH = Paths.get("");
+
+    public static final Path SPRING_BOOT_FAT_JAR_PATH = Paths.get("");
 
     public static final HandlerResultTypeExtractStrategy HOW_TO_FIND_RESULT_TYPE =
             HandlerResultTypeExtractStrategy.FIRST_SEE_TAG_CONTENT;

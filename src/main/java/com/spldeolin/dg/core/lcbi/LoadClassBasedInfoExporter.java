@@ -58,7 +58,7 @@ public class LoadClassBasedInfoExporter {
 
     private void process() {
         log.info("start process");
-        Path path = Paths.get(Conf.PROJECT_PATH);
+        Path path = Conf.PROJECT_PATH;
 
         Collection<PojoSchemaDto> pojoJsonSchemas = Lists.newLinkedList();
         Collection<HandlerMappingDto> handlerMappings = Lists.newLinkedList();
@@ -98,7 +98,7 @@ public class LoadClassBasedInfoExporter {
         reports.forEach(report -> log.info("\t{} took [{}]ms.", report.getPath(), report.getElapsed()));
 
 
-        File jsonSchemaOutput = new File(Conf.POJO_SCHEMA_PATH);
+        File jsonSchemaOutput = Conf.POJO_SCHEMA_PATH.toFile();
         try {
             FileUtils.writeStringToFile(jsonSchemaOutput, Jsons.toJson(pojoJsonSchemas), StandardCharsets.UTF_8);
             log.info("POJO schema has been export into [{}].", jsonSchemaOutput);
@@ -106,7 +106,7 @@ public class LoadClassBasedInfoExporter {
             log.error("FileUtils.writeStringToFile", e);
         }
 
-        File handlerMappingOutput = new File(Conf.HANDLER_MAPPING_PATH);
+        File handlerMappingOutput = Conf.HANDLER_MAPPING_PATH.toFile();
         try {
             FileUtils.writeStringToFile(handlerMappingOutput, Jsons.toJson(handlerMappings), StandardCharsets.UTF_8);
             log.info("Handler mapping has been export into [{}].", handlerMappingOutput);
