@@ -38,22 +38,32 @@ public class CoidContainer {
     private final Path path;
 
     @Getter
-    private final Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
+    private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
     @Getter
-    private final Map<String, JsonSchema> jsonSchemasByPojoQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, JsonSchema> jsonSchemasByPojoQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private final Map<String, ClassOrInterfaceDeclaration> byCoidQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, ClassOrInterfaceDeclaration> byCoidQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private final Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap
-            .create(EXPECTED, 1);
+    private Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, ClassOrInterfaceDeclaration> byCoidName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, ClassOrInterfaceDeclaration> byCoidName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, String> coidQulifierByCoidName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, String> coidQulifierByCoidName = ArrayListMultimap.create(EXPECTED, 1);
 
-    /* package-private */ CoidContainer(Path path) {
-        CuContainer cuContainer = ContainerFactory.cuContainer(path);
+    private static Map<Path, CoidContainer> instancesCache = Maps.newConcurrentMap();
+
+    public static CoidContainer getInstance(Path path) {
+        CoidContainer result = instancesCache.get(path);
+        if (result == null) {
+            result = new CoidContainer(path);
+            instancesCache.put(path, result);
+        }
+        return result;
+    }
+
+    private CoidContainer(Path path) {
+        CuContainer cuContainer = CuContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
@@ -61,8 +71,7 @@ public class CoidContainer {
 
                 coid.getFullyQualifiedName().ifPresent(qualifier -> {
 
-                    if (coid.getAnnotations().stream().anyMatch(anno -> StringUtils
-                            .equalsAnyIgnoreCase(anno.getNameAsString(), "Data", "Getter", "Setter", "Value"))) {
+                    if (!coid.isInterface()) {
                         String qualifierForClassLoader = this.qualifierForClassLoader(coid);
                         if (!qualifierForClassLoader.equals(qualifier)) {
                             log.info("qualifierForClassLoader={}", qualifierForClassLoader);
@@ -102,7 +111,7 @@ public class CoidContainer {
 
     public Multimap<String, ClassOrInterfaceDeclaration> getByPackageQualifier() {
         if (byPackageQualifier.size() == 0) {
-            ContainerFactory.cuContainer(path).getByPackageQualifier().asMap()
+            CuContainer.getInstance(path).getByPackageQualifier().asMap()
                     .forEach((packageQualifier, cus) -> cus.forEach(cu -> {
                         cu.findAll(ClassOrInterfaceDeclaration.class)
                                 .forEach(coid -> byPackageQualifier.put(packageQualifier, coid));

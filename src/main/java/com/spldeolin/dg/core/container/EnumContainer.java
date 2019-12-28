@@ -21,21 +21,32 @@ public class EnumContainer {
     private static final int EXPECTED = 5200;
 
     @Getter
-    private final Path path;
+    private Path path;
 
     @Getter
-    private final Collection<EnumDeclaration> all = Lists.newLinkedList();
+    private Collection<EnumDeclaration> all = Lists.newLinkedList();
 
-    private final Map<String, EnumDeclaration> byEnumQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, EnumDeclaration> byEnumQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private final Multimap<String, EnumDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, EnumDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, EnumDeclaration> byEnumName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, EnumDeclaration> byEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, String> enumQulifierByEnumName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, String> enumQulifierByEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
-    /* package-private */ EnumContainer(Path path) {
-        CuContainer cuContainer = ContainerFactory.cuContainer(path);
+    private static Map<Path, EnumContainer> instancesCache = Maps.newConcurrentMap();
+
+    public static EnumContainer getInstance(Path path) {
+        EnumContainer result = instancesCache.get(path);
+        if (result == null) {
+            result = new EnumContainer(path);
+            instancesCache.put(path, result);
+        }
+        return result;
+    }
+
+    private EnumContainer(Path path) {
+        CuContainer cuContainer = CuContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
@@ -61,7 +72,7 @@ public class EnumContainer {
 
     public Multimap<String, EnumDeclaration> getByPackageQualifier() {
         if (byPackageQualifier.size() == 0) {
-            ContainerFactory.cuContainer(path).getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus
+            CuContainer.getInstance(path).getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus
                     .forEach(cu -> cu.findAll(EnumDeclaration.class)
                             .forEach(enumDeclaration -> byPackageQualifier.put(packageQualifier, enumDeclaration))));
         }

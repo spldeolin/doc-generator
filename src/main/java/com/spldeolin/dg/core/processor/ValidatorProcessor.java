@@ -28,7 +28,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.container.ContainerFactory;
+import com.spldeolin.dg.core.container.EnumContainer;
 import com.spldeolin.dg.core.domain.ValidatorDomain;
 import com.spldeolin.dg.core.util.Javadocs;
 import lombok.extern.log4j.Log4j2;
@@ -63,7 +63,7 @@ public class ValidatorProcessor {
             anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                 if (nameOf(pair, "enumType")) {
                     String enumName = StringUtils.removeEnd(pair.getValue().toString(), ".class");
-                    Collection<EnumDeclaration> enumDeclarations = ContainerFactory.enumContainer(path).getByEnumName()
+                    Collection<EnumDeclaration> enumDeclarations = EnumContainer.getInstance(path).getByEnumName()
                             .get(enumName);
 
                     Collection<String> parts = Lists.newLinkedList();

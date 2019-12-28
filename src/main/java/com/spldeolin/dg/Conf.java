@@ -13,7 +13,8 @@ public class Conf {
 
     }
 
-    public static final Path TARGET_PROJECT_PATH = Paths.get("");
+    public static final Path TARGET_PROJECT_PATH = Paths
+            .get("/Users/deolin/Documents/project-repo/motherbuy/motherbuy");
 
     public static final Path TARGET_SPRING_BOOT_FAT_JAR_PATH = Paths.get("");
 

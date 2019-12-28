@@ -2,11 +2,12 @@ package com.spldeolin.dg.core.container;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -19,14 +20,25 @@ import lombok.extern.log4j.Log4j2;
 @Getter
 public class HandlerContainer {
 
-    private final Path path;
+    private Path path;
 
-    private final Collection<MethodDeclaration> all = Lists.newLinkedList();
+    private Collection<MethodDeclaration> all = Lists.newLinkedList();
 
-    private final List<HandlerEntry> withController = Lists.newLinkedList();
+    private Collection<HandlerEntry> withController = Lists.newLinkedList();
 
-    /* package-private */ HandlerContainer(Path path) {
-        CoidContainer coidContainer = ContainerFactory.coidContainer(path);
+    private static Map<Path, HandlerContainer> instancesCache = Maps.newConcurrentMap();
+
+    public static HandlerContainer getInstance(Path path) {
+        HandlerContainer result = instancesCache.get(path);
+        if (result == null) {
+            result = new HandlerContainer(path);
+            instancesCache.put(path, result);
+        }
+        return result;
+    }
+
+    private HandlerContainer(Path path) {
+        CoidContainer coidContainer = CoidContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
 

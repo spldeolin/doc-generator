@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.convert.rap.RapConverter;
-import com.spldeolin.dg.core.container.ContainerFactory;
 import com.spldeolin.dg.core.container.HandlerContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.processor.ApiProcessor;
@@ -20,7 +19,7 @@ public class Boot {
 
         // collect
         Path path = Conf.TARGET_PROJECT_PATH;
-        HandlerContainer handlerContainer = ContainerFactory.handlerContainer(path);
+        HandlerContainer handlerContainer = HandlerContainer.getInstance(path);
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();
@@ -29,7 +28,7 @@ public class Boot {
 
         // convert
         String result = new RapConverter().convert(apis);
-        log.info(result);
+//        log.info(result);
     }
 
 }

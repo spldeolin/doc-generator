@@ -2,6 +2,7 @@ package com.spldeolin.dg.core.container;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -17,9 +18,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.ClassLoaderCollectionStrategy;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
 import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
 import lombok.Getter;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -33,24 +34,36 @@ public class CuContainer {
     private static final int EXPECTED = 5500;
 
     @Getter
-    private final Path path;
+    private Path path;
 
     @Getter
-    private final Collection<CompilationUnit> all = Lists.newLinkedList();
+    private Collection<CompilationUnit> all = Lists.newLinkedList();
 
-    private final Map<String, CompilationUnit> byPrimaryClassQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, CompilationUnit> byPrimaryClassQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private final Multimap<String, CompilationUnit> byPrimaryClassName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, CompilationUnit> byPrimaryClassName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, CompilationUnit> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, CompilationUnit> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, CompilationUnit> byClassName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, CompilationUnit> byClassName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Multimap<String, CompilationUnit> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, CompilationUnit> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Collection<Report> reports = Sets.newTreeSet();
+    private Collection<Report> reports = Sets.newTreeSet();
 
-    /* package-private */ CuContainer(Path path) {
+    private static Map<Path, CuContainer> instancesCache = Maps.newConcurrentMap();;
+
+    public static CuContainer getInstance(Path path) {
+        CuContainer result = instancesCache.get(path);
+        if (result == null) {
+            result = new CuContainer(path);
+            instancesCache.put(path, result);
+        }
+        return result;
+    }
+
+
+    private CuContainer(Path path) {
         long start = System.currentTimeMillis();
         this.path = path;
 
@@ -111,10 +124,9 @@ public class CuContainer {
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
-        ProjectRoot projectRoot;
-        ClassLoader classLoader = SpringBootFatJarClassLoaderBuilder.getInstance(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
-                .build();
-        projectRoot = new ClassLoaderCollectionStrategy(classLoader).collect(path);
+        URLClassLoader classloader = SpringBootFatJarClassLoaderBuilder
+                .getInstance(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH).build();
+        ProjectRoot projectRoot = new ClassLoaderCollectionStrategy(classloader).collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();
     }

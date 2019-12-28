@@ -19,8 +19,8 @@ import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.container.ContainerFactory;
+import com.spldeolin.dg.core.container.CoidContainer;
+import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
@@ -132,7 +132,7 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        JsonSchema jsonSchema = ContainerFactory.coidContainer(path).getJsonSchemasByPojoQualifier().get(classQulifier);
+        JsonSchema jsonSchema = CoidContainer.getInstance(path).getJsonSchemasByPojoQualifier().get(classQulifier);
         if (jsonSchema == null) {
             log.error("classloader找不到[{}]", classQulifier);
             return Pair.of(Lists.newArrayList(), Lists.newArrayList());
@@ -166,7 +166,7 @@ public class FieldProcessor {
             FieldDomain childFieldDto = new FieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-            FieldDeclaration fieldDeclaration = ContainerFactory.fieldContainer(path).getByFieldVarQualifier()
+            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(path).getByFieldVarQualifier()
                     .get(fieldVarQualifier);
             if (fieldDeclaration == null) {
                 /*
@@ -179,10 +179,7 @@ public class FieldProcessor {
 
             childFieldDto.setFieldName(childFieldName);
 
-            String comment = ContainerFactory.fieldContainer(path).getCmtByFieldVarQualifier().get(fieldVarQualifier);
-            if (StringUtils.isBlank(comment)) {
-                log.warn("comment absent [{}]", fieldVarQualifier);
-            }
+            String comment = FieldContainer.getInstance(path).getCmtByFieldVarQualifier().get(fieldVarQualifier);
             childFieldDto.setDescription(comment);
 
             childFieldDto.setNullable(true);
@@ -224,8 +221,8 @@ public class FieldProcessor {
             }
 
             if (childFieldDto.getJsonType() == JsonType.number) {
-                String javaType = ContainerFactory.fieldContainer(path).getVarByFieldVarQualifier()
-                        .get(fieldVarQualifier).getTypeAsString();
+                String javaType = FieldContainer.getInstance(path).getVarByFieldVarQualifier().get(fieldVarQualifier)
+                        .getTypeAsString();
                 childFieldDto.setNumberFormat(calcNumberFormat(javaType));
             }
 
@@ -285,8 +282,7 @@ public class FieldProcessor {
     }
 
     private Optional<String> tryGetClassQulifier(String className) {
-        Collection<String> classQulifiers = ContainerFactory.coidContainer(path).getCoidQulifierByCoidName()
-                .get(className);
+        Collection<String> classQulifiers = CoidContainer.getInstance(path).getCoidQulifierByCoidName().get(className);
         if (classQulifiers.size() == 0) {
             if (StringUtils.isNotEmpty(className)) {
                 log.info("找不到Class[{}]", className);

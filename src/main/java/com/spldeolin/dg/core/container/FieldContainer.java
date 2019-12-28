@@ -27,21 +27,32 @@ public class FieldContainer {
 
     private static final int EXPECTED = 28000;
 
-    private final Path path;
+    private Path path;
 
-    private final Collection<FieldDeclaration> all = Lists.newLinkedList();
+    private Collection<FieldDeclaration> all = Lists.newLinkedList();
 
-    private final Map<String, FieldDeclaration> byFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, FieldDeclaration> byFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
     // 存在这种情况 private int a, b = 1, c;
-    private final Map<String, VariableDeclarator> varByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, VariableDeclarator> varByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private final Multimap<String, FieldDeclaration> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, FieldDeclaration> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private final Map<String, String> cmtByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, String> cmtByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    /* package-private */ FieldContainer(Path path) {
-        CoidContainer coidContainer = ContainerFactory.coidContainer(path);
+    private static Map<Path, FieldContainer> instancesCache = Maps.newConcurrentMap();
+
+    public static FieldContainer getInstance(Path path) {
+        FieldContainer result = instancesCache.get(path);
+        if (result == null) {
+            result = new FieldContainer(path);
+            instancesCache.put(path, result);
+        }
+        return result;
+    }
+
+    private FieldContainer(Path path) {
+        CoidContainer coidContainer = CoidContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
         coidContainer.getByCoidQualifier()

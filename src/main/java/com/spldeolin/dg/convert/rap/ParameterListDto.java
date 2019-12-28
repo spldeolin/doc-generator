@@ -45,7 +45,8 @@ public class ParameterListDto {
         result.setParameterList(Lists.newArrayList());
 
         StringBuilder remark = new StringBuilder(64);
-        if (fieldDto.getStringFormat() != null && !StringFormatType.normal.getValue().equals(fieldDto.getStringFormat())) {
+        if (fieldDto.getStringFormat() != null && !StringFormatType.normal.getValue()
+                .equals(fieldDto.getStringFormat())) {
             remark.append("格式：");
             remark.append(fieldDto.getStringFormat());
             remark.append("　");

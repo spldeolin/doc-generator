@@ -5,8 +5,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.CompilationUnit.Storage;
-import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
-import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.extern.log4j.Log4j2;
 
 /**
