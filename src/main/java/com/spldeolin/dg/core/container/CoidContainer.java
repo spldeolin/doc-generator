@@ -4,7 +4,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -73,18 +72,12 @@ public class CoidContainer {
 
                     if (!coid.isInterface()) {
                         String qualifierForClassLoader = this.qualifierForClassLoader(coid);
-                        if (!qualifierForClassLoader.equals(qualifier)) {
-                            log.info("qualifierForClassLoader={}", qualifierForClassLoader);
-                        }
-
                         SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
                         try {
                             Class<?> clazz = classLoader.loadClass(qualifierForClassLoader);
                             om.acceptJsonFormatVisitor(clazz, sfw);
-                        } catch (ClassNotFoundException e) {
-                            log.warn("Class.forName({})", qualifierForClassLoader);
-                        } catch (JsonMappingException e) {
-                            log.warn("om.acceptJsonFormatVisitor(Class.forName({}))", qualifier, e);
+                        } catch (ClassNotFoundException | JsonMappingException| NoClassDefFoundError e) {
+                            log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);
                         }
                         jsonSchemasByPojoQualifier.put(qualifier, sfw.finalSchema());
                     }

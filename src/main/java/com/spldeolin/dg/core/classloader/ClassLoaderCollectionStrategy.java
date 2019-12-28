@@ -16,6 +16,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderType
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.Log;
 import com.github.javaparser.utils.ProjectRoot;
@@ -31,6 +32,7 @@ public class ClassLoaderCollectionStrategy implements CollectionStrategy {
 
     public ClassLoaderCollectionStrategy(ClassLoader classLoader) {
         typeSolver = new CombinedTypeSolver(new ClassLoaderTypeSolver(classLoader));
+        typeSolver.add(new ReflectionTypeSolver(false));
         parserConfiguration = new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
     }
 

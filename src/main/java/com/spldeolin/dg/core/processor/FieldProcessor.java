@@ -285,7 +285,7 @@ public class FieldProcessor {
         Collection<String> classQulifiers = CoidContainer.getInstance(path).getCoidQulifierByCoidName().get(className);
         if (classQulifiers.size() == 0) {
             if (StringUtils.isNotEmpty(className)) {
-                log.info("找不到Class[{}]", className);
+                report(className);
             }
             return Optional.empty();
         }
@@ -294,6 +294,13 @@ public class FieldProcessor {
             return Optional.empty();
         }
         return Optional.of(Iterables.getOnlyElement(classQulifiers));
+    }
+
+    private void report(String className) {
+        if (!StringUtils.equalsAny(className, null, "null", "void", "Long", "Integer", "Long[]")) {
+            log.info("cannot found qualifier by [{}]", className);
+        }
+
     }
 
 }

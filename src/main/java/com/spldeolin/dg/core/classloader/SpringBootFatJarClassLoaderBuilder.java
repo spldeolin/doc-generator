@@ -46,7 +46,9 @@ public class SpringBootFatJarClassLoaderBuilder {
         try {
             Path path = this.decompressJarToTempDir();
             Path bootInf = path.resolve("BOOT-INF");
-            List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL());
+            List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL(),
+                    new URL(getClass().getProtectionDomain().getCodeSource().getLocation(), "servlet-classpath"));
+
             FileUtils.iterateFiles(bootInf.resolve("lib").toFile(), new String[]{"jar"}, true).forEachRemaining(jar -> {
                 try {
                     urls.add(jar.toURI().toURL());
@@ -80,6 +82,7 @@ public class SpringBootFatJarClassLoaderBuilder {
                 }
             }
         }
+        log.info("decompressJarToTempDir=[{}]", tempDir);
         return tempDir;
     }
 
