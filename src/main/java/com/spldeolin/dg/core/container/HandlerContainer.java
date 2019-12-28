@@ -32,9 +32,9 @@ public class HandlerContainer {
 
         coidContainer.getAll().stream().filter(this::isController).forEach(coid -> {
 
-            if (!coid.getNameAsString().startsWith("Marketing")) {
-                return;
-            }
+//            if (!coid.getNameAsString().startsWith("Marketing")) {
+//                return;
+//            }
 
             coid.findAll(MethodDeclaration.class).stream().filter(this::isHandler).forEach(method -> {
                 all.add(method);

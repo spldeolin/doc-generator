@@ -4,6 +4,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
@@ -15,8 +16,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
+import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -60,7 +61,8 @@ public class CoidContainer {
 
                 coid.getFullyQualifiedName().ifPresent(qualifier -> {
 
-                    if (coid.getAnnotationByName("Data").isPresent()) {
+                    if (coid.getAnnotations().stream().anyMatch(anno -> StringUtils
+                            .equalsAnyIgnoreCase(anno.getNameAsString(), "Data", "Getter", "Setter", "Value"))) {
                         String qualifierForClassLoader = this.qualifierForClassLoader(coid);
                         if (!qualifierForClassLoader.equals(qualifier)) {
                             log.info("qualifierForClassLoader={}", qualifierForClassLoader);
