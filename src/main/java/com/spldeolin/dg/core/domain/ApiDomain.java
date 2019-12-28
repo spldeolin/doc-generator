@@ -11,9 +11,9 @@ import lombok.Data;
 @Data
 public class ApiDomain {
 
-    private String httpMethod;
+    private Collection<String> httpMethod;
 
-    private String uri;
+    private Collection<String> uri;
 
     private String description;
 

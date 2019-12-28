@@ -80,17 +80,6 @@ public class LoadClassBasedInfoExporter {
                                 pojoJsonSchemas.add(new PojoSchemaDto().setPojoQualifier(pojoQualifier)
                                         .setJsonSchema(sfw.finalSchema()));
                             }
-
-                            if (coid.getAnnotationByName("RestController").isPresent()) {
-                                log.info(pojoQualifier);
-                                String qualifierForClassLoader = qualifierForClassLoader(coid);
-                                try {
-                                    handlerMappings
-                                            .addAll(new UriProcessor().process(Class.forName(qualifierForClassLoader)));
-                                } catch (ClassNotFoundException e) {
-                                    log.warn("Class.forName({})", qualifierForClassLoader);
-                                }
-                            }
                         }))));
 
         log.info("{} CU(pojo) has been parsed and taken {} ms complete.", pojoJsonSchemas.size(),

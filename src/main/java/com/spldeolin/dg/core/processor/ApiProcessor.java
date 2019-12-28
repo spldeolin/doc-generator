@@ -1,7 +1,9 @@
 package com.spldeolin.dg.core.processor;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
@@ -9,7 +11,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
-import com.spldeolin.dg.core.lcbi.LoadClassBasedInfoImporter;
 import com.spldeolin.dg.core.util.Javadocs;
 
 /**
@@ -23,7 +24,7 @@ public class ApiProcessor {
         this.path = path;
     }
 
-    public ApiDomain process(MethodDeclaration handler) {
+    public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         FieldProcessor fieldProcessor = new FieldProcessor(path);
         String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
 
@@ -37,11 +38,14 @@ public class ApiProcessor {
         }
         Joiner.on(",").appendTo(sb, parameterTypeQualifier);
         sb.append(")");
-        String methodQualifier = sb.toString();
 
         ApiDomain api = new ApiDomain();
-        api.setHttpMethod(LoadClassBasedInfoImporter.getHandlerHttpMethods(methodQualifier));
-        api.setUri(LoadClassBasedInfoImporter.getHandlerUri(methodQualifier));
+
+        Pair<Collection<String>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
+                .process(controller, handler);
+        api.setUri(urisAndMethods.getLeft());
+        api.setHttpMethod(urisAndMethods.getRight());
+
         api.setDescription(Javadocs.extractFirstLine(handler));
         api.setUriPathFields(Lists.newArrayList());
         api.setUriQueryFields(Lists.newArrayList());

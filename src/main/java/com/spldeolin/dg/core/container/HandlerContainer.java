@@ -16,12 +16,11 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-07
  */
 @Log4j2
+@Getter
 public class HandlerContainer {
 
-    @Getter
     private final Path path;
 
-    @Getter
     private final Collection<MethodDeclaration> all = Lists.newLinkedList();
 
     private final List<HandlerEntry> withController = Lists.newLinkedList();
@@ -56,21 +55,6 @@ public class HandlerContainer {
         return method.getAnnotations().stream().anyMatch(anno -> StringUtils
                 .equalsAny(anno.getNameAsString(), "GetMapping", "PostMapping", "PutMapping", "PatchMapping",
                         "DeleteMapping", "RequestMapping"));
-    }
-
-    public List<HandlerEntry> getWithController() {
-        if (withController.size() == 0) {
-            ContainerFactory.coidContainer(path).getAll().stream().filter(this::isController).forEach(coid -> {
-
-                if (!coid.getNameAsString().startsWith("Marketing")) {
-                    return;
-                }
-
-                coid.findAll(MethodDeclaration.class).stream().filter(this::isHandler).forEach(
-                        method -> withController.add(new HandlerEntry().setController(coid).setHandler(method)));
-            });
-        }
-        return withController;
     }
 
     @Data
