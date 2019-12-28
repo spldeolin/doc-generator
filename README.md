@@ -16,9 +16,13 @@ a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generato
 
 - body, e.g.: `@RequestBody String itemName`
 
-- mazy `@RequestMapping` combine situation
-
 - a sample project
+
+
+
+## DONE
+
+- mazy `@RequestMapping` combine situation
 
 
 
