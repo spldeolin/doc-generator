@@ -11,6 +11,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
+import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.util.Javadocs;
 
 /**
@@ -41,10 +42,10 @@ public class ApiProcessor {
 
         ApiDomain api = new ApiDomain();
 
-        Pair<Collection<String>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
+        Pair<Collection<MethodType>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
                 .process(controller, handler);
-        api.setUri(urisAndMethods.getLeft());
-        api.setHttpMethod(urisAndMethods.getRight());
+        api.setMethod(urisAndMethods.getLeft());
+        api.setUri(urisAndMethods.getRight());
 
         api.setDescription(Javadocs.extractFirstLine(handler));
         api.setUriPathFields(Lists.newArrayList());

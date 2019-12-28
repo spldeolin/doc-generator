@@ -1,15 +1,19 @@
 package com.spldeolin.dg.core.processor;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.core.enums.MethodType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -22,24 +26,14 @@ public class RequestMappingProcessor {
 
     private static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
 
-    private static final String DELETE_MAPPING = "org.springframework.web.bind.annotation.DeleteMapping";
-
-    private static final String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping";
-
-    private static final String PATCH_MAPPING = "org.springframework.web.bind.annotation.PatchMapping";
-
-    private static final String POST_MAPPING = "org.springframework.web.bind.annotation.PostMapping";
-
-    private static final String PUT_MAPPING = "org.springframework.web.bind.annotation.PutMapping";
-
-    public Pair<Collection<String>, Collection<String>> process(ClassOrInterfaceDeclaration controller,
+    public Pair<Collection<MethodType>, Collection<String>> process(ClassOrInterfaceDeclaration controller,
             MethodDeclaration handler) {
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
 
         Collection<String> combinePaths = Lists.newArrayList();
-        Collection<String> combineMethods = Lists.newArrayList();
+        Collection<MethodType> combineMethods = Lists.newArrayList();
         for (RequestMappingDto dto1 : fromController) {
             for (RequestMappingDto dto2 : fromHandler) {
                 combineMethods.addAll(dto1.getMethods());
@@ -52,7 +46,7 @@ public class RequestMappingProcessor {
             }
         }
 
-        return Pair.of(combinePaths, combineMethods);
+        return Pair.of(combineMethods, combinePaths);
     }
 
     private Collection<RequestMappingDto> parseRequestMappings(NodeList<AnnotationExpr> annotations) {
@@ -62,18 +56,13 @@ public class RequestMappingProcessor {
             RequestMappingDto dto;
             if (REQUEST_MAPPING.equals(annoQualifier)) {
                 dto = this.parseRequestMapping(annotation, false);
-            } else if (DELETE_MAPPING.equals(annoQualifier)) {
-                dto = this.parseRequestMapping(annotation, true).setMethods(Lists.newArrayList("DELETE"));
-            } else if (GET_MAPPING.equals(annoQualifier)) {
-                dto = this.parseRequestMapping(annotation, true).setMethods(Lists.newArrayList("GET"));
-            } else if (PATCH_MAPPING.equals(annoQualifier)) {
-                dto = this.parseRequestMapping(annotation, true).setMethods(Lists.newArrayList("PATCH"));
-            } else if (POST_MAPPING.equals(annoQualifier)) {
-                dto = this.parseRequestMapping(annotation, true).setMethods(Lists.newArrayList("POST"));
-            } else if (PUT_MAPPING.equals(annoQualifier)) {
-                dto = this.parseRequestMapping(annotation, true).setMethods(Lists.newArrayList("PUT"));
             } else {
-                continue;
+                Optional<MethodType> methodType = MethodType.ofAnnotationQualifier(annoQualifier);
+                if (methodType.isPresent()) {
+                    dto = this.parseRequestMapping(annotation, true).setMethods(methodType.get().inCollection());
+                } else {
+                    continue;
+                }
             }
             result.add(dto);
         }
@@ -110,12 +99,14 @@ public class RequestMappingProcessor {
         return result;
     }
 
-    private Collection<String> collectionMethods(Expression memberValue) {
-        Collection<String> result = Lists.newArrayList();
-        memberValue.ifArrayInitializerExpr(arrayInit -> result
-                .addAll(arrayInit.getValues().stream().map(arrayEle -> arrayEle.asFieldAccessExpr().getNameAsString())
-                        .collect(Collectors.toList())));
-        memberValue.ifFieldAccessExpr(fieldAccess -> result.add(fieldAccess.getNameAsString()));
+    @RequestMapping(method = RequestMethod.GET)
+    private Collection<MethodType> collectionMethods(Expression memberValue) {
+        Collection<MethodType> result = Lists.newArrayList();
+        memberValue.ifArrayInitializerExpr(arrayInit -> arrayInit.getValues().forEach(arrayEle -> arrayEle
+                .ifFieldAccessExpr(
+                        fieldAccess -> MethodType.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add))));
+        memberValue.ifFieldAccessExpr(
+                fieldAccess -> MethodType.ofValue(fieldAccess.getNameAsString()).ifPresent(result::add));
         return result;
     }
 
@@ -123,7 +114,7 @@ public class RequestMappingProcessor {
     @Accessors(chain = true)
     private static class RequestMappingDto {
 
-        private Collection<String> methods = Lists.newArrayList();
+        private Collection<MethodType> methods = Lists.newArrayList();
 
         private Collection<String> paths = Lists.newArrayList();
 

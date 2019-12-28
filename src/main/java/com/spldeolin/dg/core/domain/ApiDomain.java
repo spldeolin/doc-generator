@@ -1,6 +1,7 @@
 package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
+import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
 import lombok.Data;
@@ -11,7 +12,7 @@ import lombok.Data;
 @Data
 public class ApiDomain {
 
-    private Collection<String> httpMethod;
+    private Collection<MethodType> method;
 
     private Collection<String> uri;
 
