@@ -1,14 +1,22 @@
 package com.spldeolin.dg.core.container;
 
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -18,13 +26,21 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CoidContainer {
 
-    private static final int EXPECTED = 5500;
+    private static final int EXPECTED = 5600;
+
+    private static final ObjectMapper om = new ObjectMapper();
+
+    private static final URLClassLoader classLoader = SpringBootFatJarClassLoaderBuilder
+            .getInstance(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH).build();
 
     @Getter
     private final Path path;
 
     @Getter
     private final Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
+
+    @Getter
+    private final Map<String, JsonSchema> jsonSchemasByPojoQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
     private final Map<String, ClassOrInterfaceDeclaration> byCoidQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
@@ -40,7 +56,31 @@ public class CoidContainer {
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-            all.addAll(cu.findAll(ClassOrInterfaceDeclaration.class));
+            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(coid -> {
+
+                coid.getFullyQualifiedName().ifPresent(qualifier -> {
+
+                    if (coid.getAnnotationByName("Data").isPresent()) {
+                        String qualifierForClassLoader = this.qualifierForClassLoader(coid);
+                        if (!qualifierForClassLoader.equals(qualifier)) {
+                            log.info("qualifierForClassLoader={}", qualifierForClassLoader);
+                        }
+
+                        SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
+                        try {
+                            Class<?> clazz = classLoader.loadClass(qualifierForClassLoader);
+                            om.acceptJsonFormatVisitor(clazz, sfw);
+                        } catch (ClassNotFoundException e) {
+                            log.warn("Class.forName({})", qualifierForClassLoader);
+                        } catch (JsonMappingException e) {
+                            log.warn("om.acceptJsonFormatVisitor(Class.forName({}))", qualifier, e);
+                        }
+                        jsonSchemasByPojoQualifier.put(qualifier, sfw.finalSchema());
+                    }
+                });
+
+                all.add(coid);
+            });
         }));
 
         log.info("CoidContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(), System.currentTimeMillis() - start);
@@ -82,6 +122,25 @@ public class CoidContainer {
                     coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
         }
         return coidQulifierByCoidName;
+    }
+
+
+    private String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {
+        StringBuilder qualifierForClassLoader = new StringBuilder(64);
+        this.qualifierForClassLoader(qualifierForClassLoader, coid);
+        return qualifierForClassLoader.toString();
+    }
+
+    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
+        node.getParentNode().ifPresent(parent -> {
+            if (parent instanceof TypeDeclaration) {
+                this.qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
+                qualifier.append("$");
+                qualifier.append(node.getNameAsString());
+            } else {
+                node.getFullyQualifiedName().ifPresent(qualifier::append);
+            }
+        });
     }
 
 }

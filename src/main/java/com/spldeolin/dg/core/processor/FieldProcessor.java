@@ -28,7 +28,6 @@ import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
-import com.spldeolin.dg.core.lcbi.LoadClassBasedInfoImporter;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
 
@@ -133,9 +132,9 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        JsonSchema jsonSchema = LoadClassBasedInfoImporter.getJsonSchema(classQulifier);
+        JsonSchema jsonSchema = ContainerFactory.coidContainer(path).getJsonSchemasByPojoQualifier().get(classQulifier);
         if (jsonSchema == null) {
-            log.warn("文件[{}]中找不到[{}]", Conf.POJO_SCHEMA_PATH, classQulifier);
+            log.error("classloader找不到[{}]", classQulifier);
             return Pair.of(Lists.newArrayList(), Lists.newArrayList());
         }
         ObjectSchema zeroSchema = jsonSchema.asObjectSchema();
