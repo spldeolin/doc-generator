@@ -24,7 +24,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-06
  */
 @Log4j2
-public class CoidContainer {
+public class ClassContainer {
 
     private static final int EXPECTED = 5600;
 
@@ -39,52 +39,32 @@ public class CoidContainer {
     @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
-    @Getter
-    private Map<String, JsonSchema> jsonSchemasByPojoQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
-
-    private Map<String, ClassOrInterfaceDeclaration> byCoidQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, ClassOrInterfaceDeclaration> byQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
     private Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private Multimap<String, ClassOrInterfaceDeclaration> byCoidName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, ClassOrInterfaceDeclaration> byClassName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private Multimap<String, String> coidQulifierByCoidName = ArrayListMultimap.create(EXPECTED, 1);
+    private Multimap<String, String> qulifierByClassName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private static Map<Path, CoidContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, ClassContainer> instancesCache = Maps.newConcurrentMap();
 
-    public static CoidContainer getInstance(Path path) {
-        CoidContainer result = instancesCache.get(path);
+    public static ClassContainer getInstance(Path path) {
+        ClassContainer result = instancesCache.get(path);
         if (result == null) {
-            result = new CoidContainer(path);
+            result = new ClassContainer(path);
             instancesCache.put(path, result);
         }
         return result;
     }
 
-    private CoidContainer(Path path) {
+    private ClassContainer(Path path) {
         CuContainer cuContainer = CuContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
         cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(coid -> {
-
-                coid.getFullyQualifiedName().ifPresent(qualifier -> {
-
-                    if (!coid.isInterface()) {
-                        String qualifierForClassLoader = this.qualifierForClassLoader(coid);
-                        SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
-                        try {
-                            Class<?> clazz = classLoader.loadClass(qualifierForClassLoader);
-                            om.acceptJsonFormatVisitor(clazz, sfw);
-                        } catch (ClassNotFoundException | JsonMappingException| NoClassDefFoundError e) {
-                            log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);
-                        }
-                        jsonSchemasByPojoQualifier.put(qualifier, sfw.finalSchema());
-                    }
-                });
-
-                all.add(coid);
-            });
+            cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
+                    .forEach(classDeclaration -> all.add(classDeclaration));
         }));
 
         log.info("CoidContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(), System.currentTimeMillis() - start);
@@ -94,44 +74,62 @@ public class CoidContainer {
         }
     }
 
-    public Map<String, ClassOrInterfaceDeclaration> getByCoidQualifier() {
-        if (byCoidQualifier.size() == 0) {
-            all.forEach(coid -> byCoidQualifier
-                    .put(coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new), coid));
+    public JsonSchema getJsonSchemasByQualifier(String classQualifier) {
+        ClassOrInterfaceDeclaration classDeclaration = this.getByQualifier().get(classQualifier);
+        if (classDeclaration == null) {
+            return null;
         }
-        return byCoidQualifier;
+        String qualifierForClassLoader = this.qualifierForClassLoader(classDeclaration);
+        SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
+        try {
+            Class<?> clazz = classLoader.loadClass(qualifierForClassLoader);
+            om.acceptJsonFormatVisitor(clazz, sfw);
+        } catch (ClassNotFoundException | JsonMappingException | NoClassDefFoundError e) {
+            log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);
+        }
+
+        return sfw.finalSchema();
+    }
+
+    public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
+        if (byQualifier.size() == 0) {
+            all.forEach(classDeclaration -> byQualifier
+                    .put(classDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
+                            classDeclaration));
+        }
+        return byQualifier;
     }
 
     public Multimap<String, ClassOrInterfaceDeclaration> getByPackageQualifier() {
         if (byPackageQualifier.size() == 0) {
             CuContainer.getInstance(path).getByPackageQualifier().asMap()
                     .forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-                        cu.findAll(ClassOrInterfaceDeclaration.class)
-                                .forEach(coid -> byPackageQualifier.put(packageQualifier, coid));
+                        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(
+                                classDeclaration -> byPackageQualifier.put(packageQualifier, classDeclaration));
                     }));
         }
         return byPackageQualifier;
     }
 
-    public Multimap<String, ClassOrInterfaceDeclaration> getByCoidName() {
-        if (byCoidName.size() == 0) {
-            all.forEach(coid -> byCoidName.put(coid.getNameAsString(), coid));
+    public Multimap<String, ClassOrInterfaceDeclaration> getByClassName() {
+        if (byClassName.size() == 0) {
+            all.forEach(classDeclaration -> byClassName.put(classDeclaration.getNameAsString(), classDeclaration));
         }
-        return byCoidName;
+        return byClassName;
     }
 
-    public Multimap<String, String> getCoidQulifierByCoidName() {
-        if (coidQulifierByCoidName.size() == 0) {
-            all.forEach(coid -> coidQulifierByCoidName.put(coid.getNameAsString(),
-                    coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
+    public Multimap<String, String> getQulifierByClassName() {
+        if (qulifierByClassName.size() == 0) {
+            all.forEach(classDeclaration -> qulifierByClassName.put(classDeclaration.getNameAsString(),
+                    classDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
         }
-        return coidQulifierByCoidName;
+        return qulifierByClassName;
     }
 
 
-    private String qualifierForClassLoader(ClassOrInterfaceDeclaration coid) {
+    private String qualifierForClassLoader(ClassOrInterfaceDeclaration classDeclaration) {
         StringBuilder qualifierForClassLoader = new StringBuilder(64);
-        this.qualifierForClassLoader(qualifierForClassLoader, coid);
+        this.qualifierForClassLoader(qualifierForClassLoader, classDeclaration);
         return qualifierForClassLoader.toString();
     }
 

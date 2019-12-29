@@ -28,7 +28,7 @@ public class Boot {
 
         // convert
         String result = new RapConverter().convert(apis);
-//        log.info(result);
+        log.info(result);
     }
 
 }

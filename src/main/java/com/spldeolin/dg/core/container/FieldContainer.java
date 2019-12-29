@@ -52,10 +52,10 @@ public class FieldContainer {
     }
 
     private FieldContainer(Path path) {
-        CoidContainer coidContainer = CoidContainer.getInstance(path);
+        ClassContainer coidContainer = ClassContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
-        coidContainer.getByCoidQualifier()
+        coidContainer.getByQualifier()
                 .forEach((classQualifier, coid) -> coid.findAll(FieldDeclaration.class).forEach(field -> {
                     all.add(field);
 

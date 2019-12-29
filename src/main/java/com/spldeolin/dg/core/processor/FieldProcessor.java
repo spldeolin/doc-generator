@@ -19,7 +19,7 @@ import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.container.CoidContainer;
+import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
@@ -132,7 +132,7 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        JsonSchema jsonSchema = CoidContainer.getInstance(path).getJsonSchemasByPojoQualifier().get(classQulifier);
+        JsonSchema jsonSchema = ClassContainer.getInstance(path).getJsonSchemasByQualifier(classQulifier);
         if (jsonSchema == null) {
             log.error("classloader找不到[{}]", classQulifier);
             return Pair.of(Lists.newArrayList(), Lists.newArrayList());
@@ -282,7 +282,7 @@ public class FieldProcessor {
     }
 
     private Optional<String> tryGetClassQulifier(String className) {
-        Collection<String> classQulifiers = CoidContainer.getInstance(path).getCoidQulifierByCoidName().get(className);
+        Collection<String> classQulifiers = ClassContainer.getInstance(path).getQulifierByClassName().get(className);
         if (classQulifiers.size() == 0) {
             if (StringUtils.isNotEmpty(className)) {
                 report(className);

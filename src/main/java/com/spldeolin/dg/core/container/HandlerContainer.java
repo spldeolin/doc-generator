@@ -38,7 +38,7 @@ public class HandlerContainer {
     }
 
     private HandlerContainer(Path path) {
-        CoidContainer coidContainer = CoidContainer.getInstance(path);
+        ClassContainer coidContainer = ClassContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
 
