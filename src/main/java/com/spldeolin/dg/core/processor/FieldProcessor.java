@@ -21,6 +21,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.container.FieldContainer;
+import com.spldeolin.dg.core.container.QualifierContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
@@ -282,7 +283,7 @@ public class FieldProcessor {
     }
 
     private Optional<String> tryGetClassQulifier(String className) {
-        Collection<String> classQulifiers = ClassContainer.getInstance(path).getQulifierByClassName().get(className);
+        Collection<String> classQulifiers = QualifierContainer.getInstance(path).getByClassName().get(className);
         if (classQulifiers.size() == 0) {
             if (StringUtils.isNotEmpty(className)) {
                 report(className);
