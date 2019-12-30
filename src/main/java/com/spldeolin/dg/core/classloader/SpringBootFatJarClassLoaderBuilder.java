@@ -47,7 +47,7 @@ public class SpringBootFatJarClassLoaderBuilder {
             Path path = this.decompressJarToTempDir();
             Path bootInf = path.resolve("BOOT-INF");
             List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL(),
-                    new URL(getClass().getProtectionDomain().getCodeSource().getLocation(), "servlet-classpath"));
+                    new URL(getClass().getProtectionDomain().getCodeSource().getLocation(), "rt"));
 
             FileUtils.iterateFiles(bootInf.resolve("lib").toFile(), new String[]{"jar"}, true).forEachRemaining(jar -> {
                 try {
@@ -66,6 +66,7 @@ public class SpringBootFatJarClassLoaderBuilder {
 
     private Path decompressJarToTempDir() throws IOException {
         Path tempDir = Files.createTempDirectory("docgen" + LocalDateTime.now().toString());
+        tempDir.toFile().deleteOnExit();
 
         try (JarFile jar = new JarFile(jarPath.toFile())) {
             for (JarEntry src : Collections.list(jar.entries())) {
