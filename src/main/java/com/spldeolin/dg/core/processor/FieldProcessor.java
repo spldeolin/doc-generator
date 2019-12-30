@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.container.QualifierContainer;
+import com.spldeolin.dg.core.container.ReflectionContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
@@ -134,7 +135,7 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        JsonSchema jsonSchema = ClassContainer.getInstance(path).getJsonSchemasByQualifier(classQulifier);
+        JsonSchema jsonSchema = ReflectionContainer.getInstance(path).getJsonSchemasByQualifier(classQulifier);
         if (jsonSchema == null) {
             log.error("classloader找不到[{}]", classQulifier);
             return Pair.of(Lists.newArrayList(), Lists.newArrayList());

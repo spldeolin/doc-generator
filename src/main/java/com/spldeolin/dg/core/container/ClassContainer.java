@@ -1,21 +1,13 @@
 package com.spldeolin.dg.core.container;
 
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderFactory;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -27,11 +19,6 @@ import lombok.extern.log4j.Log4j2;
 public class ClassContainer {
 
     public static final int EXPECTED = 5600;
-
-    private static final ObjectMapper om = new ObjectMapper();
-
-    private static final URLClassLoader classLoader = SpringBootFatJarClassLoaderFactory
-            .create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH);
 
     @Getter
     private final Path path;
@@ -72,23 +59,6 @@ public class ClassContainer {
         }
     }
 
-    public JsonSchema getJsonSchemasByQualifier(String classQualifier) {
-        ClassOrInterfaceDeclaration classDeclaration = this.getByQualifier().get(classQualifier);
-        if (classDeclaration == null) {
-            return null;
-        }
-        String qualifierForClassLoader = this.qualifierForClassLoader(classDeclaration);
-        SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
-        try {
-            Class<?> clazz = classLoader.loadClass(qualifierForClassLoader);
-            om.acceptJsonFormatVisitor(clazz, sfw);
-        } catch (ClassNotFoundException | JsonMappingException | NoClassDefFoundError e) {
-            log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);
-        }
-
-        return sfw.finalSchema();
-    }
-
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
         if (byQualifier.size() == 0) {
             all.forEach(classDeclaration -> byQualifier
@@ -114,24 +84,6 @@ public class ClassContainer {
             all.forEach(classDeclaration -> byClassName.put(classDeclaration.getNameAsString(), classDeclaration));
         }
         return byClassName;
-    }
-
-    private String qualifierForClassLoader(ClassOrInterfaceDeclaration classDeclaration) {
-        StringBuilder qualifierForClassLoader = new StringBuilder(64);
-        this.qualifierForClassLoader(qualifierForClassLoader, classDeclaration);
-        return qualifierForClassLoader.toString();
-    }
-
-    private void qualifierForClassLoader(StringBuilder qualifier, TypeDeclaration<?> node) {
-        node.getParentNode().ifPresent(parent -> {
-            if (parent instanceof TypeDeclaration) {
-                this.qualifierForClassLoader(qualifier, (TypeDeclaration<?>) parent);
-                qualifier.append("$");
-                qualifier.append(node.getNameAsString());
-            } else {
-                node.getFullyQualifiedName().ifPresent(qualifier::append);
-            }
-        });
     }
 
 }
