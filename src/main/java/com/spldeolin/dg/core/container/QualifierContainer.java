@@ -22,13 +22,13 @@ public class QualifierContainer {
     @Getter
     private final Path path;
 
-    private static Map<Path, QualifierContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, QualifierContainer> instances = Maps.newConcurrentMap();
 
     public static QualifierContainer getInstance(Path path) {
-        QualifierContainer result = instancesCache.get(path);
+        QualifierContainer result = instances.get(path);
         if (result == null) {
             result = new QualifierContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }

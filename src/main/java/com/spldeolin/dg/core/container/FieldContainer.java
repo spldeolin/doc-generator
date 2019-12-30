@@ -14,7 +14,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.spldeolin.dg.core.exception.ParentAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
-import com.spldeolin.dg.core.util.Javadocs;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,15 +37,13 @@ public class FieldContainer {
 
     private Multimap<String, FieldDeclaration> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
-    private Map<String, String> cmtByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
-
-    private static Map<Path, FieldContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, FieldContainer> instances = Maps.newConcurrentMap();
 
     public static FieldContainer getInstance(Path path) {
-        FieldContainer result = instancesCache.get(path);
+        FieldContainer result = instances.get(path);
         if (result == null) {
             result = new FieldContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }
@@ -73,7 +70,6 @@ public class FieldContainer {
 
                         byFieldVarQualifier.put(fieldVarQulifier, field);
                         varByFieldVarQualifier.put(fieldVarQulifier, variable);
-                        cmtByFieldVarQualifier.put(fieldVarQulifier, Javadocs.extractFirstLine(field));
                     });
 
                     byClassQualifier.put(classQualifier, field);

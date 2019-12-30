@@ -32,13 +32,13 @@ public class InterfaceContainer {
 
     private Multimap<String, ClassOrInterfaceDeclaration> byInterfaceName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private static Map<Path, InterfaceContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, InterfaceContainer> instances = Maps.newConcurrentMap();
 
     public static InterfaceContainer getInstance(Path path) {
-        InterfaceContainer result = instancesCache.get(path);
+        InterfaceContainer result = instances.get(path);
         if (result == null) {
             result = new InterfaceContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }

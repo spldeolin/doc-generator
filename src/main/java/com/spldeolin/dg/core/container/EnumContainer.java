@@ -32,13 +32,13 @@ public class EnumContainer {
 
     private Multimap<String, EnumDeclaration> byEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private static Map<Path, EnumContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, EnumContainer> instances = Maps.newConcurrentMap();
 
     public static EnumContainer getInstance(Path path) {
-        EnumContainer result = instancesCache.get(path);
+        EnumContainer result = instances.get(path);
         if (result == null) {
             result = new EnumContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }

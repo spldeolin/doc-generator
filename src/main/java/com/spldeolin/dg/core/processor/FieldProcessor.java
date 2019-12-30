@@ -29,6 +29,7 @@ import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
+import com.spldeolin.dg.core.util.Javadocs;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
 
@@ -180,7 +181,7 @@ public class FieldProcessor {
 
             childFieldDto.setFieldName(childFieldName);
 
-            String comment = FieldContainer.getInstance(path).getCmtByFieldVarQualifier().get(fieldVarQualifier);
+            String comment = Javadocs.extractFirstLine(FieldContainer.getInstance(path).getByFieldVarQualifier().get(fieldVarQualifier));
             childFieldDto.setDescription(comment);
 
             childFieldDto.setNullable(true);

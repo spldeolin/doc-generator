@@ -51,15 +51,15 @@ public class CuContainer {
 
     private Collection<Report> reports = Sets.newTreeSet();
 
-    private static Map<Path, CuContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, CuContainer> instances = Maps.newConcurrentMap();
 
     ;
 
     public static CuContainer getInstance(Path path) {
-        CuContainer result = instancesCache.get(path);
+        CuContainer result = instances.get(path);
         if (result == null) {
             result = new CuContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }

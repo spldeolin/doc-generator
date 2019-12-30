@@ -26,13 +26,13 @@ public class HandlerContainer {
 
     private Collection<HandlerEntry> withController = Lists.newLinkedList();
 
-    private static Map<Path, HandlerContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, HandlerContainer> instances = Maps.newConcurrentMap();
 
     public static HandlerContainer getInstance(Path path) {
-        HandlerContainer result = instancesCache.get(path);
+        HandlerContainer result = instances.get(path);
         if (result == null) {
             result = new HandlerContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }

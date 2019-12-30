@@ -45,13 +45,13 @@ public class ClassContainer {
 
     private Multimap<String, ClassOrInterfaceDeclaration> byClassName = ArrayListMultimap.create(EXPECTED, 1);
 
-    private static Map<Path, ClassContainer> instancesCache = Maps.newConcurrentMap();
+    private static Map<Path, ClassContainer> instances = Maps.newConcurrentMap();
 
     public static ClassContainer getInstance(Path path) {
-        ClassContainer result = instancesCache.get(path);
+        ClassContainer result = instances.get(path);
         if (result == null) {
             result = new ClassContainer(path);
-            instancesCache.put(path, result);
+            instances.put(path, result);
         }
         return result;
     }
