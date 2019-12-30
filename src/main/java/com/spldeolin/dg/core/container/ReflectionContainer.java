@@ -5,7 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.BiMap;
@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ReflectionContainer {
 
-    private static final ObjectMapper om = new ObjectMapper();
+    private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     private BiMap<ClassOrInterfaceDeclaration, Class<?>> classes = HashBiMap.create();
 
@@ -53,15 +53,13 @@ public class ReflectionContainer {
         if (result == null) {
             ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(path).getByQualifier().get(qualifier);
             String qualifierForClassLoader = this.qualifierForClassLoader(coid);
-            SchemaFactoryWrapper sfw = new SchemaFactoryWrapper();
             try {
                 Class<?> clazz = SpringBootFatJarClassLoaderFactory.create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
                         .loadClass(qualifierForClassLoader);
-                om.acceptJsonFormatVisitor(clazz, sfw);
+                result = jsg.generateSchema(clazz);
             } catch (ClassNotFoundException | JsonMappingException | NoClassDefFoundError e) {
                 log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);
             }
-            result = sfw.finalSchema();
             if (result != null) {
                 jsonSchemasByQualifier.put(qualifier, result);
             }
