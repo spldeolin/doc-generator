@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class InterfaceContainer {
 
-    private static final int EXPECTED = 5600;
+    public static final int EXPECTED = 5600;
 
     @Getter
     private final Path path;
@@ -31,8 +31,6 @@ public class InterfaceContainer {
     private Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
     private Multimap<String, ClassOrInterfaceDeclaration> byInterfaceName = ArrayListMultimap.create(EXPECTED, 1);
-
-    private Multimap<String, String> qulifierByInterfaceName = ArrayListMultimap.create(EXPECTED, 1);
 
     private static Map<Path, InterfaceContainer> instancesCache = Maps.newConcurrentMap();
 
@@ -87,14 +85,6 @@ public class InterfaceContainer {
             all.forEach(iinterface -> byInterfaceName.put(iinterface.getNameAsString(), iinterface));
         }
         return byInterfaceName;
-    }
-
-    public Multimap<String, String> getQulifierByInterfaceName() {
-        if (qulifierByInterfaceName.size() == 0) {
-            all.forEach(iinterface -> qulifierByInterfaceName.put(iinterface.getNameAsString(),
-                    iinterface.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
-        }
-        return qulifierByInterfaceName;
     }
 
 }

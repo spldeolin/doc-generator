@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class EnumContainer {
 
-    private static final int EXPECTED = 5200;
+    public static final int EXPECTED = 5200;
 
     @Getter
     private Path path;
@@ -31,8 +31,6 @@ public class EnumContainer {
     private Multimap<String, EnumDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
     private Multimap<String, EnumDeclaration> byEnumName = ArrayListMultimap.create(EXPECTED, 1);
-
-    private Multimap<String, String> enumQulifierByEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
     private static Map<Path, EnumContainer> instancesCache = Maps.newConcurrentMap();
 
@@ -84,15 +82,6 @@ public class EnumContainer {
             all.forEach(enumDeclaration -> byEnumName.put(enumDeclaration.getNameAsString(), enumDeclaration));
         }
         return byEnumName;
-    }
-
-    public Multimap<String, String> getEnumQulifierByEnumName() {
-        if (enumQulifierByEnumName.size() == 0) {
-            all.forEach(enumDeclaration -> enumQulifierByEnumName
-                    .put(enumDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
-                            enumDeclaration.getNameAsString()));
-        }
-        return enumQulifierByEnumName;
     }
 
 }

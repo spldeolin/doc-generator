@@ -26,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ClassContainer {
 
-    private static final int EXPECTED = 5600;
+    public static final int EXPECTED = 5600;
 
     private static final ObjectMapper om = new ObjectMapper();
 
@@ -44,8 +44,6 @@ public class ClassContainer {
     private Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
 
     private Multimap<String, ClassOrInterfaceDeclaration> byClassName = ArrayListMultimap.create(EXPECTED, 1);
-
-    private Multimap<String, String> qulifierByClassName = ArrayListMultimap.create(EXPECTED, 1);
 
     private static Map<Path, ClassContainer> instancesCache = Maps.newConcurrentMap();
 
@@ -117,15 +115,6 @@ public class ClassContainer {
         }
         return byClassName;
     }
-
-    public Multimap<String, String> getQulifierByClassName() {
-        if (qulifierByClassName.size() == 0) {
-            all.forEach(classDeclaration -> qulifierByClassName.put(classDeclaration.getNameAsString(),
-                    classDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new)));
-        }
-        return qulifierByClassName;
-    }
-
 
     private String qualifierForClassLoader(ClassOrInterfaceDeclaration classDeclaration) {
         StringBuilder qualifierForClassLoader = new StringBuilder(64);
