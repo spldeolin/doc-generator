@@ -18,7 +18,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderFactory;
 import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
@@ -51,7 +51,9 @@ public class CuContainer {
 
     private Collection<Report> reports = Sets.newTreeSet();
 
-    private static Map<Path, CuContainer> instancesCache = Maps.newConcurrentMap();;
+    private static Map<Path, CuContainer> instancesCache = Maps.newConcurrentMap();
+
+    ;
 
     public static CuContainer getInstance(Path path) {
         CuContainer result = instancesCache.get(path);
@@ -124,8 +126,7 @@ public class CuContainer {
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
-        URLClassLoader classloader = SpringBootFatJarClassLoaderBuilder
-                .getInstance(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH).build();
+        URLClassLoader classloader = SpringBootFatJarClassLoaderFactory.create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH);
         ProjectRoot projectRoot = new ClassLoaderCollectionStrategy(classloader).collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();

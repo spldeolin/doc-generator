@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderBuilder;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderFactory;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -30,8 +30,8 @@ public class ClassContainer {
 
     private static final ObjectMapper om = new ObjectMapper();
 
-    private static final URLClassLoader classLoader = SpringBootFatJarClassLoaderBuilder
-            .getInstance(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH).build();
+    private static final URLClassLoader classLoader = SpringBootFatJarClassLoaderFactory
+            .create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH);
 
     @Getter
     private final Path path;
