@@ -1,6 +1,5 @@
 package com.spldeolin.dg;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.convert.rap.RapConverter;
@@ -18,13 +17,12 @@ public class Boot {
     public static void main(String[] args) {
 
         // collect
-        Path path = Conf.TARGET_PROJECT_PATH;
-        HandlerContainer handlerContainer = HandlerContainer.getInstance(path);
+        HandlerContainer handlerContainer = HandlerContainer.getInstance(Conf.TARGET_PROJECT_PATH);
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();
         handlerContainer.getWithController()
-                .forEach(entry -> apis.add(new ApiProcessor(path).process(entry.getController(), entry.getHandler())));
+                .forEach(entry -> apis.add(new ApiProcessor().process(entry.getController(), entry.getHandler())));
 
         // convert
         String result = new RapConverter().convert(apis);

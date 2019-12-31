@@ -1,6 +1,5 @@
 package com.spldeolin.dg.core.classloader;
 
-import java.nio.file.Path;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
@@ -10,16 +9,13 @@ public class CustomClassLoaderTypeFactory extends TypeFactory {
 
     private static final long serialVersionUID = 5102533383636005355L;
 
-    private final Path path;
-
-    public CustomClassLoaderTypeFactory(Path path) {
+    public CustomClassLoaderTypeFactory() {
         super(null);
-        this.path = path;
     }
 
     @Override
     public ClassLoader getClassLoader() {
-        return SpringBootFatJarClassLoaderFactory.create(path);
+        return SpringBootFatJarClassLoader.classLoader;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.spldeolin.dg.core.container;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -17,9 +16,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderFactory;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.exception.PrimaryTypeAbsentException;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
@@ -127,7 +125,7 @@ public class CuContainer {
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
-        URLClassLoader classloader = SpringBootFatJarClassLoaderFactory.create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH);
+        URLClassLoader classloader = SpringBootFatJarClassLoader.classLoader;
         ProjectRoot projectRoot = new ClassLoaderCollectionStrategy(classloader).collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();

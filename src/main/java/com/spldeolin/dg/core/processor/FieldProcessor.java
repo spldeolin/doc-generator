@@ -1,21 +1,18 @@
 package com.spldeolin.dg.core.processor;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -29,7 +26,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.CustomClassLoaderTypeFactory;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.container.QualifierContainer;
 import com.spldeolin.dg.core.container.ReflectionContainer;
@@ -56,12 +53,6 @@ import lombok.extern.log4j.Log4j2;
 public class FieldProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
-
-    private final Path path;
-
-    public FieldProcessor(Path path) {
-        this.path = path;
-    }
 
     public Collection<FieldDomain> processUriPathFields(NodeList<Parameter> parameters) {
         // ignore now
@@ -124,8 +115,15 @@ public class FieldProcessor {
 
                     // TODO move to ParameterProcessor
                     ResolvedType resolvedType = parameter.getType().resolve();
-//                    JavaType javaType = new CustomClassLoaderTypeFactory(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
-//                            .constructFromCanonical(resolvedType.describe());
+//                    TypeFactory customTypeFactory = new TypeFactory(null) {
+//                        private static final long serialVersionUID = -8151903006798193420L;
+//
+//                        @Override
+//                        public ClassLoader getClassLoader() {
+//                            return SpringBootFatJarClassLoader.classLoader;
+//                        }
+//                    };
+//                    customTypeFactory.constructFromCanonical(resolvedType.describe());
 //                    try {
 //                        JsonSchema jsonSchema = jsg.generateSchema(javaType);
 //                        System.out.println(
@@ -170,7 +168,8 @@ public class FieldProcessor {
     private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(String classQulifier,
             boolean isResponseBody) {
         List<FieldDomain> flatList = Lists.newArrayList();
-        JsonSchema jsonSchema = ReflectionContainer.getInstance(path).getJsonSchemasByQualifier(classQulifier);
+        JsonSchema jsonSchema = ReflectionContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+                .getJsonSchemasByQualifier(classQulifier);
         if (jsonSchema == null) {
             log.error("classloader找不到[{}]", classQulifier);
             return Pair.of(Lists.newArrayList(), Lists.newArrayList());
@@ -204,8 +203,8 @@ public class FieldProcessor {
             FieldDomain childFieldDto = new FieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(path).getByFieldVarQualifier()
-                    .get(fieldVarQualifier);
+            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+                    .getByFieldVarQualifier().get(fieldVarQualifier);
             if (fieldDeclaration == null) {
                 /*
                 被JsonSchema认为是个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
@@ -217,8 +216,9 @@ public class FieldProcessor {
 
             childFieldDto.setFieldName(childFieldName);
 
-            String comment = Javadocs
-                    .extractFirstLine(FieldContainer.getInstance(path).getByFieldVarQualifier().get(fieldVarQualifier));
+            String comment = Javadocs.extractFirstLine(
+                    FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByFieldVarQualifier()
+                            .get(fieldVarQualifier));
             childFieldDto.setDescription(comment);
 
             childFieldDto.setNullable(true);
@@ -228,7 +228,7 @@ public class FieldProcessor {
                 childFieldDto.setNullable(false);
             }
 
-            childFieldDto.setValidators(new ValidatorProcessor(path).process(fieldDeclaration));
+            childFieldDto.setValidators(new ValidatorProcessor().process(fieldDeclaration));
 
             if (childSchema.isValueTypeSchema()) {
                 childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
@@ -260,8 +260,8 @@ public class FieldProcessor {
             }
 
             if (childFieldDto.getJsonType() == JsonType.number) {
-                String javaType = FieldContainer.getInstance(path).getVarByFieldVarQualifier().get(fieldVarQualifier)
-                        .getTypeAsString();
+                String javaType = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getVarByFieldVarQualifier()
+                        .get(fieldVarQualifier).getTypeAsString();
                 childFieldDto.setNumberFormat(calcNumberFormat(javaType));
             }
 
@@ -321,7 +321,8 @@ public class FieldProcessor {
     }
 
     private Optional<String> tryGetClassQulifier(String className) {
-        Collection<String> classQulifiers = QualifierContainer.getInstance(path).getByClassName().get(className);
+        Collection<String> classQulifiers = QualifierContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByClassName()
+                .get(className);
         if (classQulifiers.size() == 0) {
             if (StringUtils.isNotEmpty(className)) {
                 report(className);

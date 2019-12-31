@@ -16,7 +16,6 @@ import static com.spldeolin.dg.core.enums.ValidatorType.past;
 import static com.spldeolin.dg.core.enums.ValidatorType.positive;
 import static com.spldeolin.dg.core.enums.ValidatorType.regex;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +27,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.container.EnumContainer;
 import com.spldeolin.dg.core.domain.ValidatorDomain;
 import com.spldeolin.dg.core.util.Javadocs;
@@ -38,12 +38,6 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class ValidatorProcessor {
-
-    private final Path path;
-
-    public ValidatorProcessor(Path path) {
-        this.path = path;
-    }
 
     public Collection<ValidatorDomain> process(FieldDeclaration fieldDeclaration) {
         Collection<ValidatorDomain> validators = this.calcValidators(fieldDeclaration.getAnnotations());
@@ -63,8 +57,8 @@ public class ValidatorProcessor {
             anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                 if (nameOf(pair, "enumType")) {
                     String enumName = StringUtils.removeEnd(pair.getValue().toString(), ".class");
-                    Collection<EnumDeclaration> enumDeclarations = EnumContainer.getInstance(path).getByEnumName()
-                            .get(enumName);
+                    Collection<EnumDeclaration> enumDeclarations = EnumContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+                            .getByEnumName().get(enumName);
 
                     Collection<String> parts = Lists.newLinkedList();
                     try {

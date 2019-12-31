@@ -11,8 +11,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
-import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoaderFactory;
+import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -54,8 +53,7 @@ public class ReflectionContainer {
             ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(path).getByQualifier().get(qualifier);
             String qualifierForClassLoader = this.qualifierForClassLoader(coid);
             try {
-                Class<?> clazz = SpringBootFatJarClassLoaderFactory.create(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
-                        .loadClass(qualifierForClassLoader);
+                Class<?> clazz = SpringBootFatJarClassLoader.classLoader.loadClass(qualifierForClassLoader);
                 result = jsg.generateSchema(clazz);
             } catch (ClassNotFoundException | JsonMappingException | NoClassDefFoundError e) {
                 log.warn("{} [{}]", e.getClass().getSimpleName(), qualifierForClassLoader);

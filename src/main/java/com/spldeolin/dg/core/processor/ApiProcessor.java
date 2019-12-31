@@ -18,12 +18,6 @@ import com.spldeolin.dg.core.util.Javadocs;
  */
 public class ApiProcessor {
 
-    private Path path;
-
-    public ApiProcessor(Path path) {
-        this.path = path;
-    }
-
     public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         ApiDomain api = new ApiDomain();
 
@@ -36,7 +30,7 @@ public class ApiProcessor {
         api.setUriPathFields(Lists.newArrayList());
         api.setUriQueryFields(Lists.newArrayList());
 
-        FieldProcessor fieldProcessor = new FieldProcessor(path);
+        FieldProcessor fieldProcessor = new FieldProcessor();
         String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
         fieldProcessor.processRequestBody(handler.getParameters(), api);
         fieldProcessor.processResponseBody(resultTypeName, api);
