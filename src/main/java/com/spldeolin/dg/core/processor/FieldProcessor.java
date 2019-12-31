@@ -7,19 +7,29 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.type.ArrayType;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedArrayType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.container.ClassContainer;
+import com.spldeolin.dg.Conf;
+import com.spldeolin.dg.core.classloader.CustomClassLoaderTypeFactory;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.container.QualifierContainer;
 import com.spldeolin.dg.core.container.ReflectionContainer;
@@ -44,6 +54,8 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class FieldProcessor {
+
+    private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
     private final Path path;
 
@@ -108,12 +120,25 @@ public class FieldProcessor {
         for (Parameter parameter : parameters) {
             if (parameter.getAnnotationByName("RequestBody").isPresent()) {
                 try {
-                    ResolvedType type = parameter.getType().resolve();
-                    if (type.isArray()) {
-                        type = recurrenceElementType(type.asArrayType());
+                    parameter.getType().ifArrayType(type -> parameter.setType(arrayTypeToListType(type)));
+
+                    // TODO move to ParameterProcessor
+                    ResolvedType resolvedType = parameter.getType().resolve();
+                    JavaType javaType = new CustomClassLoaderTypeFactory(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
+                            .constructFromCanonical(resolvedType.describe());
+                    try {
+                        JsonSchema jsonSchema = jsg.generateSchema(javaType);
+                        System.out.println(
+                                new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
                     }
-                    if (!type.isReferenceType()) {
-                        throw new RuntimeException("unknow ResolvedType " + type.getClass().getSimpleName());
+
+                    if (resolvedType.isArray()) {
+                        resolvedType = recurrenceElementType(resolvedType.asArrayType());
+                    }
+                    if (!resolvedType.isReferenceType()) {
+                        throw new RuntimeException("unknow ResolvedType " + resolvedType.getClass().getSimpleName());
                     }
                 } catch (UnsolvedSymbolException e) {
                     log.warn(e.getName());
@@ -122,6 +147,24 @@ public class FieldProcessor {
             }
         }
         return null;
+    }
+
+    private void ensureJavaUtilListImported(CompilationUnit cu) {
+        if (cu.getImports().stream().noneMatch(importDec -> importDec.getNameAsString().equals("java.util.List"))) {
+            cu.addImport("java.util.List");
+        }
+    }
+
+    private ClassOrInterfaceType arrayTypeToListType(ArrayType arrayType) {
+        Type elementType = arrayType.getComponentType();
+        if (elementType.isArrayType()) {
+            elementType = arrayTypeToListType(elementType.asArrayType());
+        }
+        ClassOrInterfaceType ListType = new ClassOrInterfaceType(null, new SimpleName("List"),
+                new NodeList<>(elementType));
+
+        arrayType.findCompilationUnit().ifPresent(this::ensureJavaUtilListImported);
+        return ListType;
     }
 
     private ResolvedType recurrenceElementType(ResolvedArrayType arrayType) {
@@ -182,7 +225,8 @@ public class FieldProcessor {
 
             childFieldDto.setFieldName(childFieldName);
 
-            String comment = Javadocs.extractFirstLine(FieldContainer.getInstance(path).getByFieldVarQualifier().get(fieldVarQualifier));
+            String comment = Javadocs
+                    .extractFirstLine(FieldContainer.getInstance(path).getByFieldVarQualifier().get(fieldVarQualifier));
             childFieldDto.setDescription(comment);
 
             childFieldDto.setNullable(true);
