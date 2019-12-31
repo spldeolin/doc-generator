@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.ProjectRoot;
@@ -143,7 +144,8 @@ public class CuContainer {
                 }
             }
 
-            List<String> pathParts = Lists.newArrayList(sourceRoot.getRoot().toString().split(File.separator));
+            List<String> pathParts = Lists.newArrayList(
+                    sourceRoot.getRoot().toString().split(Pattern.quote(System.getProperty("file.separator"))));
             reports.add(new Report(pathParts.get(pathParts.size() - 4), System.currentTimeMillis() - start));
         } catch (IOException e) {
             log.error("StaticJavaParser.parse失败", e);
