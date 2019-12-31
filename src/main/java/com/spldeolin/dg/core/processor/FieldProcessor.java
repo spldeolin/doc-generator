@@ -124,15 +124,15 @@ public class FieldProcessor {
 
                     // TODO move to ParameterProcessor
                     ResolvedType resolvedType = parameter.getType().resolve();
-                    JavaType javaType = new CustomClassLoaderTypeFactory(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
-                            .constructFromCanonical(resolvedType.describe());
-                    try {
-                        JsonSchema jsonSchema = jsg.generateSchema(javaType);
-                        System.out.println(
-                                new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    JavaType javaType = new CustomClassLoaderTypeFactory(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH)
+//                            .constructFromCanonical(resolvedType.describe());
+//                    try {
+//                        JsonSchema jsonSchema = jsg.generateSchema(javaType);
+//                        System.out.println(
+//                                new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
+//                    } catch (JsonProcessingException e) {
+//                        throw new RuntimeException(e);
+//                    }
 
                     if (resolvedType.isArray()) {
                         resolvedType = recurrenceElementType(resolvedType.asArrayType());
@@ -149,21 +149,13 @@ public class FieldProcessor {
         return null;
     }
 
-    private void ensureJavaUtilListImported(CompilationUnit cu) {
-        if (cu.getImports().stream().noneMatch(importDec -> importDec.getNameAsString().equals("java.util.List"))) {
-            cu.addImport("java.util.List");
-        }
-    }
-
     private ClassOrInterfaceType arrayTypeToListType(ArrayType arrayType) {
         Type elementType = arrayType.getComponentType();
         if (elementType.isArrayType()) {
             elementType = arrayTypeToListType(elementType.asArrayType());
         }
-        ClassOrInterfaceType ListType = new ClassOrInterfaceType(null, new SimpleName("List"),
+        ClassOrInterfaceType ListType = new ClassOrInterfaceType(null, new SimpleName("java.util.List"),
                 new NodeList<>(elementType));
-
-        arrayType.findCompilationUnit().ifPresent(this::ensureJavaUtilListImported);
         return ListType;
     }
 
