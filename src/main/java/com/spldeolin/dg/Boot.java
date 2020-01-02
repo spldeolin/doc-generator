@@ -8,6 +8,7 @@ import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.processor.ApiProcessor;
 import com.spldeolin.dg.core.processor.HandlerProcessor;
+import com.spldeolin.dg.core.strategy.ReturnStmtParser;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -20,7 +21,7 @@ public class Boot {
 
         // collect
         Collection<HandlerEntry> handlerEntries = new HandlerProcessor()
-                .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll(), null, null);
+                .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll(), null, new ReturnStmtParser());
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();
