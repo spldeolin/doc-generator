@@ -11,10 +11,9 @@ import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
-import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.domain.HandlerEntry;
+import com.spldeolin.dg.core.strategy.HandlerFilter;
 import com.spldeolin.dg.core.util.MethodQualifier;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,7 +23,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
-    public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes) {
+    public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
+            HandlerFilter handlerFilter) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
         classes.stream().filter(this::isController).forEach(controller -> {
 
@@ -43,6 +43,10 @@ public class HandlerProcessor {
                     method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
 
             controller.findAll(MethodDeclaration.class).stream().filter(this::isHandler).forEach(handler -> {
+                if (handlerFilter != null && !handlerFilter.filter(controller, handler)) {
+                    return;
+                }
+
                 HandlerEntry entry = new HandlerEntry();
 
                 entry.setController(controller);
@@ -111,13 +115,6 @@ public class HandlerProcessor {
                 node.getFullyQualifiedName().ifPresent(qualifier::append);
             }
         });
-    }
-
-
-    public static void main(String[] args) {
-        Collection<HandlerEntry> result = new HandlerProcessor()
-                .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll());
-        System.out.println(result.size());
     }
 
 }
