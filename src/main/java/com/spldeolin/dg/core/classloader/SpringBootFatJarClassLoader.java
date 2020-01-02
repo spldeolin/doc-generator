@@ -48,29 +48,6 @@ public class SpringBootFatJarClassLoader {
         }
     }
 
-//    public static URLClassLoader create() {
-//        try {
-//            Path path = decompressJarToTempDir(Conf.TARGET_SPRING_BOOT_FAT_JAR_PATH);
-//            Path bootInf = path.resolve("BOOT-INF");
-//            List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL(),
-//                    new URL(SpringBootFatJarClassLoaderFactory.class.getProtectionDomain().getCodeSource()
-//                            .getLocation(), "rt"));
-//
-//            FileUtils.iterateFiles(bootInf.resolve("lib").toFile(), new String[]{"jar"}, true).forEachRemaining(jar
-//            -> {
-//                try {
-//                    urls.add(jar.toURI().toURL());
-//                } catch (MalformedURLException e) {
-//                    log.error(e.getMessage());
-//                    throw new RuntimeException();
-//                }
-//            });
-//            return new URLClassLoader(urls.toArray(new URL[0]));
-//        } catch (IOException e) {
-//            throw new RuntimeException();
-//        }
-//    }
-
     private static Path decompressJarToTempDir() throws IOException {
         Path tempDir = Files.createTempDirectory("docgen" + LocalDateTime.now().toString());
         tempDir.toFile().deleteOnExit();

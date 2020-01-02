@@ -36,7 +36,7 @@ public class MethodQualifier {
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
      */
     public static String getShortestQualifiedSignature(MethodDeclaration methodDeclaration) {
-        String result = methodDeclaration.resolve().getQualifiedSignature().replaceAll("<[^\\>]\\+>", "");
+        String result = methodDeclaration.resolve().getQualifiedSignature().replaceAll("<[^>]+>", "");
         return trimAllSpaces(result);
     }
 
