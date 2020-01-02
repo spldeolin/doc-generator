@@ -20,7 +20,7 @@ public class Boot {
 
         // collect
         Collection<HandlerEntry> handlerEntries = new HandlerProcessor()
-                .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll(), null);
+                .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll(), null, null);
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();

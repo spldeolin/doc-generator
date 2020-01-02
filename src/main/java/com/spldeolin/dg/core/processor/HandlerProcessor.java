@@ -14,6 +14,7 @@ import com.google.common.collect.Maps;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.strategy.HandlerFilter;
+import com.spldeolin.dg.core.strategy.HandlerResultTypeParser;
 import com.spldeolin.dg.core.util.MethodQualifier;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
 public class HandlerProcessor {
 
     public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
-            HandlerFilter handlerFilter) {
+            HandlerFilter handlerFilter, HandlerResultTypeParser hanlderResultTypeParser) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
         classes.stream().filter(this::isController).forEach(controller -> {
 
@@ -58,6 +59,12 @@ public class HandlerProcessor {
                     return;
                 }
                 entry.setReflectHandler(reflectHandler);
+
+                if (hanlderResultTypeParser != null) {
+                    entry.setHandlerResultResolvedType(hanlderResultTypeParser.parse(handler));
+                } else {
+                    entry.setHandlerResultResolvedType(handler.getType().resolve());
+                }
 
                 result.add(entry);
             });

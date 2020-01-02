@@ -1,8 +1,11 @@
 package com.spldeolin.dg.core.domain;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.resolution.types.ResolvedType;
 import lombok.Data;
 
 /**
@@ -19,6 +22,12 @@ public class HandlerEntry {
 
     private Method reflectHandler;
 
+    private ResolvedType handlerResultResolvedType;
 
+    private ResolvedType requestBodyTypeResolveType;
+
+    private Collection<Parameter> pathVariables;
+
+    private Collection<Parameter> requestParams;
 
 }
