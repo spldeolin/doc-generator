@@ -25,8 +25,7 @@ public class Boot {
 
         // process
         Collection<ApiDomain> apis = Lists.newLinkedList();
-        handlerEntries
-                .forEach(entry -> apis.add(new ApiProcessor().process(entry.getController(), entry.getHandler())));
+        handlerEntries.forEach(entry -> apis.add(new ApiProcessor().process(entry)));
 
         // convert
         String result = new RapConverter().convert(apis);

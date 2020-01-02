@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
@@ -26,7 +25,6 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.container.QualifierContainer;
 import com.spldeolin.dg.core.container.ReflectionContainer;
@@ -35,7 +33,7 @@ import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
-import com.spldeolin.dg.core.enums.ResponseBodyType;
+import com.spldeolin.dg.core.enums.ResponseBodyMode;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Javadocs;
 import com.spldeolin.dg.core.util.Strings;
@@ -89,13 +87,13 @@ public class FieldProcessor {
     public void processResponseBody(String resultTypeName, ApiDomain api) {
         // responseBodyType
         if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
-            api.setResponseBodyType(ResponseBodyType.objectArray);
+            api.setResponseBodyType(ResponseBodyMode.arrayObject);
             resultTypeName = Strings.removeSurround(resultTypeName, "List<", ">");
         } else if (Strings.isSurroundedBy(resultTypeName, "PageInfo<", ">")) {
-            api.setResponseBodyType(ResponseBodyType.objectPage);
+            api.setResponseBodyType(ResponseBodyMode.pageObject);
             resultTypeName = Strings.removeSurround(resultTypeName, "PageInfo<", ">");
         } else {
-            api.setResponseBodyType(ResponseBodyType.object);
+            api.setResponseBodyType(ResponseBodyMode.object);
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {

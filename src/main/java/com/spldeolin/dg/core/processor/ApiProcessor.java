@@ -1,15 +1,13 @@
 package com.spldeolin.dg.core.processor;
 
-import java.nio.file.Path;
 import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
+import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.util.Javadocs;
 
@@ -18,7 +16,10 @@ import com.spldeolin.dg.core.util.Javadocs;
  */
 public class ApiProcessor {
 
-    public ApiDomain process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
+    public ApiDomain process(HandlerEntry handlerEntry) {
+        ClassOrInterfaceDeclaration controller = handlerEntry.getController();
+        MethodDeclaration handler = handlerEntry.getHandler();
+
         ApiDomain api = new ApiDomain();
 
         Pair<Collection<MethodType>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
