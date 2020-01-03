@@ -31,8 +31,8 @@ public class SpringBootFatJarClassLoader {
             Path path = decompressJarToTempDir();
             Path bootInf = path.resolve("BOOT-INF");
             List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL(),
-                    new URL(SpringBootFatJarClassLoader.class.getProtectionDomain().getCodeSource()
-                            .getLocation(), "rt"));
+                    new URL(SpringBootFatJarClassLoader.class.getProtectionDomain().getCodeSource().getLocation(),
+                            "rt"));
 
             FileUtils.iterateFiles(bootInf.resolve("lib").toFile(), new String[]{"jar"}, true).forEachRemaining(jar -> {
                 try {

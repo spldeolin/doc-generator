@@ -4,12 +4,12 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.collect.Lists;
@@ -27,10 +27,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
-    @Autowired
-    private AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator;
-
-    public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
+    public Collection<HandlerEntry> process(@RequestBody Collection<ClassOrInterfaceDeclaration> classes,
             HandlerFilter handlerFilter, HandlerResultTypeParser hanlderResultTypeParser) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
         classes.stream().filter(this::isController).forEach(controller -> {
@@ -53,8 +50,11 @@ public class HandlerProcessor {
 
                 HandlerEntry entry = new HandlerEntry();
 
+                // controller
                 entry.setController(controller);
                 entry.setReflectController(reflectController);
+
+                // handler
                 String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
                 entry.setShortestQualifiedSignature(shortestQualifiedSignature);
                 entry.setHandler(handler);
@@ -65,11 +65,32 @@ public class HandlerProcessor {
                 }
                 entry.setReflectHandler(reflectHandler);
 
+                // result
                 if (hanlderResultTypeParser != null) {
                     entry.setHandlerResultResolvedType(hanlderResultTypeParser.parse(handler));
                 } else {
                     entry.setHandlerResultResolvedType(handler.getType().resolve());
                 }
+
+                // requestBody requestParams pathVariables
+                Collection<Parameter> requestParams = Lists.newLinkedList();
+                Collection<Parameter> pathVariables = Lists.newLinkedList();
+                for (Parameter parameter : handler.getParameters()) {
+                    parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
+                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestBody"
+                                    .equals(resolvedAnno.getId()))
+                            .ifPresent(resolvedAnno -> entry.setRequestBodyResolveType(parameter.getType().resolve()));
+                    parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
+                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestParam"
+                                    .equals(resolvedAnno.getId()))
+                            .ifPresent(resolvedAnno -> requestParams.add(parameter));
+                    parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
+                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.PathVariable"
+                                    .equals(resolvedAnno.getId()))
+                            .ifPresent(resolvedAnno -> pathVariables.add(parameter));
+                }
+                entry.setRequestParams(requestParams);
+                entry.setPathVariables(pathVariables);
 
                 result.add(entry);
                 log.debug("hanlder : {}",
@@ -82,8 +103,8 @@ public class HandlerProcessor {
 
     private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
         Map<String, Method> declaredMethods = Maps.newHashMap();
-        Arrays.stream(reflectController.getDeclaredMethods()).forEach(
-                method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
+        Arrays.stream(reflectController.getDeclaredMethods())
+                .forEach(method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
         return declaredMethods;
     }
 

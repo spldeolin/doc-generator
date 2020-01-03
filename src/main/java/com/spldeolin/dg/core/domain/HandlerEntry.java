@@ -26,10 +26,15 @@ public class HandlerEntry {
 
     private ResolvedType handlerResultResolvedType;
 
-    private ResolvedType requestBodyTypeResolveType;
+    private ResolvedType requestBodyResolveType;
 
     private Collection<Parameter> pathVariables;
 
     private Collection<Parameter> requestParams;
+
+    @Override
+    public String toString() {
+        return "HandlerEntry{" + shortestQualifiedSignature + '}';
+    }
 
 }
