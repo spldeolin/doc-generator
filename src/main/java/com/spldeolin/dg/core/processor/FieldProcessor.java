@@ -310,7 +310,7 @@ public class FieldProcessor {
             return Optional.empty();
         }
         if (classQulifiers.size() > 1) {
-            log.warn("Class[{}]存在多个同名Class[{}]，无法进行加载", className, classQulifiers);
+//            log.warn("Class[{}]存在多个同名Class[{}]，无法进行加载", className, classQulifiers);
             return Optional.empty();
         }
         return Optional.of(Iterables.getOnlyElement(classQulifiers));
@@ -318,7 +318,7 @@ public class FieldProcessor {
 
     private void report(String className) {
         if (!StringUtils.equalsAny(className, null, "null", "void", "Long", "Integer", "Long[]")) {
-            log.info("cannot found qualifier by [{}]", className);
+//            log.info("cannot found qualifier by [{}]", className);
         }
 
     }
