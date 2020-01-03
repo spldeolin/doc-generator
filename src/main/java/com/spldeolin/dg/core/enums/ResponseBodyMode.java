@@ -11,6 +11,11 @@ import lombok.Getter;
 public enum ResponseBodyMode {
 
     /**
+     * 没有返回值
+     */
+    nothing("nothing"),
+
+    /**
      * 单纯的值
      *
      * 整个body是boolean、字符串、数字中的一个。e.g.: @ResponseBody public BigDecaimal ....

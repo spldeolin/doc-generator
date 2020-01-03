@@ -70,7 +70,7 @@ public class CuContainer {
 
         this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all));
 
-        log.info("CompilationUnitContainer构建完毕，共从[{}]解析到[{}]个CompilationUnit，耗时[{}]毫秒", path, all.size(),
+        log.debug("CompilationUnitContainer构建完毕，共从[{}]解析到[{}]个CompilationUnit，耗时[{}]毫秒", path, all.size(),
                 System.currentTimeMillis() - start);
         reports.forEach(report -> log.info("\t[{}]模块耗时[{}]毫秒", report.getPath(), report.getElapsed()));
 
@@ -136,12 +136,15 @@ public class CuContainer {
         try {
             List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse();
             for (ParseResult<CompilationUnit> parseResult : parseResults) {
-                parseResult.ifSuccessful(all::add);
-                if (parseResult.getProblems().size() > 0) {
+                if (parseResult.isSuccessful()) {
+                    parseResult.getResult().ifPresent(cu -> {
+                        cu.getStorage().ifPresent(storage -> log.debug("CompilationUnit : {}", storage.getPath()));
+                        all.add(cu);
+                    });
+                } else {
                     log.warn("无法正确被解析，跳过[{}]", parseResult.getProblems());
                 }
             }
-
             List<String> pathParts = Lists.newArrayList(
                     sourceRoot.getRoot().toString().split(Pattern.quote(System.getProperty("file.separator"))));
             reports.add(new Report(pathParts.get(pathParts.size() - 4), System.currentTimeMillis() - start));

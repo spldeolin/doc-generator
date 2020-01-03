@@ -18,6 +18,8 @@ public class HandlerEntry {
 
     private Class<?> reflectController;
 
+    private String shortestQualifiedSignature;
+
     private MethodDeclaration handler;
 
     private Method reflectHandler;

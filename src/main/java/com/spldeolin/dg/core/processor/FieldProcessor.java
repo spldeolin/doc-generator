@@ -111,25 +111,7 @@ public class FieldProcessor {
                 try {
                     parameter.getType().ifArrayType(type -> parameter.setType(arrayTypeToListType(type)));
 
-                    // TODO move to ParameterProcessor
                     ResolvedType resolvedType = parameter.getType().resolve();
-//                    TypeFactory customTypeFactory = new TypeFactory(null) {
-//                        private static final long serialVersionUID = -8151903006798193420L;
-//
-//                        @Override
-//                        public ClassLoader getClassLoader() {
-//                            return SpringBootFatJarClassLoader.classLoader;
-//                        }
-//                    };
-//                    customTypeFactory.constructFromCanonical(resolvedType.describe());
-//                    try {
-//                        JsonSchema jsonSchema = jsg.generateSchema(javaType);
-//                        System.out.println(
-//                                new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
-//                    } catch (JsonProcessingException e) {
-//                        throw new RuntimeException(e);
-//                    }
-
                     if (resolvedType.isArray()) {
                         resolvedType = recurrenceElementType(resolvedType.asArrayType());
                     }

@@ -15,7 +15,9 @@ public class MethodQualifier {
         StringBuilder result = new StringBuilder(64);
 
         // class qualifier and method name
-        result.append(method.getDeclaringClass().getTypeName()).append('.');
+        String typeName = method.getDeclaringClass().getTypeName();
+        typeName = dollarToDot(typeName);
+        result.append(typeName).append('.');
         result.append(method.getName());
 
         // every parameter qualifier
@@ -36,24 +38,18 @@ public class MethodQualifier {
      * 获取能定位到唯一一个方法的最短形式QualifiedSignature
      */
     public static String getShortestQualifiedSignature(MethodDeclaration methodDeclaration) {
-        String result = methodDeclaration.resolve().getQualifiedSignature().replaceAll("<[^>]+>", "");
-        return trimAllSpaces(result);
+        String result = methodDeclaration.resolve().getQualifiedSignature();
+        // remove every <*>
+        result = result.replaceAll("<[^>]+>", "");
+        return trimAllSpaces(dollarToDot(result));
+    }
+
+    private static String dollarToDot(String s) {
+        return s.replaceAll("\\$", ".");
     }
 
     private static String trimAllSpaces(CharSequence s) {
         return s.toString().replaceAll(" ", "");
     }
-
-    static void separateWithCommas(Class<?>[] types, StringBuilder sb) {
-        for (int j = 0; j < types.length; j++) {
-            sb.append(types[j].getTypeName());
-            if (j < (types.length - 1)) {
-                sb.append(",");
-            }
-        }
-
-    }
-
-
 
 }

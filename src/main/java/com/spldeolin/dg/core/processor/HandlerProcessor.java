@@ -4,6 +4,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -24,6 +27,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
+    @Autowired
+    private AnnotationAwareAspectJAutoProxyCreator annotationAwareAspectJAutoProxyCreator;
+
     public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
             HandlerFilter handlerFilter, HandlerResultTypeParser hanlderResultTypeParser) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
@@ -39,11 +45,8 @@ public class HandlerProcessor {
                 return;
             }
 
-            Map<String, Method> declaredMethods = Maps.newHashMap();
-            Arrays.stream(reflectController.getDeclaredMethods()).forEach(
-                    method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
-
-            controller.findAll(MethodDeclaration.class).stream().filter(this::isHandler).forEach(handler -> {
+            Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
+            controller.getMethods().stream().filter(this::isHandler).forEach(handler -> {
                 if (handlerFilter != null && !handlerFilter.filter(controller, handler)) {
                     return;
                 }
@@ -52,10 +55,12 @@ public class HandlerProcessor {
 
                 entry.setController(controller);
                 entry.setReflectController(reflectController);
+                String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
+                entry.setShortestQualifiedSignature(shortestQualifiedSignature);
                 entry.setHandler(handler);
-                Method reflectHandler = declaredMethods.get(MethodQualifier.getShortestQualifiedSignature(handler));
+                Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
                 if (reflectHandler == null) {
-                    log.warn("method[{}] not found", MethodQualifier.getShortestQualifiedSignature(handler));
+                    log.warn("method[{}] not found", shortestQualifiedSignature);
                     return;
                 }
                 entry.setReflectHandler(reflectHandler);
@@ -67,10 +72,19 @@ public class HandlerProcessor {
                 }
 
                 result.add(entry);
+                log.debug("hanlder : {}",
+                        shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
             });
         });
 
         return result;
+    }
+
+    private Map<String, Method> listDeclaredMethodAsMap(Class<?> reflectController) {
+        Map<String, Method> declaredMethods = Maps.newHashMap();
+        Arrays.stream(reflectController.getDeclaredMethods()).forEach(
+                method -> declaredMethods.put(MethodQualifier.getShortestQualifiedSignature(method), method));
+        return declaredMethods;
     }
 
     private boolean isController(ClassOrInterfaceDeclaration clazz) {
