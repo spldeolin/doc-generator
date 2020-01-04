@@ -51,25 +51,25 @@ public class HandlerProcessor {
                 HandlerEntry entry = new HandlerEntry();
 
                 // controller
-                entry.setController(controller);
-                entry.setReflectController(reflectController);
+                entry.controller(controller);
+                entry.reflectController(reflectController);
 
                 // handler
                 String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
-                entry.setShortestQualifiedSignature(shortestQualifiedSignature);
-                entry.setHandler(handler);
+                entry.shortestQualifiedSignature(shortestQualifiedSignature);
+                entry.handler(handler);
                 Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
                 if (reflectHandler == null) {
                     log.warn("method[{}] not found", shortestQualifiedSignature);
                     return;
                 }
-                entry.setReflectHandler(reflectHandler);
+                entry.reflectHandler(reflectHandler);
 
                 // result
                 if (hanlderResultTypeParser != null) {
-                    entry.setHandlerResultResolvedType(hanlderResultTypeParser.parse(handler));
+                    entry.handlerResultResolvedType(hanlderResultTypeParser.parse(handler));
                 } else {
-                    entry.setHandlerResultResolvedType(handler.getType().resolve());
+                    entry.handlerResultResolvedType(handler.getType().resolve());
                 }
 
                 // requestBody requestParams pathVariables
@@ -79,7 +79,7 @@ public class HandlerProcessor {
                     parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
                             .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestBody"
                                     .equals(resolvedAnno.getId()))
-                            .ifPresent(resolvedAnno -> entry.setRequestBodyResolveType(parameter.getType().resolve()));
+                            .ifPresent(resolvedAnno -> entry.requestBodyResolveType(parameter.getType().resolve()));
                     parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
                             .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestParam"
                                     .equals(resolvedAnno.getId()))
@@ -89,8 +89,8 @@ public class HandlerProcessor {
                                     .equals(resolvedAnno.getId()))
                             .ifPresent(resolvedAnno -> pathVariables.add(parameter));
                 }
-                entry.setRequestParams(requestParams);
-                entry.setPathVariables(pathVariables);
+                entry.requestParams(requestParams);
+                entry.pathVariables(pathVariables);
 
                 result.add(entry);
                 log.debug("hanlder : {}",

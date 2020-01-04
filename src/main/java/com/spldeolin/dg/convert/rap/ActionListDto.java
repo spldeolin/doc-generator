@@ -35,9 +35,9 @@ public class ActionListDto {
         result.setId(-2333L);
         result.setRequestType("2");
         result.setResponseTemplate("");
-        result.setName(apiDto.getDescription());
+        result.setName(apiDto.description());
         result.setDescription("");
-        result.setRequestUrl(apiDto.getUri().toString());
+        result.setRequestUrl(apiDto.uri().toString());
         result.setRequestParameterList(Lists.newArrayList());
         result.setResponseParameterList(Lists.newArrayList());
         return result;

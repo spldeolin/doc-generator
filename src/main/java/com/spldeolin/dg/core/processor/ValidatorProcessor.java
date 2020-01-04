@@ -42,9 +42,9 @@ public class ValidatorProcessor {
     public Collection<ValidatorDomain> process(FieldDeclaration fieldDeclaration) {
         Collection<ValidatorDomain> validators = this.calcValidators(fieldDeclaration.getAnnotations());
 
-        if (validators.removeIf(validator -> enumValue == validator.getValidatorType())) {
+        if (validators.removeIf(validator -> enumValue == validator.validatorType())) {
             String enumValueNote = this.calcEnumValueSpecially(fieldDeclaration).toString();
-            validators.add(new ValidatorDomain().setValidatorType(enumValue).setNote(enumValueNote));
+            validators.add(new ValidatorDomain().validatorType(enumValue).note(enumValueNote));
         }
 
         return validators;
@@ -90,89 +90,89 @@ public class ValidatorProcessor {
         annos.forEach(anno -> {
             switch (anno.getNameAsString()) {
                 case "NotEmpty":
-                    result.add(new ValidatorDomain().setValidatorType(notEmpty));
+                    result.add(new ValidatorDomain().validatorType(notEmpty));
                     break;
                 case "NotBlank":
-                    result.add(new ValidatorDomain().setValidatorType(notBlank));
+                    result.add(new ValidatorDomain().validatorType(notBlank));
                     break;
                 case "Size":
                 case "Length":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        ValidatorDomain validator = new ValidatorDomain().setNote(pair.getValue().toString());
+                        ValidatorDomain validator = new ValidatorDomain().note(pair.getValue().toString());
                         if (nameOf(pair, "min")) {
-                            result.add(validator.setValidatorType(minSize));
+                            result.add(validator.validatorType(minSize));
                         }
                         if (nameOf(pair, "max")) {
-                            result.add(validator.setValidatorType(maxSize));
+                            result.add(validator.validatorType(maxSize));
                         }
                     });
                     break;
                 case "Max":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new ValidatorDomain().setValidatorType(maxInteger)
-                                    .setNote(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDomain().validatorType(maxInteger)
+                                    .note(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new ValidatorDomain().setValidatorType(maxInteger)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result.add(new ValidatorDomain().validatorType(maxInteger)
+                                            .note(pair.getValue().toString()))));
                     break;
                 case "Min":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new ValidatorDomain().setValidatorType(minInteger)
-                                    .setNote(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDomain().validatorType(minInteger)
+                                    .note(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new ValidatorDomain().setValidatorType(minInteger)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result.add(new ValidatorDomain().validatorType(minInteger)
+                                            .note(pair.getValue().toString()))));
                     break;
                 case "DecimalMax":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new ValidatorDomain().setValidatorType(maxFloat)
-                                    .setNote(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDomain().validatorType(maxFloat)
+                                    .note(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new ValidatorDomain().setValidatorType(maxFloat)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result.add(new ValidatorDomain().validatorType(maxFloat)
+                                            .note(pair.getValue().toString()))));
                     break;
                 case "DecimalMin":
                     anno.ifSingleMemberAnnotationExpr(singleAnno -> result
-                            .add(new ValidatorDomain().setValidatorType(minFloat)
-                                    .setNote(singleAnno.getMemberValue().toString())));
+                            .add(new ValidatorDomain().validatorType(minFloat)
+                                    .note(singleAnno.getMemberValue().toString())));
                     anno.ifNormalAnnotationExpr(
                             normalAnno -> normalAnno.getPairs().stream().filter(this::nameIsValue).findAny().ifPresent(
-                                    pair -> result.add(new ValidatorDomain().setValidatorType(minFloat)
-                                            .setNote(pair.getValue().toString()))));
+                                    pair -> result.add(new ValidatorDomain().validatorType(minFloat)
+                                            .note(pair.getValue().toString()))));
                     break;
                 case "Future":
-                    result.add(new ValidatorDomain().setValidatorType(future));
+                    result.add(new ValidatorDomain().validatorType(future));
                     break;
                 case "Past":
-                    result.add(new ValidatorDomain().setValidatorType(past));
+                    result.add(new ValidatorDomain().validatorType(past));
                     break;
                 case "Digits":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
-                        ValidatorDomain validator = new ValidatorDomain().setNote(pair.getValue().toString());
+                        ValidatorDomain validator = new ValidatorDomain().note(pair.getValue().toString());
                         if (nameOf(pair, "integer")) {
-                            result.add(validator.setValidatorType(maxIntegralDigits));
+                            result.add(validator.validatorType(maxIntegralDigits));
                         }
                         if (nameOf(pair, "fraction")) {
-                            result.add(validator.setValidatorType(maxFractionalDigits));
+                            result.add(validator.validatorType(maxFractionalDigits));
                         }
                     });
                     break;
                 case "Positive":
-                    result.add(new ValidatorDomain().setValidatorType(positive));
+                    result.add(new ValidatorDomain().validatorType(positive));
                     break;
                 case "Pattern":
                     anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                         if (nameOf(pair, "regexp")) {
-                            result.add(new ValidatorDomain().setValidatorType(regex)
-                                    .setNote(pair.getValue().asStringLiteralExpr().asString()));
+                            result.add(new ValidatorDomain().validatorType(regex)
+                                    .note(pair.getValue().asStringLiteralExpr().asString()));
                         }
                     });
                     break;
                 case "ValidEnumValue":
-                    result.add(new ValidatorDomain().setValidatorType(enumValue));
+                    result.add(new ValidatorDomain().validatorType(enumValue));
                     break;
             }
         });

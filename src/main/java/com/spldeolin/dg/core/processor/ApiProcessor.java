@@ -18,26 +18,26 @@ import com.spldeolin.dg.core.util.Javadocs;
 public class ApiProcessor {
 
     public ApiDomain process(HandlerEntry handlerEntry) {
-        ClassOrInterfaceDeclaration controller = handlerEntry.getController();
-        MethodDeclaration handler = handlerEntry.getHandler();
+        ClassOrInterfaceDeclaration controller = handlerEntry.controller();
+        MethodDeclaration handler = handlerEntry.handler();
 
         ApiDomain api = new ApiDomain();
 
         Pair<Collection<MethodType>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
                 .process(controller, handler);
-        api.setMethod(urisAndMethods.getLeft());
-        api.setUri(urisAndMethods.getRight());
+        api.method(urisAndMethods.getLeft());
+        api.uri(urisAndMethods.getRight());
 
-        api.setDescription(Javadocs.extractFirstLine(handler));
-        api.setUriPathFields(Lists.newArrayList());
-        api.setUriQueryFields(Lists.newArrayList());
+        api.description(Javadocs.extractFirstLine(handler));
+        api.uriPathFields(Lists.newArrayList());
+        api.uriQueryFields(Lists.newArrayList());
 
         FieldProcessor fieldProcessor = new FieldProcessor();
         String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
         fieldProcessor.processRequestBody(handler.getParameters(), api);
         fieldProcessor.processResponseBody(resultTypeName, api);
 
-        ResultEntry process = new ResultProcessor().process(handlerEntry.getHandlerResultResolvedType());
+        ResultEntry process = new ResultProcessor().process(handlerEntry.handlerResultResolvedType());
 
         return api;
     }

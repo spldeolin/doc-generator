@@ -31,8 +31,8 @@ public class RapConverter {
         Collection<ActionListDto> actions = Lists.newLinkedList();
         apis.forEach(api -> {
             ActionListDto action = ActionListDto.build(api);
-            action.setRequestParameterList(convertFields(api.getRequestBodyFileds()));
-            action.setResponseParameterList(convertFields(api.getResponseBodyFields()));
+            action.setRequestParameterList(convertFields(api.requestBodyFileds()));
+            action.setResponseParameterList(convertFields(api.responseBodyFields()));
             actions.add(action);
         });
 
@@ -46,8 +46,8 @@ public class RapConverter {
         }
         for (FieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
-            if (field.getFields() != null && field.getFields().size() > 0) {
-                this.convertFields(field.getFields(), child);
+            if (field.fields() != null && field.fields().size() > 0) {
+                this.convertFields(field.fields(), child);
             }
             firstFloor.add(child);
         }
@@ -58,8 +58,8 @@ public class RapConverter {
         List<ParameterListDto> childrent = Lists.newArrayList();
         for (FieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
-            if (field.getFields() != null && field.getFields().size() > 0) {
-                this.convertFields(field.getFields(), child);
+            if (field.fields() != null && field.fields().size() > 0) {
+                this.convertFields(field.fields(), child);
             }
             childrent.add(child);
         }

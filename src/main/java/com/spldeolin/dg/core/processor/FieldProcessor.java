@@ -69,38 +69,38 @@ public class FieldProcessor {
         }
         // requestBodyType
         if (Strings.isSurroundedBy(parameterTypeName, "List<", ">")) {
-            api.setRequestBodyType(RequestBodyType.objectArray);
+            api.requestBodyType(RequestBodyType.objectArray);
             parameterTypeName = Strings.removeSurround(parameterTypeName, "List<", ">");
         } else {
-            api.setRequestBodyType(RequestBodyType.object);
+            api.requestBodyType(RequestBodyType.object);
         }
 
         // requestBodyFields
         tryGetClassQulifier(parameterTypeName).ifPresent(parameterTypeQulifier -> {
             Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(parameterTypeQulifier,
                     false);
-            api.setRequestBodyFileds(pair.getLeft());
-            api.setRequestBodyFiledsFlatly(pair.getRight());
+            api.requestBodyFileds(pair.getLeft());
+            api.requestBodyFiledsFlatly(pair.getRight());
         });
     }
 
     public void processResponseBody(String resultTypeName, ApiDomain api) {
         // responseBodyType
         if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
-            api.setResponseBodyType(ResponseBodyMode.arrayObject);
+            api.responseBodyType(ResponseBodyMode.arrayObject);
             resultTypeName = Strings.removeSurround(resultTypeName, "List<", ">");
         } else if (Strings.isSurroundedBy(resultTypeName, "PageInfo<", ">")) {
-            api.setResponseBodyType(ResponseBodyMode.pageObject);
+            api.responseBodyType(ResponseBodyMode.pageObject);
             resultTypeName = Strings.removeSurround(resultTypeName, "PageInfo<", ">");
         } else {
-            api.setResponseBodyType(ResponseBodyMode.object);
+            api.responseBodyType(ResponseBodyMode.object);
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {
             Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(resultTypeQulifier,
                     true);
-            api.setResponseBodyFields(pair.getLeft());
-            api.setResponseBodyFieldsFlatly(pair.getRight());
+            api.responseBodyFields(pair.getLeft());
+            api.responseBodyFieldsFlatly(pair.getRight());
         });
 
     }
@@ -156,13 +156,13 @@ public class FieldProcessor {
         }
         ObjectSchema zeroSchema = jsonSchema.asObjectSchema();
         Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList)
-                .getFields();
-        zeroFloorFields.forEach(fieldDto -> fieldDto.setParentField(null));
+                .fields();
+        zeroFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
 
         if (isResponseBody) {
             flatList.forEach(fieldDto -> {
-                fieldDto.setNullable(null);
-                fieldDto.setValidators(null);
+                fieldDto.nullable(null);
+                fieldDto.validators(null);
             });
         }
 
@@ -172,9 +172,9 @@ public class FieldProcessor {
     private FieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, FieldDomain parent,
             List<FieldDomain> flatList) {
         if (isObjectInArray) {
-            parent.setJsonType(JsonType.objectArray);
+            parent.jsonType(JsonType.objectArray);
         } else {
-            parent.setJsonType(JsonType.object);
+            parent.jsonType(JsonType.object);
         }
 
 
@@ -194,24 +194,24 @@ public class FieldProcessor {
                 return;
             }
 
-            childFieldDto.setFieldName(childFieldName);
+            childFieldDto.fieldName(childFieldName);
 
             String comment = Javadocs.extractFirstLine(
                     FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByFieldVarQualifier()
                             .get(fieldVarQualifier));
-            childFieldDto.setDescription(comment);
+            childFieldDto.description(comment);
 
-            childFieldDto.setNullable(true);
+            childFieldDto.nullable(true);
             if (fieldDeclaration.getAnnotationByName("NotNull").isPresent() || fieldDeclaration
                     .getAnnotationByName("NotEmpty").isPresent() || fieldDeclaration.getAnnotationByName("NotBlank")
                     .isPresent()) {
-                childFieldDto.setNullable(false);
+                childFieldDto.nullable(false);
             }
 
-            childFieldDto.setValidators(new ValidatorProcessor().process(fieldDeclaration));
+            childFieldDto.validators(new ValidatorProcessor().process(fieldDeclaration));
 
             if (childSchema.isValueTypeSchema()) {
-                childFieldDto.setJsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
+                childFieldDto.jsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
             } else if (childSchema.isObjectSchema()) {
                 parseFieldTypes(childSchema.asObjectSchema(), false, childFieldDto, flatList);
             } else if (childSchema.isArraySchema()) {
@@ -227,7 +227,7 @@ public class FieldProcessor {
 
                 JsonSchema eleSchema = aSchema.getItems().asSingleItems().getSchema();
                 if (eleSchema.isValueTypeSchema()) {
-                    childFieldDto.setJsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
+                    childFieldDto.jsonType(calcValueDataType(eleSchema.asValueTypeSchema(), true));
                 } else if (eleSchema.isObjectSchema()) {
                     parseFieldTypes(eleSchema.asObjectSchema(), true, childFieldDto, flatList);
                 } else {
@@ -239,28 +239,28 @@ public class FieldProcessor {
                 return;
             }
 
-            if (childFieldDto.getJsonType() == JsonType.number) {
+            if (childFieldDto.jsonType() == JsonType.number) {
                 String javaType = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getVarByFieldVarQualifier()
                         .get(fieldVarQualifier).getTypeAsString();
-                childFieldDto.setNumberFormat(calcNumberFormat(javaType));
+                childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
 
-            if (childFieldDto.getJsonType() == JsonType.string) {
-                childFieldDto.setStringFormat(StringFormatType.normal.getValue());
+            if (childFieldDto.jsonType() == JsonType.string) {
+                childFieldDto.stringFormat(StringFormatType.normal.getValue());
                 fieldDeclaration.getAnnotationByClass(JsonFormat.class)
                         .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                             if (pair.getNameAsString().equals("pattern")) {
-                                childFieldDto.setStringFormat(
+                                childFieldDto.stringFormat(
                                         String.format(StringFormatType.datetime.getValue(), pair.getValue()));
                             }
                         }));
             }
 
-            childFieldDto.setParentField(parent);
+            childFieldDto.parentField(parent);
             children.add(childFieldDto);
         });
 
-        parent.setFields(children);
+        parent.fields(children);
         flatList.addAll(children);
         return parent;
     }

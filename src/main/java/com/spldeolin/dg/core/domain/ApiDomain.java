@@ -5,11 +5,13 @@ import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
 import com.spldeolin.dg.core.enums.ResponseBodyMode;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2019-12-02
  */
 @Data
+@Accessors(fluent = true)
 public class ApiDomain {
 
     private Collection<MethodType> method;

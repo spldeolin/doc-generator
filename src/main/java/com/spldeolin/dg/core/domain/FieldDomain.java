@@ -5,11 +5,13 @@ import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import lombok.Data;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * @author Deolin 2019-12-02
  */
 @Data
+@Accessors(fluent = true)
 @ToString(exclude = {"parentField"}) // StackOverflowError
 public class FieldDomain {
 
@@ -19,8 +21,8 @@ public class FieldDomain {
 
     /**
      * @see JsonType
-     * @see ApiDomain#getUriPathFields() string, number, boolean
-     * @see ApiDomain#getUriQueryFields() string, number, boolean
+     * @see ApiDomain#uriPathFields() string, number, boolean
+     * @see ApiDomain#uriQueryFields() string, number, boolean
      */
     private JsonType jsonType;
 
