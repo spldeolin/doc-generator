@@ -33,7 +33,7 @@ import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
-import com.spldeolin.dg.core.enums.ResponseBodyMode;
+import com.spldeolin.dg.core.enums.ResponseBodyStructure;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Javadocs;
 import com.spldeolin.dg.core.util.Strings;
@@ -87,13 +87,13 @@ public class FieldProcessor {
     public void processResponseBody(String resultTypeName, ApiDomain api) {
         // responseBodyType
         if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
-            api.responseBodyType(ResponseBodyMode.arrayObject);
+            api.responseBodyType(ResponseBodyStructure.keyValLike);
             resultTypeName = Strings.removeSurround(resultTypeName, "List<", ">");
         } else if (Strings.isSurroundedBy(resultTypeName, "PageInfo<", ">")) {
-            api.responseBodyType(ResponseBodyMode.pageObject);
+            api.responseBodyType(ResponseBodyStructure.keyValLike);
             resultTypeName = Strings.removeSurround(resultTypeName, "PageInfo<", ">");
         } else {
-            api.responseBodyType(ResponseBodyMode.object);
+            api.responseBodyType(ResponseBodyStructure.keyValLike);
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {

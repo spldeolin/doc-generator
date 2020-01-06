@@ -4,52 +4,36 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
+ * ResponseBody的数据结构
+ * 1、不返回
+ * 2、值类型结构
+ * 3、kv型结构
+ * 4、复杂结构
+ *
  * @author Deolin 2019-12-03
  */
 @AllArgsConstructor
 @Getter
-public enum ResponseBodyMode {
+public enum ResponseBodyStructure {
 
     /**
      * 没有返回值
      */
-    nothing("nothing"),
+    v0id("void"),
 
     /**
-     * 单纯的值
+     * 单纯的值类型结构
      *
      * 整个body是boolean、字符串、数字中的一个。e.g.: @ResponseBody public BigDecaimal ....
      */
-    val("value"),
+    valueLike("valueLike"),
 
     /**
-     * 最外层是数组，次外层是单纯的值
-     *
-     * e.g.: @ResponseBody public List<String>
-     */
-    arrayValue("arrayValue"),
-
-    /**
-     * 最外层是kv对象
+     * kv型数据结构
      *
      * e.g.: @ResponseBody public UserVo ....
      */
-    object("object"),
-
-    /**
-     * 最外层是数组，次外层是kv对象
-     *
-     * e.g.: @ResponseBody public Set<UserVo> ...
-     * e.g.: @ResponseBody public UserVo[] ...
-     */
-    arrayObject("arrayObject"),
-
-    /**
-     * 最外层是分页对象，分页的数据域是个kv对象
-     *
-     * e.g.: @ResponseBody public YourPageWrapper<UserVo> ...
-     */
-    pageObject("pageObject"),
+    keyValLike("keyValLike"),
 
     /**
      * 复杂的Body
@@ -68,7 +52,7 @@ public enum ResponseBodyMode {
      *
      * 这类情况不会出现太多，解析成field的成本也比较高，解析出来后也无法以主流的表格形式来描述field之间的关系，所以只提供一个Json Schema作为特殊处理
      */
-    mazy("mazy");
+    chaos("chaos");
 
     private String value;
 

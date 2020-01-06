@@ -3,7 +3,7 @@ package com.spldeolin.dg.core.domain;
 import java.util.Collection;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.enums.RequestBodyType;
-import com.spldeolin.dg.core.enums.ResponseBodyMode;
+import com.spldeolin.dg.core.enums.ResponseBodyStructure;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -30,7 +30,7 @@ public class ApiDomain {
 
     private Collection<FieldDomain> requestBodyFiledsFlatly;
 
-    private ResponseBodyMode responseBodyType;
+    private ResponseBodyStructure responseBodyType;
 
     private Collection<FieldDomain> responseBodyFields;
 

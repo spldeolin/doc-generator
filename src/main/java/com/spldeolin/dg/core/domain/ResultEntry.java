@@ -2,7 +2,7 @@ package com.spldeolin.dg.core.domain;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.spldeolin.dg.core.enums.ResponseBodyMode;
+import com.spldeolin.dg.core.enums.ResponseBodyStructure;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -13,7 +13,15 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class ResultEntry {
 
-    private ResponseBodyMode mode;
+    /**
+     * void, value, keyValue, mazy
+     */
+    private ResponseBodyStructure struct;
+
+    /**
+     * 1none, 2array, 3page
+     */
+    private Integer outermostWrapper;
 
     private Class<?> reflectClass;
 

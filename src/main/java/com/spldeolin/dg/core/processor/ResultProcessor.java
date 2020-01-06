@@ -16,7 +16,7 @@ import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.domain.ResultEntry;
-import com.spldeolin.dg.core.enums.ResponseBodyMode;
+import com.spldeolin.dg.core.enums.ResponseBodyStructure;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,37 +35,39 @@ public class ResultProcessor {
 
     public ResultEntry process() {
         if (type == null) {
-            return new ResultEntry().mode(ResponseBodyMode.nothing);
+            return new ResultEntry().struct(ResponseBodyStructure.v0id);
         }
 
         ResultEntry result;
         try {
-            // e.g.: UserVo[]
             if (isArray(type)) {
-                result = tryProcessNonArrayLikeType(type.asArrayType().getComponentType(), true);
+                // 最外层是 数组
+                result = tryProcessNonArrayLikeType(type.asArrayType().getComponentType()).outermostWrapper(2);
             } else if (isJUC(type)) {
-                // e.g.: public List<UserVo>
+                // 最外层是 列表
                 result = tryProcessNonArrayLikeType(
-                        Iterables.getOnlyElement(type.asReferenceType().getTypeParametersMap()).b, true);
+                        Iterables.getOnlyElement(type.asReferenceType().getTypeParametersMap()).b).outermostWrapper(2);
             } else if (isPage(type)) {
+                // 最外层是 Page对象
                 result = tryProcessNonArrayLikeType(
-                        Iterables.getOnlyElement(type.asReferenceType().getTypeParametersMap()).b, true);
+                        Iterables.getOnlyElement(type.asReferenceType().getTypeParametersMap()).b).outermostWrapper(3);
             } else {
-                result = tryProcessNonArrayLikeType(type, false);
+                // 单层
+                result = tryProcessNonArrayLikeType(type).outermostWrapper(1);
             }
         } catch (Exception e) {
             log.warn(e.getClass().getSimpleName() + ":" + Strings.nullToEmpty(e.getMessage()));
             // as mazy mode
-            result = new ResultEntry().mode(ResponseBodyMode.mazy);
+            result = new ResultEntry().struct(ResponseBodyStructure.chaos);
         }
 
         // try generate json schema for mazy mode
-        if (result.mode() == ResponseBodyMode.mazy) {
+        if (result.struct() == ResponseBodyStructure.chaos) {
             JsonSchema jsonSchema = generateSchema(type.describe());
             if (jsonSchema != null) {
                 result.jsonSchema(jsonSchema);
             } else {
-                result = new ResultEntry().mode(ResponseBodyMode.nothing);
+                result = new ResultEntry().struct(ResponseBodyStructure.v0id);
             }
         }
         return result;
@@ -91,12 +93,11 @@ public class ResultProcessor {
         return false;
     }
 
-    private ResultEntry tryProcessNonArrayLikeType(ResolvedType componentType, boolean isInArray)
-            throws ClassNotFoundException {
+    private ResultEntry tryProcessNonArrayLikeType(ResolvedType componentType) throws ClassNotFoundException {
         String describe = componentType.describe();
         JsonSchema jsonSchema = generateSchema(describe);
         if (jsonSchema == null) {
-            return new ResultEntry().mode(ResponseBodyMode.nothing);
+            return new ResultEntry().struct(ResponseBodyStructure.v0id);
         }
 
         if (jsonSchema.isObjectSchema()) {
@@ -105,18 +106,16 @@ public class ResultProcessor {
             if (coid == null) {
                 // 往往是泛型返回值或是类库中会被认为是ObjectSchema的类型
                 System.out.println(describe);
-                return new ResultEntry().mode(ResponseBodyMode.mazy);
+                return new ResultEntry().struct(ResponseBodyStructure.chaos);
             }
             Class<?> clazz = cl.loadClass(qualifierForClassLoader(coid));
-            return new ResultEntry().mode(isInArray ? ResponseBodyMode.arrayObject : ResponseBodyMode.object)
-                    .clazz(coid).reflectClass(clazz);
+            return new ResultEntry().struct(ResponseBodyStructure.keyValLike).clazz(coid).reflectClass(clazz);
 
         } else if (jsonSchema.isValueTypeSchema()) {
-            return new ResultEntry().mode(isInArray ? ResponseBodyMode.arrayValue : ResponseBodyMode.val)
-                    .jsonSchema(jsonSchema);
+            return new ResultEntry().struct(ResponseBodyStructure.valueLike).jsonSchema(jsonSchema);
 
         } else {
-            return new ResultEntry().mode(ResponseBodyMode.mazy);
+            return new ResultEntry().struct(ResponseBodyStructure.chaos);
         }
     }
 
