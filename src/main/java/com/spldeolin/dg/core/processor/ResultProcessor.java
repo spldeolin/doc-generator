@@ -15,10 +15,13 @@ import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.ClassContainer;
+import com.spldeolin.dg.core.domain.ChaosStructureResultEntry;
+import com.spldeolin.dg.core.domain.KeyValStructureResultEntry;
 import com.spldeolin.dg.core.domain.ResultEntry;
+import com.spldeolin.dg.core.domain.ValueStructureResultEntry;
+import com.spldeolin.dg.core.domain.VoidStructureResultEntry;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
-import com.spldeolin.dg.core.enums.ResponseBodyStructure;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -37,7 +40,7 @@ public class ResultProcessor {
 
     public ResultEntry process() {
         if (type == null) {
-            return new ResultEntry().struct(ResponseBodyStructure.v0id);
+            return new VoidStructureResultEntry();
         }
 
         ResultEntry result;
@@ -58,7 +61,7 @@ public class ResultProcessor {
         } catch (Exception e) {
             log.warn("type={}", type, e);
             // as mazy mode
-            result = new ResultEntry().struct(ResponseBodyStructure.chaos).jsonSchema(generateSchema(type.describe()));
+            result = new ChaosStructureResultEntry().jsonSchema(generateSchema(type.describe()));
         }
         return result;
     }
@@ -67,7 +70,7 @@ public class ResultProcessor {
         String describe = type.describe();
         JsonSchema jsonSchema = generateSchema(describe);
         if (jsonSchema == null) {
-            return new ResultEntry().struct(ResponseBodyStructure.v0id);
+            return new VoidStructureResultEntry();
         }
 
         if (jsonSchema.isObjectSchema()) {
@@ -76,10 +79,10 @@ public class ResultProcessor {
             if (coid == null) {
                 // 往往是泛型返回值或是类库中会被认为是ObjectSchema的类型
                 System.out.println(describe);
-                return new ResultEntry().struct(ResponseBodyStructure.chaos).jsonSchema(jsonSchema);
+                return new ChaosStructureResultEntry().jsonSchema(jsonSchema);
             }
             Class<?> clazz = cl.loadClass(qualifierForClassLoader(coid));
-            return new ResultEntry().struct(ResponseBodyStructure.keyVal).clazz(coid).reflectClass(clazz);
+            return new KeyValStructureResultEntry().clazz(coid).reflectClass(clazz);
 
         } else if (jsonSchema.isValueTypeSchema()) {
             JsonType jsonType;
@@ -103,11 +106,11 @@ public class ResultProcessor {
             } else {
                 throw new RuntimeException("impossible unless bug");
             }
-            return new ResultEntry().struct(ResponseBodyStructure.val).valueStructureJsonType(jsonType)
+            return new ValueStructureResultEntry().valueStructureJsonType(jsonType)
                     .valueStructureNumberFormat(numberFormat);
 
         } else {
-            return new ResultEntry().struct(ResponseBodyStructure.chaos);
+            return new ChaosStructureResultEntry().jsonSchema(jsonSchema);
         }
     }
 
