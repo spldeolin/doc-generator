@@ -7,6 +7,10 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
+ * 单纯的值类型结构
+ *
+ * 整个body是boolean、字符串、数字中的一个。e.g.: @ResponseBody public BigDecaimal ....
+ *
  * @author Deolin 2020-01-06
  */
 @Data
@@ -23,7 +27,5 @@ public class ValueStructureResultEntry extends ResultEntry {
      * struct=val时有效
      */
     private NumberFormatType valueStructureNumberFormat;
-
-
 
 }

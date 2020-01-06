@@ -2,8 +2,7 @@ package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
 import com.spldeolin.dg.core.enums.MethodType;
-import com.spldeolin.dg.core.enums.RequestBodyType;
-import com.spldeolin.dg.core.enums.ResponseBodyStructure;
+import com.spldeolin.dg.core.enums.BodyType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -24,13 +23,13 @@ public class ApiDomain {
 
     private Collection<FieldDomain> uriQueryFields;
 
-    private RequestBodyType requestBodyType;
+    private BodyType requestBodyType;
 
     private Collection<FieldDomain> requestBodyFileds;
 
     private Collection<FieldDomain> requestBodyFiledsFlatly;
 
-    private ResponseBodyStructure responseBodyType;
+    private BodyType responseBodyType;
 
     private Collection<FieldDomain> responseBodyFields;
 

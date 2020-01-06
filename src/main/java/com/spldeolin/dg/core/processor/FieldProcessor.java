@@ -32,8 +32,7 @@ import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
-import com.spldeolin.dg.core.enums.RequestBodyType;
-import com.spldeolin.dg.core.enums.ResponseBodyStructure;
+import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Javadocs;
 import com.spldeolin.dg.core.util.Strings;
@@ -69,10 +68,10 @@ public class FieldProcessor {
         }
         // requestBodyType
         if (Strings.isSurroundedBy(parameterTypeName, "List<", ">")) {
-            api.requestBodyType(RequestBodyType.objectArray);
+            api.requestBodyType(BodyType.keyValueArray);
             parameterTypeName = Strings.removeSurround(parameterTypeName, "List<", ">");
         } else {
-            api.requestBodyType(RequestBodyType.object);
+            api.requestBodyType(BodyType.keyValue);
         }
 
         // requestBodyFields
@@ -85,16 +84,6 @@ public class FieldProcessor {
     }
 
     public void processResponseBody(String resultTypeName, ApiDomain api) {
-        // responseBodyType
-        if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
-            api.responseBodyType(ResponseBodyStructure.keyVal);
-            resultTypeName = Strings.removeSurround(resultTypeName, "List<", ">");
-        } else if (Strings.isSurroundedBy(resultTypeName, "PageInfo<", ">")) {
-            api.responseBodyType(ResponseBodyStructure.keyVal);
-            resultTypeName = Strings.removeSurround(resultTypeName, "PageInfo<", ">");
-        } else {
-            api.responseBodyType(ResponseBodyStructure.keyVal);
-        }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {
             Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(resultTypeQulifier,

@@ -9,6 +9,7 @@ import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.domain.ResultEntry;
+import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.util.Javadocs;
 import lombok.AllArgsConstructor;
@@ -41,9 +42,35 @@ public class ApiProcessor {
         fieldProcessor.processRequestBody(handler.getParameters(), api);
         fieldProcessor.processResponseBody(resultTypeName, api);
 
-        ResultEntry process = new ResultProcessor(handlerEntry.responseBodyResolvedType()).process();
+        ResultEntry resultEntry = new ResultProcessor(handlerEntry.responseBodyResolvedType()).process();
+        this.calcResponseBodyType(api, resultEntry);
 
         return api;
+    }
+
+    private void calcResponseBodyType(ApiDomain api, ResultEntry resultEntry) {
+        if (resultEntry.isVoidStructureResultEntry()) {
+            api.responseBodyType(BodyType.none);
+        }
+        if (resultEntry.isChaosStructureResultEntry()) {
+            api.responseBodyType(BodyType.chaos);
+        }
+        if (resultEntry.isValueStructureResultEntry()) {
+            if (resultEntry.inArray()) {
+                api.responseBodyType(BodyType.valueArray);
+            } else {
+                api.responseBodyType(BodyType.va1ue);
+            }
+        }
+        if (resultEntry.isKeyValStructureResultEntry()) {
+            if (resultEntry.inArray()) {
+                api.responseBodyType(BodyType.keyValueArray);
+            } else if (resultEntry.inPage()) {
+                api.responseBodyType(BodyType.keyValuePage);
+            } else {
+                api.responseBodyType(BodyType.keyValue);
+            }
+        }
     }
 
 }

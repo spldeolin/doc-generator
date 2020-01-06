@@ -47,16 +47,16 @@ public class ResultProcessor {
         try {
             if (isArray(type)) {
                 // 最外层是 数组
-                result = tryProcessNonArrayLikeType(getArrayElementType(type)).outermostWrapper(2);
+                result = tryProcessNonArrayLikeType(getArrayElementType(type)).inArray(true);
             } else if (isJUC(type)) {
                 // 最外层是 列表
-                result = tryProcessNonArrayLikeType(getJUCElementType(type)).outermostWrapper(2);
+                result = tryProcessNonArrayLikeType(getJUCElementType(type)).inArray(true);
             } else if (isPage(type)) {
                 // 最外层是 Page对象
-                result = tryProcessNonArrayLikeType(getPageElementType(type)).outermostWrapper(3);
+                result = tryProcessNonArrayLikeType(getPageElementType(type)).inPage(true);
             } else {
                 // 单层
-                result = tryProcessNonArrayLikeType(type).outermostWrapper(1);
+                result = tryProcessNonArrayLikeType(type);
             }
         } catch (Exception e) {
             log.warn("type={}", type, e);
