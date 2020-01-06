@@ -31,7 +31,7 @@ public class RapConverter {
         Collection<ActionListDto> actions = Lists.newLinkedList();
         apis.forEach(api -> {
             ActionListDto action = ActionListDto.build(api);
-            action.setRequestParameterList(convertFields(api.requestBodyFileds()));
+            action.setRequestParameterList(convertFields(api.requestBodyFields()));
             action.setResponseParameterList(convertFields(api.responseBodyFields()));
             actions.add(action);
         });

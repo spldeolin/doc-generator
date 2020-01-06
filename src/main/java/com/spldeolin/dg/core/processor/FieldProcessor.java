@@ -30,9 +30,9 @@ import com.spldeolin.dg.core.container.QualifierContainer;
 import com.spldeolin.dg.core.container.ReflectionContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
-import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Javadocs;
 import com.spldeolin.dg.core.util.Strings;
@@ -78,8 +78,8 @@ public class FieldProcessor {
         tryGetClassQulifier(parameterTypeName).ifPresent(parameterTypeQulifier -> {
             Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(parameterTypeQulifier,
                     false);
-            api.requestBodyFileds(pair.getLeft());
-            api.requestBodyFiledsFlatly(pair.getRight());
+            api.requestBodyFields(pair.getLeft());
+            api.requestBodyFieldsFlatly(pair.getRight());
         });
     }
 

@@ -31,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class FieldProcessorV2 {
 
-    public void processResponseBody(ObjectSchema objectSchema, ApiDomain api) {
+    public void process(ObjectSchema objectSchema, ApiDomain api) {
         Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(objectSchema);
         api.responseBodyFields(pair.getLeft());
         api.responseBodyFieldsFlatly(pair.getRight());

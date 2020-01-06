@@ -13,4 +13,5 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 public class VoidStructureBodyProcessResult extends BodyProcessResult {
+
 }

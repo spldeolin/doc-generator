@@ -20,68 +20,121 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ApiProcessor {
 
-    private final HandlerProcessResult handlerEntry;
+    private final HandlerProcessResult handlerProcessorResult;
 
     public ApiDomain process() {
-        ClassOrInterfaceDeclaration controller = handlerEntry.controller();
-        MethodDeclaration handler = handlerEntry.handler();
+        ClassOrInterfaceDeclaration controller = handlerProcessorResult.controller();
+        MethodDeclaration handler = handlerProcessorResult.handler();
 
         ApiDomain api = new ApiDomain();
 
+        // method uri
         RequestMappingProcessResult requestMappingProcessResult = new RequestMappingProcessor()
                 .process(controller, handler);
         api.method(requestMappingProcessResult.methodTypes());
         api.uri(requestMappingProcessResult.uris());
 
+        // description
         api.description(Javadocs.extractFirstLine(handler));
+
+        // path query
         api.uriPathFields(Lists.newArrayList());
         api.uriQueryFields(Lists.newArrayList());
 
-        FieldProcessor fieldProcessor = new FieldProcessor();
-        fieldProcessor.processRequestBody(handler.getParameters(), api);
+        // request body
+        BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolveType()).process();
+        this.calcRequestBodyType(api, req);
+        this.processRequestBodyFields(api, req);
 
-        BodyProcessResult resultEntry = new BodyProcessor(handlerEntry.responseBodyResolvedType()).process();
-        this.calcResponseBodyType(api, resultEntry);
-        if (resultEntry.isKeyValueStructure()) {
-            new FieldProcessorV2().processResponseBody(resultEntry.asKeyValueStructure().objectSchema(), api);
+        // response body
+        BodyProcessResult resp = new BodyProcessor(handlerProcessorResult.responseBodyResolvedType()).process();
+        this.calcResponseBodyType(api, resp);
+        this.processResponseBodyFields(api, resp);
+
+        return api;
+    }
+
+    private void calcRequestBodyType(ApiDomain api, BodyProcessResult req) {
+        if (req.isVoidStructure()) {
+            api.requestBodyType(BodyType.none);
         }
-        if (resultEntry.isValueStructure()) {
-            ValueStructureBodyProcessResult valueStruct = resultEntry.asValueStructure();
+        if (req.isChaosStructure()) {
+            api.requestBodyType(BodyType.chaos);
+        }
+        if (req.isValueStructure()) {
+            if (req.inArray()) {
+                api.requestBodyType(BodyType.valueArray);
+            } else {
+                api.requestBodyType(BodyType.va1ue);
+            }
+        }
+        if (req.isKeyValueStructure()) {
+            if (req.inArray()) {
+                api.requestBodyType(BodyType.keyValueArray);
+            } else if (req.inPage()) {
+                api.requestBodyType(BodyType.keyValuePage);
+            } else {
+                api.requestBodyType(BodyType.keyValue);
+            }
+        }
+    }
+
+    private void processRequestBodyFields(ApiDomain api, BodyProcessResult req) {
+        if (req.isKeyValueStructure()) {
+            new FieldProcessorV2().process(req.asKeyValueStructure().objectSchema(), api);
+        }
+        if (req.isValueStructure()) {
+            ValueStructureBodyProcessResult valueStruct = req.asValueStructure();
+            Collection<FieldDomain> field = Lists.newArrayList(
+                    new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
+                            .numberFormat(valueStruct.valueStructureNumberFormat()));
+            api.requestBodyFields(field);
+            api.requestBodyFieldsFlatly(field);
+        }
+        if (req.isChaosStructure()) {
+            api.requestBodyChaosJsonSchema(req.asChaosStructure().jsonSchema());
+        }
+    }
+
+    private void calcResponseBodyType(ApiDomain api, BodyProcessResult resp) {
+        if (resp.isVoidStructure()) {
+            api.responseBodyType(BodyType.none);
+        }
+        if (resp.isChaosStructure()) {
+            api.responseBodyType(BodyType.chaos);
+        }
+        if (resp.isValueStructure()) {
+            if (resp.inArray()) {
+                api.responseBodyType(BodyType.valueArray);
+            } else {
+                api.responseBodyType(BodyType.va1ue);
+            }
+        }
+        if (resp.isKeyValueStructure()) {
+            if (resp.inArray()) {
+                api.responseBodyType(BodyType.keyValueArray);
+            } else if (resp.inPage()) {
+                api.responseBodyType(BodyType.keyValuePage);
+            } else {
+                api.responseBodyType(BodyType.keyValue);
+            }
+        }
+    }
+
+    private void processResponseBodyFields(ApiDomain api, BodyProcessResult resp) {
+        if (resp.isKeyValueStructure()) {
+            new FieldProcessorV2().process(resp.asKeyValueStructure().objectSchema(), api);
+        }
+        if (resp.isValueStructure()) {
+            ValueStructureBodyProcessResult valueStruct = resp.asValueStructure();
             Collection<FieldDomain> field = Lists.newArrayList(
                     new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.responseBodyFields(field);
             api.responseBodyFieldsFlatly(field);
         }
-        if (resultEntry.isChaosStructure()) {
-            api.responseBodyChaosJsonSchema(resultEntry.asChaosStructure().jsonSchema());
-        }
-
-        return api;
-    }
-
-    private void calcResponseBodyType(ApiDomain api, BodyProcessResult resultEntry) {
-        if (resultEntry.isVoidStructure()) {
-            api.responseBodyType(BodyType.none);
-        }
-        if (resultEntry.isChaosStructure()) {
-            api.responseBodyType(BodyType.chaos);
-        }
-        if (resultEntry.isValueStructure()) {
-            if (resultEntry.inArray()) {
-                api.responseBodyType(BodyType.valueArray);
-            } else {
-                api.responseBodyType(BodyType.va1ue);
-            }
-        }
-        if (resultEntry.isKeyValueStructure()) {
-            if (resultEntry.inArray()) {
-                api.responseBodyType(BodyType.keyValueArray);
-            } else if (resultEntry.inPage()) {
-                api.responseBodyType(BodyType.keyValuePage);
-            } else {
-                api.responseBodyType(BodyType.keyValue);
-            }
+        if (resp.isChaosStructure()) {
+            api.responseBodyChaosJsonSchema(resp.asChaosStructure().jsonSchema());
         }
     }
 
