@@ -11,13 +11,17 @@ import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.domain.ResultEntry;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.util.Javadocs;
+import lombok.AllArgsConstructor;
 
 /**
  * @author Deolin 2019-12-03
  */
+@AllArgsConstructor
 public class ApiProcessor {
 
-    public ApiDomain process(HandlerEntry handlerEntry) {
+    private final HandlerEntry handlerEntry;
+
+    public ApiDomain process() {
         ClassOrInterfaceDeclaration controller = handlerEntry.controller();
         MethodDeclaration handler = handlerEntry.handler();
 
@@ -37,7 +41,7 @@ public class ApiProcessor {
         fieldProcessor.processRequestBody(handler.getParameters(), api);
         fieldProcessor.processResponseBody(resultTypeName, api);
 
-        ResultEntry process = new ResultProcessor().process(handlerEntry.handlerResultResolvedType());
+        ResultEntry process = new ResultProcessor(handlerEntry.handlerResultResolvedType()).process();
 
         return api;
     }

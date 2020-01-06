@@ -138,7 +138,7 @@ public class CuContainer {
             for (ParseResult<CompilationUnit> parseResult : parseResults) {
                 if (parseResult.isSuccessful()) {
                     parseResult.getResult().ifPresent(cu -> {
-                        cu.getStorage().ifPresent(storage -> log.debug("CompilationUnit : {}", storage.getPath()));
+//                        cu.getStorage().ifPresent(storage -> log.debug("CompilationUnit : {}", storage.getPath()));
                         all.add(cu);
                     });
                 } else {

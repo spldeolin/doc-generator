@@ -17,11 +17,13 @@ import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.domain.ResultEntry;
 import com.spldeolin.dg.core.enums.ResponseBodyMode;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2020-01-02
  */
+@AllArgsConstructor
 @Log4j2
 public class ResultProcessor {
 
@@ -29,7 +31,9 @@ public class ResultProcessor {
 
     private static final ClassLoader cl = SpringBootFatJarClassLoader.classLoader;
 
-    public ResultEntry process(ResolvedType type) {
+    private final ResolvedType type;
+
+    public ResultEntry process() {
         if (type == null) {
             return new ResultEntry().mode(ResponseBodyMode.nothing);
         }
