@@ -8,7 +8,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
  *
  * @author Deolin 2020-01-02
  */
-public interface HandlerResultTypeParser {
+public interface ResponseBodyTypeParser {
 
     ResolvedType parse(MethodDeclaration handler);
 

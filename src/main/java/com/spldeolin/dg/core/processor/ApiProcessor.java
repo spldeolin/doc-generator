@@ -41,7 +41,7 @@ public class ApiProcessor {
         fieldProcessor.processRequestBody(handler.getParameters(), api);
         fieldProcessor.processResponseBody(resultTypeName, api);
 
-        ResultEntry process = new ResultProcessor(handlerEntry.handlerResultResolvedType()).process();
+        ResultEntry process = new ResultProcessor(handlerEntry.responseBodyResolvedType()).process();
 
         return api;
     }

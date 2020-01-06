@@ -61,7 +61,6 @@ public class ResultProcessor {
             result = new ResultEntry().struct(ResponseBodyStructure.chaos);
         }
 
-        // try generate json schema for mazy mode
         if (result.struct() == ResponseBodyStructure.chaos) {
             JsonSchema jsonSchema = generateSchema(type.describe());
             if (jsonSchema != null) {

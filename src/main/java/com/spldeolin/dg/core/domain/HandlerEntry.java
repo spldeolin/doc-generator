@@ -26,7 +26,7 @@ public class HandlerEntry {
 
     private Method reflectHandler;
 
-    private ResolvedType handlerResultResolvedType;
+    private ResolvedType responseBodyResolvedType;
 
     private ResolvedType requestBodyResolveType;
 

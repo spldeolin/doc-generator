@@ -18,7 +18,7 @@ import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.dg.core.strategy.HandlerFilter;
-import com.spldeolin.dg.core.strategy.HandlerResultTypeParser;
+import com.spldeolin.dg.core.strategy.ResponseBodyTypeParser;
 import com.spldeolin.dg.core.util.MethodQualifier;
 import lombok.extern.log4j.Log4j2;
 
@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 public class HandlerProcessor {
 
     public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
-            HandlerFilter handlerFilter, HandlerResultTypeParser hanlderResultTypeParser) {
+            HandlerFilter handlerFilter, ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
 
         classes.stream().filter(clazz -> isFilteredController(clazz, handlerFilter)).forEach(controller -> {
@@ -66,9 +66,9 @@ public class HandlerProcessor {
 
                         // result
                         if (hanlderResultTypeParser != null) {
-                            entry.handlerResultResolvedType(hanlderResultTypeParser.parse(handler));
+                            entry.responseBodyResolvedType(hanlderResultTypeParser.parse(handler));
                         } else {
-                            entry.handlerResultResolvedType(handler.getType().resolve());
+                            entry.responseBodyResolvedType(handler.getType().resolve());
                         }
 
                         // requestBody requestParams pathVariables

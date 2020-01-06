@@ -28,8 +28,6 @@ public class EnumContainer {
 
     private Map<String, EnumDeclaration> byEnumQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private Multimap<String, EnumDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
-
     private Multimap<String, EnumDeclaration> byEnumName = ArrayListMultimap.create(EXPECTED, 1);
 
     private static Map<Path, EnumContainer> instances = Maps.newConcurrentMap();
@@ -47,9 +45,7 @@ public class EnumContainer {
         CuContainer cuContainer = CuContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
-        cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-            all.addAll(cu.findAll(EnumDeclaration.class));
-        }));
+        cuContainer.getAll().forEach(cu -> all.addAll(cu.findAll(EnumDeclaration.class)));
 
         log.info("EnumContainer构建完毕，共从[{}]解析到[{}]个EnumDeclaration，耗时[{}]毫秒", path, all.size(),
                 System.currentTimeMillis() - start);
@@ -66,15 +62,6 @@ public class EnumContainer {
                             enumDeclaration));
         }
         return byEnumQualifier;
-    }
-
-    public Multimap<String, EnumDeclaration> getByPackageQualifier() {
-        if (byPackageQualifier.size() == 0) {
-            CuContainer.getInstance(path).getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus
-                    .forEach(cu -> cu.findAll(EnumDeclaration.class)
-                            .forEach(enumDeclaration -> byPackageQualifier.put(packageQualifier, enumDeclaration))));
-        }
-        return byPackageQualifier;
     }
 
     public Multimap<String, EnumDeclaration> getByEnumName() {

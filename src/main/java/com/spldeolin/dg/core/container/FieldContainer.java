@@ -35,8 +35,6 @@ public class FieldContainer {
     // 存在这种情况 private int a, b = 1, c;
     private Map<String, VariableDeclarator> varByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private Multimap<String, FieldDeclaration> byClassQualifier = ArrayListMultimap.create(EXPECTED, 1);
-
     private static Map<Path, FieldContainer> instances = Maps.newConcurrentMap();
 
     public static FieldContainer getInstance(Path path) {
@@ -71,8 +69,6 @@ public class FieldContainer {
                         byFieldVarQualifier.put(fieldVarQulifier, field);
                         varByFieldVarQualifier.put(fieldVarQulifier, variable);
                     });
-
-                    byClassQualifier.put(classQualifier, field);
                 }));
 
         log.info("FieldContainer构建完毕，共从[{}]解析到[{}]个Field，耗时[{}]毫秒", path, all.size(),

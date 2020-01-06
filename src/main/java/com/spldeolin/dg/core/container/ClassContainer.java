@@ -28,8 +28,6 @@ public class ClassContainer {
 
     private Map<String, ClassOrInterfaceDeclaration> byQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
 
-    private Multimap<String, ClassOrInterfaceDeclaration> byPackageQualifier = ArrayListMultimap.create(EXPECTED, 1);
-
     private Multimap<String, ClassOrInterfaceDeclaration> byClassName = ArrayListMultimap.create(EXPECTED, 1);
 
     private static Map<Path, ClassContainer> instances = Maps.newConcurrentMap();
@@ -47,10 +45,9 @@ public class ClassContainer {
         CuContainer cuContainer = CuContainer.getInstance(path);
         long start = System.currentTimeMillis();
         this.path = path;
-        cuContainer.getByPackageQualifier().asMap().forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-            cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
-                    .forEach(classDeclaration -> all.add(classDeclaration));
-        }));
+        cuContainer.getAll().forEach(
+                cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
+                        .forEach(classDeclaration -> all.add(classDeclaration)));
 
         log.info("CoidContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(), System.currentTimeMillis() - start);
 
@@ -66,17 +63,6 @@ public class ClassContainer {
                             classDeclaration));
         }
         return byQualifier;
-    }
-
-    public Multimap<String, ClassOrInterfaceDeclaration> getByPackageQualifier() {
-        if (byPackageQualifier.size() == 0) {
-            CuContainer.getInstance(path).getByPackageQualifier().asMap()
-                    .forEach((packageQualifier, cus) -> cus.forEach(cu -> {
-                        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(
-                                classDeclaration -> byPackageQualifier.put(packageQualifier, classDeclaration));
-                    }));
-        }
-        return byPackageQualifier;
     }
 
     public Multimap<String, ClassOrInterfaceDeclaration> getByClassName() {

@@ -11,7 +11,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 /**
  * @author Deolin 2020-01-02
  */
-public class ReturnStmtParser implements HandlerResultTypeParser {
+public class ReturnStmtBaseResponseBodyTypeParser implements ResponseBodyTypeParser {
 
     @Override
     public ResolvedType parse(MethodDeclaration handler) {
