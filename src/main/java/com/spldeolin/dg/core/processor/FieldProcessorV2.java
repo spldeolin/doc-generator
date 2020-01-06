@@ -54,7 +54,6 @@ public class FieldProcessorV2 {
             parent.jsonType(JsonType.object);
         }
 
-
         List<FieldDomain> children = Lists.newArrayList();
         schema.getProperties().forEach((childFieldName, childSchema) -> {
             FieldDomain childFieldDto = new FieldDomain();

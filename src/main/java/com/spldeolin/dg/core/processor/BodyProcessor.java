@@ -34,8 +34,6 @@ public class BodyProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    private static final ClassLoader cl = SpringBootFatJarClassLoader.classLoader;
-
     private final ResolvedType type;
 
     public BodyProcessResult process() {
@@ -66,7 +64,7 @@ public class BodyProcessor {
         return result;
     }
 
-    private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) throws ClassNotFoundException {
+    private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
         JsonSchema jsonSchema = generateSchema(describe);
         if (jsonSchema == null) {
@@ -81,9 +79,7 @@ public class BodyProcessor {
                 System.out.println(describe);
                 return new ChaosStructureBodyProcessResult().jsonSchema(jsonSchema);
             }
-            Class<?> clazz = cl.loadClass(qualifierForClassLoader(coid));
-            return new KeyValueStructureBodyProcessResult().clazz(coid).reflectClass(clazz)
-                    .objectSchema(jsonSchema.asObjectSchema());
+            return new KeyValueStructureBodyProcessResult().objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
             JsonType jsonType;
@@ -155,7 +151,7 @@ public class BodyProcessor {
 
                 @Override
                 public ClassLoader getClassLoader() {
-                    return cl;
+                    return SpringBootFatJarClassLoader.classLoader;
                 }
             }.constructFromCanonical(describe);
         } catch (IllegalArgumentException e) {

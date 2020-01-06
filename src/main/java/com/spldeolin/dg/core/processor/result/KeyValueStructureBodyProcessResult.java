@@ -1,7 +1,6 @@
 package com.spldeolin.dg.core.processor.result;
 
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -17,16 +16,6 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
 public class KeyValueStructureBodyProcessResult extends BodyProcessResult {
-
-    /**
-     * struct=keyVal时有效
-     */
-    private Class<?> reflectClass;
-
-    /**
-     * struct=keyVal时有效
-     */
-    private ClassOrInterfaceDeclaration clazz;
 
     private ObjectSchema objectSchema;
 
