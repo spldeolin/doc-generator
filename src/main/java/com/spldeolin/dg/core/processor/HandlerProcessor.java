@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import org.springframework.web.bind.annotation.RequestBody;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -12,10 +11,12 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.domain.HandlerEntry;
+import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.dg.core.strategy.HandlerFilter;
 import com.spldeolin.dg.core.strategy.HandlerResultTypeParser;
 import com.spldeolin.dg.core.util.MethodQualifier;
@@ -27,10 +28,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
-    public Collection<HandlerEntry> process(@RequestBody Collection<ClassOrInterfaceDeclaration> classes,
+    public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
             HandlerFilter handlerFilter, HandlerResultTypeParser hanlderResultTypeParser) {
         Collection<HandlerEntry> result = Lists.newLinkedList();
-        classes.stream().filter(this::isController).forEach(controller -> {
+
+        classes.stream().filter(clazz -> isFilteredController(clazz, handlerFilter)).forEach(controller -> {
 
             // reflect controller
             Class<?> reflectController;
@@ -43,61 +45,57 @@ public class HandlerProcessor {
             }
 
             Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
-            controller.getMethods().stream().filter(this::isHandler).forEach(handler -> {
-                if (handlerFilter != null && !handlerFilter.filter(controller, handler)) {
-                    return;
-                }
+            controller.getMethods().stream().filter(method -> this.isFilteredHandler(method, handlerFilter))
+                    .forEach(handler -> {
+                        HandlerEntry entry = new HandlerEntry();
 
-                HandlerEntry entry = new HandlerEntry();
+                        // controller
+                        entry.controller(controller);
+                        entry.reflectController(reflectController);
 
-                // controller
-                entry.controller(controller);
-                entry.reflectController(reflectController);
+                        // handler
+                        String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
+                        entry.shortestQualifiedSignature(shortestQualifiedSignature);
+                        entry.handler(handler);
+                        Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
+                        if (reflectHandler == null) {
+                            log.warn("method[{}] not found", shortestQualifiedSignature);
+                            return;
+                        }
+                        entry.reflectHandler(reflectHandler);
 
-                // handler
-                String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
-                entry.shortestQualifiedSignature(shortestQualifiedSignature);
-                entry.handler(handler);
-                Method reflectHandler = declaredMethods.get(shortestQualifiedSignature);
-                if (reflectHandler == null) {
-                    log.warn("method[{}] not found", shortestQualifiedSignature);
-                    return;
-                }
-                entry.reflectHandler(reflectHandler);
+                        // result
+                        if (hanlderResultTypeParser != null) {
+                            entry.handlerResultResolvedType(hanlderResultTypeParser.parse(handler));
+                        } else {
+                            entry.handlerResultResolvedType(handler.getType().resolve());
+                        }
 
-                // result
-                if (hanlderResultTypeParser != null) {
-                    entry.handlerResultResolvedType(hanlderResultTypeParser.parse(handler));
-                } else {
-                    entry.handlerResultResolvedType(handler.getType().resolve());
-                }
+                        // requestBody requestParams pathVariables
+                        Collection<Parameter> requestParams = Lists.newLinkedList();
+                        Collection<Parameter> pathVariables = Lists.newLinkedList();
+                        for (Parameter parameter : handler.getParameters()) {
+                            parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
+                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestBody"
+                                            .equals(resolvedAnno.getId())).ifPresent(
+                                    resolvedAnno -> entry.requestBodyResolveType(parameter.getType().resolve()));
+                            parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
+                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestParam"
+                                            .equals(resolvedAnno.getId()))
+                                    .ifPresent(resolvedAnno -> requestParams.add(parameter));
+                            parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
+                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.PathVariable"
+                                            .equals(resolvedAnno.getId()))
+                                    .ifPresent(resolvedAnno -> pathVariables.add(parameter));
+                        }
+                        entry.requestParams(requestParams);
+                        entry.pathVariables(pathVariables);
 
-                // requestBody requestParams pathVariables
-                Collection<Parameter> requestParams = Lists.newLinkedList();
-                Collection<Parameter> pathVariables = Lists.newLinkedList();
-                for (Parameter parameter : handler.getParameters()) {
-                    parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
-                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestBody"
-                                    .equals(resolvedAnno.getId()))
-                            .ifPresent(resolvedAnno -> entry.requestBodyResolveType(parameter.getType().resolve()));
-                    parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
-                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestParam"
-                                    .equals(resolvedAnno.getId()))
-                            .ifPresent(resolvedAnno -> requestParams.add(parameter));
-                    parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
-                            .filter(resolvedAnno -> "org.springframework.web.bind.annotation.PathVariable"
-                                    .equals(resolvedAnno.getId()))
-                            .ifPresent(resolvedAnno -> pathVariables.add(parameter));
-                }
-                entry.requestParams(requestParams);
-                entry.pathVariables(pathVariables);
-
-                result.add(entry);
-                log.debug("hanlder : {}",
-                        shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
-            });
+                        result.add(entry);
+                        log.debug("hanlder : {}",
+                                shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
+                    });
         });
-
         return result;
     }
 
@@ -108,25 +106,48 @@ public class HandlerProcessor {
         return declaredMethods;
     }
 
-    private boolean isController(ClassOrInterfaceDeclaration clazz) {
-        return clazz.getAnnotations().stream().anyMatch(anno -> {
+    private boolean isFilteredController(ClassOrInterfaceDeclaration clazz, HandlerFilter handlerFilter) {
+        // is filtered
+        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(clazz)) {
+            return false;
+        }
+
+        // is controller
+        for (AnnotationExpr anno : clazz.getAnnotations()) {
+            ResolvedAnnotationDeclaration resolvedAnno;
             try {
-                ResolvedAnnotationDeclaration resolvedAnno = anno.resolve();
-                return isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno);
+                resolvedAnno = anno.resolve();
             } catch (UnsolvedSymbolException e) {
-                return false;
+                log.warn(e);
+                continue;
             }
-        });
+            if (isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean isHandler(MethodDeclaration method) {
-        return method.getAnnotations().stream().anyMatch(anno -> {
+    private boolean isFilteredHandler(MethodDeclaration method, HandlerFilter handlerFilter) {
+        // is filtered
+        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(method)) {
+            return false;
+        }
+
+        // is handler
+        for (AnnotationExpr anno : method.getAnnotations()) {
+            ResolvedAnnotationDeclaration resolveAnno;
             try {
-                return isKindOfRequestMapping(anno.resolve());
+                resolveAnno = anno.resolve();
             } catch (UnsolvedSymbolException e) {
-                return false;
+                log.warn(e);
+                continue;
             }
-        });
+            if (isKindOfRequestMapping(resolveAnno)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isKindOfController(ResolvedAnnotationDeclaration resolvedAnno) {

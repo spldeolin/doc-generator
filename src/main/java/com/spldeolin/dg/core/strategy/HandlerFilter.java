@@ -8,6 +8,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
  */
 public interface HandlerFilter {
 
-    boolean filter(ClassOrInterfaceDeclaration controller, MethodDeclaration handler);
+    boolean filter(ClassOrInterfaceDeclaration controller);
+
+    boolean filter(MethodDeclaration handler);
 
 }
