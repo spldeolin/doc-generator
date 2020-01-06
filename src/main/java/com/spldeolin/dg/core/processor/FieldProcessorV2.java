@@ -15,7 +15,7 @@ import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
-import com.spldeolin.dg.core.enums.JsonType;
+import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Javadocs;
@@ -49,9 +49,9 @@ public class FieldProcessorV2 {
     private FieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, FieldDomain parent,
             List<FieldDomain> flatList) {
         if (isObjectInArray) {
-            parent.jsonType(JsonType.objectArray);
+            parent.jsonType(FieldJsonType.objectArray);
         } else {
-            parent.jsonType(JsonType.object);
+            parent.jsonType(FieldJsonType.object);
         }
 
         List<FieldDomain> children = Lists.newArrayList();
@@ -115,13 +115,13 @@ public class FieldProcessorV2 {
                 return;
             }
 
-            if (childFieldDto.jsonType() == JsonType.number) {
+            if (childFieldDto.jsonType() == FieldJsonType.number) {
                 String javaType = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getVarByFieldVarQualifier()
                         .get(fieldVarQualifier).getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
 
-            if (childFieldDto.jsonType() == JsonType.string) {
+            if (childFieldDto.jsonType() == FieldJsonType.string) {
                 childFieldDto.stringFormat(StringFormatType.normal.getValue());
                 fieldDeclaration.getAnnotationByClass(JsonFormat.class)
                         .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
@@ -142,24 +142,24 @@ public class FieldProcessorV2 {
     }
 
 
-    private JsonType calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
+    private FieldJsonType calcValueDataType(ValueTypeSchema vSchema, boolean isValueInArray) {
         if (vSchema.isNumberSchema()) {
             if (isValueInArray) {
-                return JsonType.numberArray;
+                return FieldJsonType.numberArray;
             } else {
-                return JsonType.number;
+                return FieldJsonType.number;
             }
         } else if (vSchema.isStringSchema()) {
             if (isValueInArray) {
-                return JsonType.stringArray;
+                return FieldJsonType.stringArray;
             } else {
-                return JsonType.string;
+                return FieldJsonType.string;
             }
         } else if (vSchema.isBooleanSchema()) {
             if (isValueInArray) {
-                return JsonType.booleanArray;
+                return FieldJsonType.booleanArray;
             } else {
-                return JsonType.bool;
+                return FieldJsonType.bool;
             }
         } else {
             throw new IllegalArgumentException(vSchema.toString());

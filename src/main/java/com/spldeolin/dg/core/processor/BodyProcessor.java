@@ -15,7 +15,7 @@ import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.ClassContainer;
-import com.spldeolin.dg.core.enums.JsonType;
+import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.processor.result.BodyProcessResult;
 import com.spldeolin.dg.core.processor.result.ChaosStructureBodyProcessResult;
@@ -82,12 +82,12 @@ public class BodyProcessor {
             return new KeyValueStructureBodyProcessResult().objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
-            JsonType jsonType;
+            FieldJsonType jsonType;
             NumberFormatType numberFormat = null;
             if (jsonSchema.isStringSchema()) {
-                jsonType = JsonType.string;
+                jsonType = FieldJsonType.string;
             } else if (jsonSchema.isNumberSchema()) {
-                jsonType = JsonType.number;
+                jsonType = FieldJsonType.number;
 
                 if (!jsonSchema.isIntegerSchema()) {
                     numberFormat = NumberFormatType.f1oat;
@@ -99,7 +99,7 @@ public class BodyProcessor {
                     numberFormat = NumberFormatType.inT;
                 }
             } else if (jsonSchema.isBooleanSchema()) {
-                jsonType = JsonType.bool;
+                jsonType = FieldJsonType.bool;
             } else {
                 throw new RuntimeException("impossible unless bug");
             }

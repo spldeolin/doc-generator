@@ -1,7 +1,7 @@
 package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
-import com.spldeolin.dg.core.enums.JsonType;
+import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import lombok.Data;
 import lombok.ToString;
@@ -20,11 +20,11 @@ public class FieldDomain {
     private String fieldName;
 
     /**
-     * @see JsonType
+     * @see FieldJsonType
      * @see ApiDomain#uriPathFields() string, number, boolean
      * @see ApiDomain#uriQueryFields() string, number, boolean
      */
-    private JsonType jsonType;
+    private FieldJsonType jsonType;
 
     private String stringFormat;
 
