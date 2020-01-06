@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.domain;
+package com.spldeolin.dg.core.processor.result;
 
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class ValueStructureResultEntry extends ResultEntry {
+public class ValueStructureBodyProcessResult extends BodyProcessResult {
 
     /**
      * struct=val时有效

@@ -15,7 +15,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
-import com.spldeolin.dg.core.domain.HandlerEntry;
+import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.dg.core.strategy.HandlerFilter;
 import com.spldeolin.dg.core.strategy.ResponseBodyTypeParser;
@@ -28,9 +28,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
-    public Collection<HandlerEntry> process(Collection<ClassOrInterfaceDeclaration> classes,
+    public Collection<HandlerProcessResult> process(Collection<ClassOrInterfaceDeclaration> classes,
             HandlerFilter handlerFilter, ResponseBodyTypeParser hanlderResultTypeParser) {
-        Collection<HandlerEntry> result = Lists.newLinkedList();
+        Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
         classes.stream().filter(clazz -> isFilteredController(clazz, handlerFilter)).forEach(controller -> {
 
@@ -47,7 +47,7 @@ public class HandlerProcessor {
             Map<String, Method> declaredMethods = listDeclaredMethodAsMap(reflectController);
             controller.getMethods().stream().filter(method -> this.isFilteredHandler(method, handlerFilter))
                     .forEach(handler -> {
-                        HandlerEntry entry = new HandlerEntry();
+                        HandlerProcessResult entry = new HandlerProcessResult();
 
                         // controller
                         entry.controller(controller);

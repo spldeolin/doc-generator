@@ -3,7 +3,6 @@ package com.spldeolin.dg.core.processor;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,6 +13,7 @@ import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.enums.MethodType;
+import com.spldeolin.dg.core.processor.result.RequestMappingProcessResult;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
@@ -26,8 +26,7 @@ public class RequestMappingProcessor {
 
     private static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
 
-    public Pair<Collection<MethodType>, Collection<String>> process(ClassOrInterfaceDeclaration controller,
-            MethodDeclaration handler) {
+    public RequestMappingProcessResult process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         AntPathMatcher antPathMatcher = new AntPathMatcher();
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
@@ -46,7 +45,7 @@ public class RequestMappingProcessor {
             }
         }
 
-        return Pair.of(combineMethods, combinePaths);
+        return new RequestMappingProcessResult().methodTypes(combineMethods).uris(combinePaths);
     }
 
     private Collection<RequestMappingDto> parseRequestMappings(NodeList<AnnotationExpr> annotations) {

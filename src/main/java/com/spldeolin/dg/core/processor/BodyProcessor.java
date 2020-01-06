@@ -15,11 +15,11 @@ import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
 import com.spldeolin.dg.core.container.ClassContainer;
-import com.spldeolin.dg.core.domain.ChaosStructureResultEntry;
-import com.spldeolin.dg.core.domain.KeyValStructureResultEntry;
-import com.spldeolin.dg.core.domain.ResultEntry;
-import com.spldeolin.dg.core.domain.ValueStructureResultEntry;
-import com.spldeolin.dg.core.domain.VoidStructureResultEntry;
+import com.spldeolin.dg.core.processor.result.ChaosStructureBodyProcessResult;
+import com.spldeolin.dg.core.processor.result.KeyValueStructureBodyProcessResult;
+import com.spldeolin.dg.core.processor.result.BodyProcessResult;
+import com.spldeolin.dg.core.processor.result.ValueStructureBodyProcessResult;
+import com.spldeolin.dg.core.processor.result.VoidStructureBodyProcessResult;
 import com.spldeolin.dg.core.enums.JsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
  */
 @AllArgsConstructor
 @Log4j2
-public class ResultProcessor {
+public class BodyProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
@@ -38,12 +38,12 @@ public class ResultProcessor {
 
     private final ResolvedType type;
 
-    public ResultEntry process() {
+    public BodyProcessResult process() {
         if (type == null) {
-            return new VoidStructureResultEntry();
+            return new VoidStructureBodyProcessResult();
         }
 
-        ResultEntry result;
+        BodyProcessResult result;
         try {
             if (isArray(type)) {
                 // 最外层是 数组
@@ -61,16 +61,16 @@ public class ResultProcessor {
         } catch (Exception e) {
             log.warn("type={}", type, e);
             // as mazy mode
-            result = new ChaosStructureResultEntry().jsonSchema(generateSchema(type.describe()));
+            result = new ChaosStructureBodyProcessResult().jsonSchema(generateSchema(type.describe()));
         }
         return result;
     }
 
-    private ResultEntry tryProcessNonArrayLikeType(ResolvedType type) throws ClassNotFoundException {
+    private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) throws ClassNotFoundException {
         String describe = type.describe();
         JsonSchema jsonSchema = generateSchema(describe);
         if (jsonSchema == null) {
-            return new VoidStructureResultEntry();
+            return new VoidStructureBodyProcessResult();
         }
 
         if (jsonSchema.isObjectSchema()) {
@@ -79,10 +79,10 @@ public class ResultProcessor {
             if (coid == null) {
                 // 往往是泛型返回值或是类库中会被认为是ObjectSchema的类型
                 System.out.println(describe);
-                return new ChaosStructureResultEntry().jsonSchema(jsonSchema);
+                return new ChaosStructureBodyProcessResult().jsonSchema(jsonSchema);
             }
             Class<?> clazz = cl.loadClass(qualifierForClassLoader(coid));
-            return new KeyValStructureResultEntry().clazz(coid).reflectClass(clazz)
+            return new KeyValueStructureBodyProcessResult().clazz(coid).reflectClass(clazz)
                     .objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
@@ -107,11 +107,11 @@ public class ResultProcessor {
             } else {
                 throw new RuntimeException("impossible unless bug");
             }
-            return new ValueStructureResultEntry().valueStructureJsonType(jsonType)
+            return new ValueStructureBodyProcessResult().valueStructureJsonType(jsonType)
                     .valueStructureNumberFormat(numberFormat);
 
         } else {
-            return new ChaosStructureResultEntry().jsonSchema(jsonSchema);
+            return new ChaosStructureBodyProcessResult().jsonSchema(jsonSchema);
         }
     }
 

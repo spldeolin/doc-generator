@@ -1,17 +1,16 @@
 package com.spldeolin.dg.core.processor;
 
 import java.util.Collection;
-import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.FieldDomain;
-import com.spldeolin.dg.core.domain.HandlerEntry;
-import com.spldeolin.dg.core.domain.ResultEntry;
-import com.spldeolin.dg.core.domain.ValueStructureResultEntry;
 import com.spldeolin.dg.core.enums.BodyType;
-import com.spldeolin.dg.core.enums.MethodType;
+import com.spldeolin.dg.core.processor.result.BodyProcessResult;
+import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
+import com.spldeolin.dg.core.processor.result.RequestMappingProcessResult;
+import com.spldeolin.dg.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.dg.core.util.Javadocs;
 import lombok.AllArgsConstructor;
 
@@ -21,7 +20,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ApiProcessor {
 
-    private final HandlerEntry handlerEntry;
+    private final HandlerProcessResult handlerEntry;
 
     public ApiDomain process() {
         ClassOrInterfaceDeclaration controller = handlerEntry.controller();
@@ -29,10 +28,10 @@ public class ApiProcessor {
 
         ApiDomain api = new ApiDomain();
 
-        Pair<Collection<MethodType>, Collection<String>> urisAndMethods = new RequestMappingProcessor()
+        RequestMappingProcessResult requestMappingProcessResult = new RequestMappingProcessor()
                 .process(controller, handler);
-        api.method(urisAndMethods.getLeft());
-        api.uri(urisAndMethods.getRight());
+        api.method(requestMappingProcessResult.methodTypes());
+        api.uri(requestMappingProcessResult.uris());
 
         api.description(Javadocs.extractFirstLine(handler));
         api.uriPathFields(Lists.newArrayList());
@@ -41,41 +40,41 @@ public class ApiProcessor {
         FieldProcessor fieldProcessor = new FieldProcessor();
         fieldProcessor.processRequestBody(handler.getParameters(), api);
 
-        ResultEntry resultEntry = new ResultProcessor(handlerEntry.responseBodyResolvedType()).process();
+        BodyProcessResult resultEntry = new BodyProcessor(handlerEntry.responseBodyResolvedType()).process();
         this.calcResponseBodyType(api, resultEntry);
-        if (resultEntry.isKeyValStructureResultEntry()) {
-            new FieldProcessorV2().processResponseBody(resultEntry.asKeyValStructureResultEntry().objectSchema(), api);
+        if (resultEntry.isKeyValueStructure()) {
+            new FieldProcessorV2().processResponseBody(resultEntry.asKeyValueStructure().objectSchema(), api);
         }
-        if (resultEntry.isValueStructureResultEntry()) {
-            ValueStructureResultEntry valueStruct = resultEntry.asValueStructureResultEntry();
+        if (resultEntry.isValueStructure()) {
+            ValueStructureBodyProcessResult valueStruct = resultEntry.asValueStructure();
             Collection<FieldDomain> field = Lists.newArrayList(
                     new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.responseBodyFields(field);
             api.responseBodyFieldsFlatly(field);
         }
-        if (resultEntry.isChaosStructureResultEntry()) {
-            api.responseBodyChaosJsonSchema(resultEntry.asChaosStructureResultEntry().jsonSchema());
+        if (resultEntry.isChaosStructure()) {
+            api.responseBodyChaosJsonSchema(resultEntry.asChaosStructure().jsonSchema());
         }
 
         return api;
     }
 
-    private void calcResponseBodyType(ApiDomain api, ResultEntry resultEntry) {
-        if (resultEntry.isVoidStructureResultEntry()) {
+    private void calcResponseBodyType(ApiDomain api, BodyProcessResult resultEntry) {
+        if (resultEntry.isVoidStructure()) {
             api.responseBodyType(BodyType.none);
         }
-        if (resultEntry.isChaosStructureResultEntry()) {
+        if (resultEntry.isChaosStructure()) {
             api.responseBodyType(BodyType.chaos);
         }
-        if (resultEntry.isValueStructureResultEntry()) {
+        if (resultEntry.isValueStructure()) {
             if (resultEntry.inArray()) {
                 api.responseBodyType(BodyType.valueArray);
             } else {
                 api.responseBodyType(BodyType.va1ue);
             }
         }
-        if (resultEntry.isKeyValStructureResultEntry()) {
+        if (resultEntry.isKeyValueStructure()) {
             if (resultEntry.inArray()) {
                 api.responseBodyType(BodyType.keyValueArray);
             } else if (resultEntry.inPage()) {

@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.domain;
+package com.spldeolin.dg.core.processor.result;
 
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import lombok.Data;
@@ -27,7 +27,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(fluent = true)
-public class ChaosStructureResultEntry extends ResultEntry {
+public class ChaosStructureBodyProcessResult extends BodyProcessResult {
 
     /**
      * struct=chaos时有效

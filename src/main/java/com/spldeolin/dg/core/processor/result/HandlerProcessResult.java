@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.domain;
+package com.spldeolin.dg.core.processor.result;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(fluent = true)
-public class HandlerEntry {
+public class HandlerProcessResult {
 
     private ClassOrInterfaceDeclaration controller;
 
