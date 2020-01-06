@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-03
  */
 @Log4j2
-public class FieldProcessorV2 {
+public class FieldProcessor {
 
     public void process(ObjectSchema objectSchema, ApiDomain api) {
         Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(objectSchema);
