@@ -82,7 +82,8 @@ public class ResultProcessor {
                 return new ChaosStructureResultEntry().jsonSchema(jsonSchema);
             }
             Class<?> clazz = cl.loadClass(qualifierForClassLoader(coid));
-            return new KeyValStructureResultEntry().clazz(coid).reflectClass(clazz);
+            return new KeyValStructureResultEntry().clazz(coid).reflectClass(clazz)
+                    .objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
             JsonType jsonType;

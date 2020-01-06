@@ -1,6 +1,7 @@
 package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.enums.BodyType;
 import lombok.Data;
@@ -34,5 +35,7 @@ public class ApiDomain {
     private Collection<FieldDomain> responseBodyFields;
 
     private Collection<FieldDomain> responseBodyFieldsFlatly;
+
+    private JsonSchema responseBodyChaosJsonSchema;
 
 }

@@ -5,10 +5,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.domain.ApiDomain;
+import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.domain.HandlerEntry;
 import com.spldeolin.dg.core.domain.ResultEntry;
+import com.spldeolin.dg.core.domain.ValueStructureResultEntry;
 import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.util.Javadocs;
@@ -38,12 +39,24 @@ public class ApiProcessor {
         api.uriQueryFields(Lists.newArrayList());
 
         FieldProcessor fieldProcessor = new FieldProcessor();
-        String resultTypeName = Conf.HOW_TO_FIND_RESULT_TYPE.getExtractor().extractHandlerResultTypeQualifier(handler);
         fieldProcessor.processRequestBody(handler.getParameters(), api);
-        fieldProcessor.processResponseBody(resultTypeName, api);
 
         ResultEntry resultEntry = new ResultProcessor(handlerEntry.responseBodyResolvedType()).process();
         this.calcResponseBodyType(api, resultEntry);
+        if (resultEntry.isKeyValStructureResultEntry()) {
+            new FieldProcessorV2().processResponseBody(resultEntry.asKeyValStructureResultEntry().objectSchema(), api);
+        }
+        if (resultEntry.isValueStructureResultEntry()) {
+            ValueStructureResultEntry valueStruct = resultEntry.asValueStructureResultEntry();
+            Collection<FieldDomain> field = Lists.newArrayList(
+                    new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
+                            .numberFormat(valueStruct.valueStructureNumberFormat()));
+            api.responseBodyFields(field);
+            api.responseBodyFieldsFlatly(field);
+        }
+        if (resultEntry.isChaosStructureResultEntry()) {
+            api.responseBodyChaosJsonSchema(resultEntry.asChaosStructureResultEntry().jsonSchema());
+        }
 
         return api;
     }
