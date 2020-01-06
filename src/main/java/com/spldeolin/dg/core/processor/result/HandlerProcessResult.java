@@ -18,21 +18,17 @@ public class HandlerProcessResult {
 
     private ClassOrInterfaceDeclaration controller;
 
-    private Class<?> reflectController;
-
     private String shortestQualifiedSignature;
 
     private MethodDeclaration handler;
 
-    private Method reflectHandler;
-
-    private ResolvedType responseBodyResolvedType;
-
-    private ResolvedType requestBodyResolveType;
-
     private Collection<Parameter> pathVariables;
 
     private Collection<Parameter> requestParams;
+
+    private ResolvedType requestBodyResolveType;
+
+    private ResolvedType responseBodyResolvedType;
 
     @Override
     public String toString() {
