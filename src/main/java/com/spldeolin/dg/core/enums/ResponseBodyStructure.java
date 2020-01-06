@@ -26,14 +26,14 @@ public enum ResponseBodyStructure {
      *
      * 整个body是boolean、字符串、数字中的一个。e.g.: @ResponseBody public BigDecaimal ....
      */
-    valueLike("valueLike"),
+    val("val"),
 
     /**
      * kv型数据结构
      *
      * e.g.: @ResponseBody public UserVo ....
      */
-    keyValLike("keyValLike"),
+    keyVal("keyVal"),
 
     /**
      * 复杂的Body

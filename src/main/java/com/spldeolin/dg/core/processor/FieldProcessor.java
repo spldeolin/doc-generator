@@ -87,13 +87,13 @@ public class FieldProcessor {
     public void processResponseBody(String resultTypeName, ApiDomain api) {
         // responseBodyType
         if (Strings.isSurroundedBy(resultTypeName, "List<", ">")) {
-            api.responseBodyType(ResponseBodyStructure.keyValLike);
+            api.responseBodyType(ResponseBodyStructure.keyVal);
             resultTypeName = Strings.removeSurround(resultTypeName, "List<", ">");
         } else if (Strings.isSurroundedBy(resultTypeName, "PageInfo<", ">")) {
-            api.responseBodyType(ResponseBodyStructure.keyValLike);
+            api.responseBodyType(ResponseBodyStructure.keyVal);
             resultTypeName = Strings.removeSurround(resultTypeName, "PageInfo<", ">");
         } else {
-            api.responseBodyType(ResponseBodyStructure.keyValLike);
+            api.responseBodyType(ResponseBodyStructure.keyVal);
         }
         // responseBodyFields
         tryGetClassQulifier(resultTypeName).ifPresent(resultTypeQulifier -> {

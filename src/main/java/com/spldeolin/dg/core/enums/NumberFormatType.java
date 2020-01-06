@@ -14,6 +14,11 @@ public enum NumberFormatType {
 
     int64("int64"),
 
+    /**
+     * e.g.: java.math.BigInteger
+     */
+    inT("int"),
+
     f1oat("float");
 
     private String value;
