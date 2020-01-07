@@ -51,7 +51,6 @@ public class HandlerProcessor {
 
                         // controller
                         entry.controller(controller);
-                        entry.reflectController(reflectController);
 
                         // handler
                         String shortestQualifiedSignature = MethodQualifier.getShortestQualifiedSignature(handler);
@@ -62,7 +61,6 @@ public class HandlerProcessor {
                             log.warn("method[{}] not found", shortestQualifiedSignature);
                             return;
                         }
-                        entry.reflectHandler(reflectHandler);
 
                         // result
                         if (hanlderResultTypeParser != null) {

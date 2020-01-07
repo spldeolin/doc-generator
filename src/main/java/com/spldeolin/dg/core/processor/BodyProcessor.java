@@ -22,6 +22,7 @@ import com.spldeolin.dg.core.processor.result.ChaosStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.KeyValueStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.VoidStructureBodyProcessResult;
+import com.spldeolin.dg.core.util.Strings;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -66,14 +67,15 @@ public class BodyProcessor {
 
     private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
-        JsonSchema jsonSchema = generateSchema(describe);
+        ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByQualifier()
+                .get(describe);
+
+        JsonSchema jsonSchema = generateSchema(coid);
         if (jsonSchema == null) {
             return new VoidStructureBodyProcessResult();
         }
 
         if (jsonSchema.isObjectSchema()) {
-            ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByQualifier()
-                    .get(describe);
             if (coid == null) {
                 // 往往是泛型返回值或是类库中会被认为是ObjectSchema的类型
                 System.out.println(describe);
@@ -143,7 +145,20 @@ public class BodyProcessor {
         return Iterables.getOnlyElement(pageType.asReferenceType().getTypeParametersMap()).b;
     }
 
-    private JsonSchema generateSchema(String describe) {
+    private JsonSchema generateSchema(ClassOrInterfaceDeclaration clazz) {
+        String qualifierForClassLoader = qualifierForClassLoader(clazz);
+        return generateSchemaByQualifierForClassLoader(qualifierForClassLoader);
+    }
+
+    private JsonSchema generateSchema(String resolvedTypeDescribe) {
+        JsonSchema jsonSchema = generateSchemaByQualifierForClassLoader(resolvedTypeDescribe);
+        if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
+            generateSchema(Strings.replaceLast(resolvedTypeDescribe, "\\.", "$"));
+        }
+        return jsonSchema;
+    }
+
+    private JsonSchema generateSchemaByQualifierForClassLoader(String qualifierForClassLoader) {
         JavaType javaType;
         try {
             javaType = new TypeFactory(null) {
@@ -153,9 +168,9 @@ public class BodyProcessor {
                 public ClassLoader getClassLoader() {
                     return SpringBootFatJarClassLoader.classLoader;
                 }
-            }.constructFromCanonical(describe);
+            }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {
-            log.warn("TypeFactory.constructFromCanonical({})", describe);
+            log.warn("TypeFactory.constructFromCanonical({})", qualifierForClassLoader);
             return null;
         }
         try {

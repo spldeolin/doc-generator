@@ -1,7 +1,6 @@
 package com.spldeolin.dg.core.util;
 
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 
 /**
@@ -16,29 +15,8 @@ public class Strings {
         return Lists.newArrayList(string.split("\\r?\\n"));
     }
 
-    public static boolean isSurroundedBy(String string, String start, String end) {
-        return string.startsWith(start) && string.endsWith(end);
-    }
-
-    public static String removeSurround(String string, String start, String end) {
-        string = StringUtils.removeStart(string, start);
-        string = StringUtils.removeEnd(string, end);
-        return string;
-    }
-
-    public static String removeFirstLetterAndTrim(String s) {
-        if (StringUtils.isBlank(s)) {
-            return s;
-        }
-        return s.substring(1).trim();
-    }
-
-    public static String upperFirstLetter(String s) {
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
-    public static String lowerFirstLetter(String s) {
-        return s.substring(0, 1).toLowerCase() + s.substring(1);
+    public static String replaceLast(String text, String regex, String replacement) {
+        return text.replaceFirst("(?s)" + regex + "(?!.*?" + regex + ")", replacement);
     }
 
 }
