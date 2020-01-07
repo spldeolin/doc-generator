@@ -2,6 +2,7 @@ package com.spldeolin.dg.core.processor;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.processor.result.RequestMappingProcessResult;
@@ -30,8 +32,8 @@ public class RequestMappingProcessor {
         Collection<RequestMappingDto> fromController = parseRequestMappings(controller.getAnnotations());
         Collection<RequestMappingDto> fromHandler = parseRequestMappings(handler.getAnnotations());
 
-        Collection<String> combinePaths = Lists.newArrayList();
-        Collection<MethodType> combineMethods = Lists.newArrayList();
+        Set<String> combinePaths = Sets.newHashSet();
+        Set<MethodType> combineMethods = Sets.newHashSet();
         for (RequestMappingDto dto1 : fromController) {
             for (RequestMappingDto dto2 : fromHandler) {
                 combineMethods.addAll(dto1.getMethods());

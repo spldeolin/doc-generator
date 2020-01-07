@@ -48,7 +48,7 @@ public class BodyProcessor {
             if (isArray(type)) {
                 // 最外层是 数组
                 result = tryProcessNonArrayLikeType(getArrayElementType(type)).inArray(true);
-            } else if (isJUC(type)) {
+            } else if (isJucAndElementTypeExplicit(type)) {
                 // 最外层是 列表
                 result = tryProcessNonArrayLikeType(getJUCElementType(type)).inArray(true);
             } else if (isPage(type)) {
@@ -59,7 +59,7 @@ public class BodyProcessor {
                 result = tryProcessNonArrayLikeType(type);
             }
         } catch (Exception e) {
-            log.warn("type={}", type, e);
+            log.warn("type={}, cause={}", type.describe(), e.getMessage());
             // as mazy mode
             result = new ChaosStructureBodyProcessResult().jsonSchema(generateSchema(type.describe()));
         }
@@ -71,17 +71,19 @@ public class BodyProcessor {
         ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByQualifier()
                 .get(describe);
 
-        JsonSchema jsonSchema = generateSchema(coid);
-        if (jsonSchema == null) {
-            return new VoidStructureBodyProcessResult();
+        JsonSchema jsonSchema;
+        if (coid == null) {
+            // 往往是泛型返回值或是非用户定义的类型
+            jsonSchema = generateSchema(describe);
+        } else {
+            jsonSchema = generateSchema(coid);
         }
 
-        if (jsonSchema.isObjectSchema()) {
-            if (coid == null) {
-                // 往往是泛型返回值或是类库中会被认为是ObjectSchema的类型
-                System.out.println(describe);
-                return new ChaosStructureBodyProcessResult().jsonSchema(jsonSchema);
-            }
+        if (jsonSchema == null) {
+            log.info("Cannot generate json schema [{}]", describe);
+            return new VoidStructureBodyProcessResult();
+
+        } else if (jsonSchema.isObjectSchema()) {
             return new KeyValueStructureBodyProcessResult().objectSchema(jsonSchema.asObjectSchema());
 
         } else if (jsonSchema.isValueTypeSchema()) {
@@ -122,11 +124,15 @@ public class BodyProcessor {
         return arrayType.asArrayType().getComponentType();
     }
 
-    private boolean isJUC(ResolvedType type) {
+    private boolean isJucAndElementTypeExplicit(ResolvedType type) {
         if (type.isReferenceType()) {
             ResolvedReferenceType referenceType = type.asReferenceType();
-            return referenceType.getAllInterfacesAncestors().stream()
-                    .anyMatch(ancestor -> QualifierConstants.COLLECTION.equals(ancestor.getId()));
+            if (referenceType.getAllInterfacesAncestors().stream()
+                    .anyMatch(ancestor -> QualifierConstants.COLLECTION.equals(ancestor.getId()))) {
+                if (referenceType.getTypeParametersMap().size() == 1) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -154,7 +160,7 @@ public class BodyProcessor {
     private JsonSchema generateSchema(String resolvedTypeDescribe) {
         JsonSchema jsonSchema = generateSchemaByQualifierForClassLoader(resolvedTypeDescribe);
         if (jsonSchema == null && resolvedTypeDescribe.contains(".")) {
-            generateSchema(Strings.replaceLast(resolvedTypeDescribe, "\\.", "$"));
+            generateSchema(Strings.replaceLast(resolvedTypeDescribe, ".", "$"));
         }
         return jsonSchema;
     }
@@ -171,7 +177,6 @@ public class BodyProcessor {
                 }
             }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {
-            log.warn("TypeFactory.constructFromCanonical({})", qualifierForClassLoader);
             return null;
         }
         try {

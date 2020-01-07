@@ -15,8 +15,9 @@ public class Strings {
         return Lists.newArrayList(string.split("\\r?\\n"));
     }
 
-    public static String replaceLast(String text, String regex, String replacement) {
-        return text.replaceFirst("(?s)" + regex + "(?!.*?" + regex + ")", replacement);
+    public static String replaceLast(String string, String target, String replacement) {
+        int ind = string.lastIndexOf(target);
+        return string.substring(0, ind) + replacement + string.substring(ind + 1);
     }
 
 }

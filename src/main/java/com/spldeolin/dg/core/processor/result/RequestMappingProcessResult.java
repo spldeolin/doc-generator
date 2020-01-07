@@ -1,6 +1,6 @@
 package com.spldeolin.dg.core.processor.result;
 
-import java.util.Collection;
+import java.util.Set;
 import com.spldeolin.dg.core.enums.MethodType;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -12,8 +12,8 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class RequestMappingProcessResult {
 
-    private Collection<MethodType> methodTypes;
+    private Set<MethodType> methodTypes;
 
-    private Collection<String> uris;
+    private Set<String> uris;
 
 }
