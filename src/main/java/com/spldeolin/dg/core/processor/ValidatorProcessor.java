@@ -24,8 +24,8 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.container.EnumContainer;
@@ -56,13 +56,14 @@ public class ValidatorProcessor {
             result.append("（");
             anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                 if (nameOf(pair, "enumType")) {
-                    String enumName = StringUtils.removeEnd(pair.getValue().toString(), ".class");
-                    Collection<EnumDeclaration> enumDeclarations = EnumContainer.getInstance(Conf.TARGET_PROJECT_PATH)
-                            .getByEnumName().get(enumName);
+                    ResolvedType resolvedType = pair.getValue().calculateResolvedType();
+                    String qualifier = resolvedType.asReferenceType().getTypeParametersMap().get(0).b.describe();
+                    EnumDeclaration enumDeclaration = EnumContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+                            .getByEnumQualifier().get(qualifier);
 
                     Collection<String> parts = Lists.newLinkedList();
                     try {
-                        Iterables.getOnlyElement(enumDeclarations).getEntries().forEach(entry -> {
+                        enumDeclaration.getEntries().forEach(entry -> {
                             if (entry.getArguments().size() > 0) {
                                 // 约定第1个作为参数绑定的value
                                 parts.add(entry.getArgument(0).toString());
@@ -72,10 +73,7 @@ public class ValidatorProcessor {
                             }
                         });
                     } catch (NoSuchElementException e) {
-                        log.warn("找不到enum[{}]", enumName);
-                        return;
-                    } catch (IllegalArgumentException e) {
-                        log.warn("enum[{}]存在多个同名enum[{}]，无法识别", enumName, enumDeclarations);
+                        log.warn("找不到enum[{}]", qualifier);
                         return;
                     }
                     Joiner.on("、").appendTo(result, parts);

@@ -16,15 +16,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class InterfaceContainer {
 
-    public static final int EXPECTED = 5600;
-
     @Getter
     private final Path path;
 
     @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
-    private Map<String, ClassOrInterfaceDeclaration> byQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, ClassOrInterfaceDeclaration> byQualifier;
 
     private static Map<Path, InterfaceContainer> instances = Maps.newConcurrentMap();
 
@@ -46,15 +44,11 @@ public class InterfaceContainer {
 
         log.info("InterfaceContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(),
                 System.currentTimeMillis() - start);
-
-        if (EXPECTED < all.size() + 100) {
-            log.warn("InterfaceContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（InterfaceContainer.all[{}]）", EXPECTED,
-                    all.size());
-        }
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
-        if (byQualifier.size() == 0) {
+        if (byQualifier == null) {
+            byQualifier = Maps.newHashMapWithExpectedSize(all.size());
             all.forEach(iinterface -> byQualifier
                     .put(iinterface.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new), iinterface));
         }

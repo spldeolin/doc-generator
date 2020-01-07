@@ -4,10 +4,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.spldeolin.dg.core.exception.QualifierAbsentException;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -18,17 +16,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ClassContainer {
 
-    public static final int EXPECTED = 5600;
-
     @Getter
     private final Path path;
 
     @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
-    private Map<String, ClassOrInterfaceDeclaration> byQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
-
-    private Multimap<String, ClassOrInterfaceDeclaration> byClassName = ArrayListMultimap.create(EXPECTED, 1);
+    private Map<String, ClassOrInterfaceDeclaration> byQualifier;
 
     private static Map<Path, ClassContainer> instances = Maps.newConcurrentMap();
 
@@ -50,26 +44,16 @@ public class ClassContainer {
                         .forEach(classDeclaration -> all.add(classDeclaration)));
 
         log.info("CoidContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(), System.currentTimeMillis() - start);
-
-        if (EXPECTED < all.size() + 100) {
-            log.warn("CoidContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（CoidContainer.all[{}]）", EXPECTED, all.size());
-        }
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
-        if (byQualifier.size() == 0) {
+        if (byQualifier == null) {
+            byQualifier = Maps.newHashMapWithExpectedSize(all.size());
             all.forEach(classDeclaration -> byQualifier
                     .put(classDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
                             classDeclaration));
         }
         return byQualifier;
-    }
-
-    public Multimap<String, ClassOrInterfaceDeclaration> getByClassName() {
-        if (byClassName.size() == 0) {
-            all.forEach(classDeclaration -> byClassName.put(classDeclaration.getNameAsString(), classDeclaration));
-        }
-        return byClassName;
     }
 
 }
