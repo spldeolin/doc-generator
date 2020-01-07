@@ -116,7 +116,7 @@ public class HandlerProcessor {
             try {
                 resolvedAnno = anno.resolve();
             } catch (UnsolvedSymbolException e) {
-                log.warn(e);
+                log.warn(e.getMessage());
                 continue;
             }
             if (isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno)) {
