@@ -18,7 +18,6 @@ import static com.spldeolin.dg.core.enums.ValidatorType.regex;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
-import org.apache.commons.lang3.StringUtils;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;

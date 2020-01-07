@@ -14,6 +14,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
@@ -93,9 +94,9 @@ public class BodyProcessor {
 
                 if (!jsonSchema.isIntegerSchema()) {
                     numberFormat = NumberFormatType.f1oat;
-                } else if (StringUtils.equalsAny(type.describe(), "java.lang.Integer", "int")) {
+                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.INTEGER, "int")) {
                     numberFormat = NumberFormatType.int32;
-                } else if (StringUtils.equalsAny(type.describe(), "java.lang.Long", "long")) {
+                } else if (StringUtils.equalsAny(type.describe(), QualifierConstants.LONG, "long")) {
                     numberFormat = NumberFormatType.int64;
                 } else {
                     numberFormat = NumberFormatType.inT;
@@ -125,7 +126,7 @@ public class BodyProcessor {
         if (type.isReferenceType()) {
             ResolvedReferenceType referenceType = type.asReferenceType();
             return referenceType.getAllInterfacesAncestors().stream()
-                    .anyMatch(ancestor -> ancestor.getId().equals("java.util.Collection"));
+                    .anyMatch(ancestor -> QualifierConstants.COLLECTION.equals(ancestor.getId()));
         }
         return false;
     }

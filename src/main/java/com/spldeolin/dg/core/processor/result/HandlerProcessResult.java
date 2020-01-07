@@ -1,6 +1,5 @@
 package com.spldeolin.dg.core.processor.result;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;

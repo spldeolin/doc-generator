@@ -12,6 +12,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.enums.MethodType;
 import com.spldeolin.dg.core.processor.result.RequestMappingProcessResult;
 import lombok.Data;
@@ -23,8 +24,6 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 public class RequestMappingProcessor {
-
-    private static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
 
     public RequestMappingProcessResult process(ClassOrInterfaceDeclaration controller, MethodDeclaration handler) {
         AntPathMatcher antPathMatcher = new AntPathMatcher();
@@ -53,7 +52,7 @@ public class RequestMappingProcessor {
         for (AnnotationExpr annotation : annotations) {
             String annoQualifier = annotation.resolve().getId();
             RequestMappingDto dto;
-            if (REQUEST_MAPPING.equals(annoQualifier)) {
+            if (QualifierConstants.REQUEST_MAPPING.equals(annoQualifier)) {
                 dto = this.parseRequestMapping(annotation, false);
             } else {
                 Optional<MethodType> methodType = MethodType.ofAnnotationQualifier(annoQualifier);

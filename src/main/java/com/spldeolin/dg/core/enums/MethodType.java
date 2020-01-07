@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import com.google.common.collect.Lists;
+import com.spldeolin.dg.core.constant.QualifierConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,15 +15,15 @@ import lombok.Getter;
 @Getter
 public enum MethodType {
 
-    DELETE("DELETE", "org.springframework.web.bind.annotation.DeleteMapping", "RequestMethod.DELETE"),
+    DELETE("DELETE", QualifierConstants.DELETE_MAPPING, "RequestMethod.DELETE"),
 
-    GET("GET", "org.springframework.web.bind.annotation.GetMapping", "RequestMethod.GET"),
+    GET("GET", QualifierConstants.GET_MAPPING, "RequestMethod.GET"),
 
-    PATCH("PATCH", "org.springframework.web.bind.annotation.PatchMapping", "RequestMethod.PATCH"),
+    PATCH("PATCH", QualifierConstants.PATCH_MAPPING, "RequestMethod.PATCH"),
 
-    POST("POST", "org.springframework.web.bind.annotation.PostMapping", "RequestMethod.POST"),
+    POST("POST", QualifierConstants.POST_MAPPING, "RequestMethod.POST"),
 
-    PUT("PUT", "org.springframework.web.bind.annotation.PutMapping", "RequestMethod.PUT");
+    PUT("PUT", QualifierConstants.PUT_MAPPING, "RequestMethod.PUT");
 
 
     private String value;
