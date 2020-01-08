@@ -23,8 +23,6 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * TODO 处理类似 @NotNull List<@Max(11) Long> 的校验情况
- * TODO path参数
- * TODO query参数
  *
  * @author Deolin 2019-12-03
  */

@@ -15,6 +15,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
 import com.spldeolin.dg.core.strategy.HandlerFilter;
@@ -74,15 +75,15 @@ public class HandlerProcessor {
                         Collection<Parameter> pathVariables = Lists.newLinkedList();
                         for (Parameter parameter : handler.getParameters()) {
                             parameter.getAnnotationByName("RequestBody").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestBody"
+                                    .filter(resolvedAnno -> QualifierConstants.REQUEST_BODY
                                             .equals(resolvedAnno.getId())).ifPresent(
                                     resolvedAnno -> entry.requestBodyResolveType(parameter.getType().resolve()));
                             parameter.getAnnotationByName("RequestParam").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.RequestParam"
+                                    .filter(resolvedAnno -> QualifierConstants.REQUEST_PARAM
                                             .equals(resolvedAnno.getId()))
                                     .ifPresent(resolvedAnno -> requestParams.add(parameter));
                             parameter.getAnnotationByName("PathVariable").map(AnnotationExpr::resolve)
-                                    .filter(resolvedAnno -> "org.springframework.web.bind.annotation.PathVariable"
+                                    .filter(resolvedAnno -> QualifierConstants.PATH_VARIABLE
                                             .equals(resolvedAnno.getId()))
                                     .ifPresent(resolvedAnno -> pathVariables.add(parameter));
                         }
@@ -149,15 +150,13 @@ public class HandlerProcessor {
     }
 
     private boolean isKindOfController(ResolvedAnnotationDeclaration resolvedAnno) {
-        String controllerQualifier = "org.springframework.stereotype.Controller";
-        return controllerQualifier.equals(resolvedAnno.getId()) || resolvedAnno
-                .hasDirectlyAnnotation(controllerQualifier);
+        return QualifierConstants.CONTROLLER.equals(resolvedAnno.getId()) || resolvedAnno
+                .hasDirectlyAnnotation(QualifierConstants.CONTROLLER);
     }
 
     private boolean isKindOfRequestMapping(ResolvedAnnotationDeclaration resolvedAnno) {
-        String requestMappingQualifier = "org.springframework.web.bind.annotation.RequestMapping";
-        return requestMappingQualifier.equals(resolvedAnno.getId()) || resolvedAnno
-                .hasDirectlyAnnotation(requestMappingQualifier);
+        return QualifierConstants.REQUEST_MAPPING.equals(resolvedAnno.getId()) || resolvedAnno
+                .hasDirectlyAnnotation(QualifierConstants.REQUEST_MAPPING);
     }
 
     private String qualifierForClassLoader(ClassOrInterfaceDeclaration controller) {

@@ -20,5 +20,4 @@ public class Conf {
 
     public static final String COMMON_PAGE_TYPE_QUALIFIER = "";
 
-
 }

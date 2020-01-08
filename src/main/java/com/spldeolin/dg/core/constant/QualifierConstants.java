@@ -5,6 +5,8 @@ package com.spldeolin.dg.core.constant;
  */
 public interface QualifierConstants {
 
+    String CONTROLLER = "org.springframework.stereotype.Controller";
+
     String DELETE_MAPPING = "org.springframework.web.bind.annotation.DeleteMapping";
 
     String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping";
@@ -22,5 +24,11 @@ public interface QualifierConstants {
     String INTEGER = "java.lang.Integer";
 
     String LONG = "java.lang.Long";
+
+    String REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
+
+    String REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
+
+    String PATH_VARIABLE = "org.springframework.web.bind.annotation.PathVariable";
 
 }

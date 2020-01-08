@@ -38,8 +38,8 @@ public class ApiProcessor {
         api.description(Javadocs.extractFirstLine(handler));
 
         // path query
-        api.uriPathFields(Lists.newArrayList());
-        api.uriQueryFields(Lists.newArrayList());
+        api.uriPathFields(new PathVariableProcessor().processor(handlerProcessorResult.pathVariables()));
+        api.uriQueryFields(new RequestParamProcessor().processor(handlerProcessorResult.requestParams()));
 
         // request body
         BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolveType()).process();

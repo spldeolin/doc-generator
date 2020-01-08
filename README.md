@@ -10,19 +10,21 @@ a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generato
 
 - valid, e.g.: `@NotNull List<@Max(11) Long>`
 
-- url, e.g.: `/user/{userId}`
-
-- url, e.g.: `/user?userName=`
-
-- body, e.g.: `@RequestBody String itemName`
-
 - a sample project
+
+- war package
 
 
 
 ## DONE
 
 - mazy `@RequestMapping` combine situation
+
+- url, e.g.: `/user/{userId}`
+
+- url, e.g.: `/user?userName=`
+
+- body, e.g.: `@RequestBody String itemName`
 
 
 

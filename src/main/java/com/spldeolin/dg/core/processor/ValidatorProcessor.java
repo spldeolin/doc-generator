@@ -20,9 +20,9 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -38,20 +38,20 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ValidatorProcessor {
 
-    public Collection<ValidatorDomain> process(FieldDeclaration fieldDeclaration) {
-        Collection<ValidatorDomain> validators = this.calcValidators(fieldDeclaration.getAnnotations());
+    public Collection<ValidatorDomain> process(NodeWithAnnotations<?> node) {
+        Collection<ValidatorDomain> validators = this.calcValidators(node.getAnnotations());
 
         if (validators.removeIf(validator -> enumValue == validator.validatorType())) {
-            String enumValueNote = this.calcEnumValueSpecially(fieldDeclaration).toString();
+            String enumValueNote = this.calcEnumValueSpecially(node).toString();
             validators.add(new ValidatorDomain().validatorType(enumValue).note(enumValueNote));
         }
 
         return validators;
     }
 
-    private StringBuilder calcEnumValueSpecially(FieldDeclaration fieldDeclaration) {
+    private StringBuilder calcEnumValueSpecially(NodeWithAnnotations<?> node) {
         StringBuilder result = new StringBuilder(64);
-        fieldDeclaration.getAnnotationByName("ValidEnumValue").ifPresent(anno -> {
+        node.getAnnotationByName("ValidEnumValue").ifPresent(anno -> {
             result.append("（");
             anno.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                 if (nameOf(pair, "enumType")) {
