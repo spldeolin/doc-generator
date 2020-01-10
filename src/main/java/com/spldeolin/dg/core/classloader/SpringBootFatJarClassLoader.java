@@ -30,9 +30,7 @@ public class SpringBootFatJarClassLoader {
         try {
             Path path = decompressJarToTempDir();
             Path bootInf = path.resolve("BOOT-INF");
-            List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL(),
-                    new URL(SpringBootFatJarClassLoader.class.getProtectionDomain().getCodeSource().getLocation(),
-                            "rt"));
+            List<URL> urls = Lists.newArrayList(bootInf.resolve("classes").toUri().toURL());
 
             FileUtils.iterateFiles(bootInf.resolve("lib").toFile(), new String[]{"jar"}, true).forEachRemaining(jar -> {
                 try {
@@ -46,6 +44,10 @@ public class SpringBootFatJarClassLoader {
         } catch (IOException e) {
             throw new RuntimeException();
         }
+    }
+
+    public static void main(String[] args) {
+        log.info(classLoader);
     }
 
     private static Path decompressJarToTempDir() throws IOException {
