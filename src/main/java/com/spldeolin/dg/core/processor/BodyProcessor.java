@@ -13,7 +13,7 @@ import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.container.ClassContainer;
 import com.spldeolin.dg.core.enums.FieldJsonType;
@@ -173,7 +173,7 @@ public class BodyProcessor {
 
                 @Override
                 public ClassLoader getClassLoader() {
-                    return SpringBootFatJarClassLoader.classLoader;
+                    return WarOrFatJarClassLoader.classLoader;
                 }
             }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {

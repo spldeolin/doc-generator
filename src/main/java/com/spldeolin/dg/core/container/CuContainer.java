@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.spldeolin.dg.core.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import lombok.Getter;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -56,7 +56,7 @@ public class CuContainer {
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
-        URLClassLoader classloader = SpringBootFatJarClassLoader.classLoader;
+        URLClassLoader classloader = WarOrFatJarClassLoader.classLoader;
         ProjectRoot projectRoot = new ClassLoaderCollectionStrategy(classloader).collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();

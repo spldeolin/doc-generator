@@ -14,7 +14,7 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.domain.FieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
@@ -110,7 +110,7 @@ public class PathVariableProcessor {
 
                 @Override
                 public ClassLoader getClassLoader() {
-                    return SpringBootFatJarClassLoader.classLoader;
+                    return WarOrFatJarClassLoader.classLoader;
                 }
             }.constructFromCanonical(qualifierForClassLoader);
         } catch (IllegalArgumentException e) {

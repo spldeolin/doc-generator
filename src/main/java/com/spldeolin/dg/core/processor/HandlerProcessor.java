@@ -14,7 +14,7 @@ import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclarati
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.dg.core.classloader.SpringBootFatJarClassLoader;
+import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
@@ -39,7 +39,7 @@ public class HandlerProcessor {
             Class<?> reflectController;
             String name = this.qualifierForClassLoader(controller);
             try {
-                reflectController = SpringBootFatJarClassLoader.classLoader.loadClass(name);
+                reflectController = WarOrFatJarClassLoader.classLoader.loadClass(name);
             } catch (ClassNotFoundException e) {
                 log.warn("class[{}] not found", name);
                 return;

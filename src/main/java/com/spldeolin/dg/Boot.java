@@ -26,7 +26,8 @@ public class Boot {
                 .process(ClassContainer.getInstance(Conf.TARGET_PROJECT_PATH).getAll(), new DefaultHandlerFilter() {
                     @Override
                     public boolean filter(ClassOrInterfaceDeclaration controller) {
-                        return controller.getNameAsString().startsWith("Marketing");
+                        return true;
+//                        return controller.getNameAsString().startsWith("Marketing");
                     }
                 }, new ReturnStmtBaseResponseBodyTypeParser());
 
