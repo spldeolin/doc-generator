@@ -57,7 +57,7 @@ public class ValidatorProcessor {
                 if (nameOf(pair, "enumType")) {
                     ResolvedType resolvedType = pair.getValue().calculateResolvedType();
                     String qualifier = resolvedType.asReferenceType().getTypeParametersMap().get(0).b.describe();
-                    EnumDeclaration enumDeclaration = EnumContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+                    EnumDeclaration enumDeclaration = EnumContainer.getInstance(Conf.PROJECT_PATH)
                             .getByEnumQualifier().get(qualifier);
 
                     Collection<String> parts = Lists.newLinkedList();

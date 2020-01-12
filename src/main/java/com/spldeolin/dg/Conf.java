@@ -12,7 +12,7 @@ public class Conf {
 
     }
 
-    public static final Path TARGET_PROJECT_PATH = Paths
+    public static final Path PROJECT_PATH = Paths
             .get("");
 
     public static final Path WAR_OR_FAT_JAR_PATH = Paths

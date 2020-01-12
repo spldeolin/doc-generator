@@ -57,7 +57,7 @@ public class FieldProcessor {
             FieldDomain childFieldDto = new FieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH)
+            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.PROJECT_PATH)
                     .getByFieldVarQualifier().get(fieldVarQualifier);
             if (fieldDeclaration == null) {
                 /*
@@ -71,7 +71,7 @@ public class FieldProcessor {
             childFieldDto.fieldName(childFieldName);
 
             String comment = Javadocs.extractFirstLine(
-                    FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getByFieldVarQualifier()
+                    FieldContainer.getInstance(Conf.PROJECT_PATH).getByFieldVarQualifier()
                             .get(fieldVarQualifier));
             childFieldDto.description(comment);
 
@@ -114,7 +114,7 @@ public class FieldProcessor {
             }
 
             if (childFieldDto.jsonType() == FieldJsonType.number) {
-                String javaType = FieldContainer.getInstance(Conf.TARGET_PROJECT_PATH).getVarByFieldVarQualifier()
+                String javaType = FieldContainer.getInstance(Conf.PROJECT_PATH).getVarByFieldVarQualifier()
                         .get(fieldVarQualifier).getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
