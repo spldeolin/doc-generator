@@ -16,7 +16,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
-import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.util.Strings;
@@ -30,10 +30,10 @@ public class PathVariableProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    public Collection<FieldDomain> processor(Collection<Parameter> parameters) {
-        Collection<FieldDomain> result = Lists.newLinkedList();
+    public Collection<BodyFieldDomain> processor(Collection<Parameter> parameters) {
+        Collection<BodyFieldDomain> result = Lists.newLinkedList();
         for (Parameter parameter : parameters) {
-            FieldDomain field = new FieldDomain();
+            BodyFieldDomain field = new BodyFieldDomain();
             AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
             String name = null;
             boolean nullable = false;

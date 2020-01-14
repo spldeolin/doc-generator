@@ -13,16 +13,16 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @ToString(exclude = {"parentField"}) // StackOverflowError
-public class FieldDomain {
+public class BodyFieldDomain {
 
-    private FieldDomain parentField;
+    private BodyFieldDomain parentField;
 
     private String fieldName;
 
     /**
      * @see FieldJsonType
-     * @see ApiDomain#uriPathFields() string, number, boolean
-     * @see ApiDomain#uriQueryFields() string, number, boolean
+     * @see ApiDomain#pathVariableFields() string, number, boolean
+     * @see ApiDomain#requestParamFields() string, number, boolean
      */
     private FieldJsonType jsonType;
 
@@ -43,6 +43,6 @@ public class FieldDomain {
      * com.topaiebiz.rapgen2.enums.TypeName#object
      * com.topaiebiz.rapgen2.enums.TypeName#objectArray
      */
-    private Collection<FieldDomain> fields;
+    private Collection<BodyFieldDomain> fields;
 
 }

@@ -5,7 +5,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.domain.ApiDomain;
-import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.BodyType;
 import com.spldeolin.dg.core.processor.result.BodyProcessResult;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
@@ -38,8 +38,8 @@ public class ApiProcessor {
         api.description(Javadocs.extractFirstLine(handler));
 
         // path query
-        api.uriPathFields(new PathVariableProcessor().processor(handlerProcessorResult.pathVariables()));
-        api.uriQueryFields(new RequestParamProcessor().processor(handlerProcessorResult.requestParams()));
+        api.pathVariableFields(new PathVariableProcessor().processor(handlerProcessorResult.pathVariables()));
+        api.requestParamFields(new RequestParamProcessor().processor(handlerProcessorResult.requestParams()));
 
         // request body
         BodyProcessResult req = new BodyProcessor(handlerProcessorResult.requestBodyResolveType()).process();
@@ -85,8 +85,8 @@ public class ApiProcessor {
         }
         if (req.isValueStructure()) {
             ValueStructureBodyProcessResult valueStruct = req.asValueStructure();
-            Collection<FieldDomain> field = Lists.newArrayList(
-                    new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
+            Collection<BodyFieldDomain> field = Lists.newArrayList(
+                    new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.requestBodyFields(field);
             api.requestBodyFieldsFlatly(field);
@@ -127,8 +127,8 @@ public class ApiProcessor {
         }
         if (resp.isValueStructure()) {
             ValueStructureBodyProcessResult valueStruct = resp.asValueStructure();
-            Collection<FieldDomain> field = Lists.newArrayList(
-                    new FieldDomain().jsonType(valueStruct.valueStructureJsonType())
+            Collection<BodyFieldDomain> field = Lists.newArrayList(
+                    new BodyFieldDomain().jsonType(valueStruct.valueStructureJsonType())
                             .numberFormat(valueStruct.valueStructureNumberFormat()));
             api.responseBodyFields(field);
             api.responseBodyFieldsFlatly(field);

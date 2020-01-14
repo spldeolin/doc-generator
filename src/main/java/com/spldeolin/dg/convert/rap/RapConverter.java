@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.domain.ApiDomain;
-import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.util.Jsons;
 
 /**
@@ -39,12 +39,12 @@ public class RapConverter {
         return actions;
     }
 
-    private List<ParameterListDto> convertFields(Collection<FieldDomain> fields) {
+    private List<ParameterListDto> convertFields(Collection<BodyFieldDomain> fields) {
         List<ParameterListDto> firstFloor = Lists.newArrayList();
         if (fields == null) {
             return Lists.newArrayList();
         }
-        for (FieldDomain field : fields) {
+        for (BodyFieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
             if (field.fields() != null && field.fields().size() > 0) {
                 this.convertFields(field.fields(), child);
@@ -54,9 +54,9 @@ public class RapConverter {
         return firstFloor;
     }
 
-    private void convertFields(Collection<FieldDomain> fields, ParameterListDto parent) {
+    private void convertFields(Collection<BodyFieldDomain> fields, ParameterListDto parent) {
         List<ParameterListDto> childrent = Lists.newArrayList();
-        for (FieldDomain field : fields) {
+        for (BodyFieldDomain field : fields) {
             ParameterListDto child = ParameterListDto.build(field);
             if (field.fields() != null && field.fields().size() > 0) {
                 this.convertFields(field.fields(), child);

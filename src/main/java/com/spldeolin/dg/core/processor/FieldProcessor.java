@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.core.container.FieldContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
-import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.StringFormatType;
@@ -30,31 +30,31 @@ import lombok.extern.log4j.Log4j2;
 public class FieldProcessor {
 
     public void process(ObjectSchema objectSchema, ApiDomain api) {
-        Pair<Collection<FieldDomain>, Collection<FieldDomain>> pair = parseZeroFloorFields(objectSchema);
+        Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> pair = parseZeroFloorFields(objectSchema);
         api.responseBodyFields(pair.getLeft());
         api.responseBodyFieldsFlatly(pair.getRight());
     }
 
-    private Pair<Collection<FieldDomain>, Collection<FieldDomain>> parseZeroFloorFields(ObjectSchema zeroSchema) {
-        List<FieldDomain> flatList = Lists.newArrayList();
-        Collection<FieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new FieldDomain(), flatList)
+    private Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> parseZeroFloorFields(ObjectSchema zeroSchema) {
+        List<BodyFieldDomain> flatList = Lists.newArrayList();
+        Collection<BodyFieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new BodyFieldDomain(), flatList)
                 .fields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
 
         return Pair.of(zeroFloorFields, flatList);
     }
 
-    private FieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, FieldDomain parent,
-            List<FieldDomain> flatList) {
+    private BodyFieldDomain parseFieldTypes(ObjectSchema schema, boolean isObjectInArray, BodyFieldDomain parent,
+            List<BodyFieldDomain> flatList) {
         if (isObjectInArray) {
             parent.jsonType(FieldJsonType.objectArray);
         } else {
             parent.jsonType(FieldJsonType.object);
         }
 
-        List<FieldDomain> children = Lists.newArrayList();
+        List<BodyFieldDomain> children = Lists.newArrayList();
         schema.getProperties().forEach((childFieldName, childSchema) -> {
-            FieldDomain childFieldDto = new FieldDomain();
+            BodyFieldDomain childFieldDto = new BodyFieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
             FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.PROJECT_PATH)

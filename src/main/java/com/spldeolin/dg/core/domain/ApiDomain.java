@@ -20,23 +20,23 @@ public class ApiDomain {
 
     private String description;
 
-    private Collection<FieldDomain> uriPathFields;
+    private Collection<BodyFieldDomain> pathVariableFields;
 
-    private Collection<FieldDomain> uriQueryFields;
+    private Collection<BodyFieldDomain> requestParamFields;
 
     private BodyType requestBodyType;
 
-    private Collection<FieldDomain> requestBodyFields;
+    private Collection<BodyFieldDomain> requestBodyFields;
 
-    private Collection<FieldDomain> requestBodyFieldsFlatly;
+    private Collection<BodyFieldDomain> requestBodyFieldsFlatly;
 
     private JsonSchema requestBodyChaosJsonSchema;
 
     private BodyType responseBodyType;
 
-    private Collection<FieldDomain> responseBodyFields;
+    private Collection<BodyFieldDomain> responseBodyFields;
 
-    private Collection<FieldDomain> responseBodyFieldsFlatly;
+    private Collection<BodyFieldDomain> responseBodyFieldsFlatly;
 
     private JsonSchema responseBodyChaosJsonSchema;
 

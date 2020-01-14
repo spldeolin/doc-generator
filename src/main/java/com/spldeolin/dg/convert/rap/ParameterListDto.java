@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.core.domain.FieldDomain;
+import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.domain.ValidatorDomain;
 import com.spldeolin.dg.core.enums.StringFormatType;
 import lombok.Data;
@@ -35,7 +35,7 @@ public class ParameterListDto {
      */
     private String dataType;
 
-    public static ParameterListDto build(FieldDomain fieldDto) {
+    public static ParameterListDto build(BodyFieldDomain fieldDto) {
         ParameterListDto result = new ParameterListDto();
         result.setId(-2333L);
         result.setIdentifier(fieldDto.fieldName());
