@@ -83,7 +83,7 @@ public class RequestParamProcessor {
                     throw new RuntimeException("impossible unless bug");
                 }
             } else {
-                log.warn("parameter[{}]不是ValueSchema", parameter);
+                log.warn("暂不支持解析ValueSchema以外的@RequestParam [{}]", parameter);
                 continue;
             }
             field.jsonType(jsonType).numberFormat(numberFormat);
