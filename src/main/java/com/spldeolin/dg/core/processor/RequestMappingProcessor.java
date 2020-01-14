@@ -38,15 +38,38 @@ public class RequestMappingProcessor {
             for (RequestMappingDto dto2 : fromHandler) {
                 combineMethods.addAll(dto1.getMethods());
                 combineMethods.addAll(dto2.getMethods());
-                for (String path1 : dto1.getPaths()) {
-                    for (String path2 : dto2.getPaths()) {
+                for (String path1 : emptyToOne(dto1.getPaths())) {
+                    for (String path2 : emptyToOne(dto2.getPaths())) {
                         combinePaths.add(antPathMatcher.combine(path1, path2));
                     }
                 }
             }
         }
+        if (fromController.size() == 0) {
+            for (RequestMappingDto dto : fromHandler) {
+                combineMethods.addAll(dto.getMethods());
+                for (String path : dto.getPaths()) {
+                    combinePaths.add(antPathMatcher.combine("", path));
+                }
+            }
+        }
+        if (fromHandler.size() == 0) {
+            for (RequestMappingDto dto : fromController) {
+                combineMethods.addAll(dto.getMethods());
+                for (String path : dto.getPaths()) {
+                    combinePaths.add(antPathMatcher.combine("", path));
+                }
+            }
+        }
 
         return new RequestMappingProcessResult().methodTypes(combineMethods).uris(combinePaths);
+    }
+
+    private Collection<String> emptyToOne(Collection<String> paths) {
+        if (paths.size() == 0) {
+            paths.add("");
+        }
+        return paths;
     }
 
     private Collection<RequestMappingDto> parseRequestMappings(NodeList<AnnotationExpr> annotations) {
