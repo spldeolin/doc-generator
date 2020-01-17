@@ -22,12 +22,10 @@ import com.spldeolin.dg.core.util.Javadocs;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * TODO 处理类似 @NotNull List<@Max(11) Long> 的校验情况
- *
  * @author Deolin 2019-12-03
  */
 @Log4j2
-public class FieldProcessor {
+public class BodyFieldProcessor {
 
     public void process(ObjectSchema objectSchema, ApiDomain api) {
         Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> pair = parseZeroFloorFields(objectSchema);

@@ -1,7 +1,10 @@
 package com.spldeolin.dg.core.processor;
 
+import static com.github.javaparser.utils.CodeGenerationUtils.f;
+
 import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,10 +19,10 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
-import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.domain.UriFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
+import com.spldeolin.dg.core.enums.StringFormatType;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
 
@@ -60,12 +63,25 @@ public class RequestParamProcessor {
 
             FieldJsonType jsonType;
             NumberFormatType numberFormat = null;
+            StringBuilder stringFormat = new StringBuilder();
             ResolvedType type = parameter.getType().resolve();
             String describe = type.describe();
             JsonSchema jsonSchema = generateSchema(describe);
             if (jsonSchema != null && jsonSchema.isValueTypeSchema()) {
                 if (jsonSchema.isStringSchema()) {
                     jsonType = FieldJsonType.string;
+                    parameter.getAnnotationByClass(DateTimeFormat.class)
+                            .ifPresent(dateTimeFormat -> dateTimeFormat.ifNormalAnnotationExpr(normal -> {
+                                normal.getPairs().forEach(pair -> {
+                                    if (pair.getNameAsString().equals("pattern")) {
+                                        stringFormat.append(f(StringFormatType.datetime.getValue(), pair.getValue()));
+                                    }
+                                });
+                            }));
+                    if (stringFormat.length() == 0) {
+                        stringFormat.append(StringFormatType.normal.getValue());
+                    }
+
                 } else if (jsonSchema.isNumberSchema()) {
                     jsonType = FieldJsonType.number;
 

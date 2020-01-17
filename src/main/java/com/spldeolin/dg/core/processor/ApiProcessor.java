@@ -81,7 +81,7 @@ public class ApiProcessor {
 
     private void processRequestBodyFields(ApiDomain api, BodyProcessResult req) {
         if (req.isKeyValueStructure()) {
-            new FieldProcessor().process(req.asKeyValueStructure().objectSchema(), api);
+            new BodyFieldProcessor().process(req.asKeyValueStructure().objectSchema(), api);
         }
         if (req.isValueStructure()) {
             ValueStructureBodyProcessResult valueStruct = req.asValueStructure();
@@ -123,7 +123,7 @@ public class ApiProcessor {
 
     private void processResponseBodyFields(ApiDomain api, BodyProcessResult resp) {
         if (resp.isKeyValueStructure()) {
-            new FieldProcessor().process(resp.asKeyValueStructure().objectSchema(), api);
+            new BodyFieldProcessor().process(resp.asKeyValueStructure().objectSchema(), api);
         }
         if (resp.isValueStructure()) {
             ValueStructureBodyProcessResult valueStruct = resp.asValueStructure();
