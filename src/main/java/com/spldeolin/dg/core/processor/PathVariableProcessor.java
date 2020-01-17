@@ -16,7 +16,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
-import com.spldeolin.dg.core.domain.BodyFieldDomain;
+import com.spldeolin.dg.core.domain.UriFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.util.Strings;
@@ -30,13 +30,13 @@ public class PathVariableProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    public Collection<BodyFieldDomain> processor(Collection<Parameter> parameters) {
-        Collection<BodyFieldDomain> result = Lists.newLinkedList();
+    public Collection<UriFieldDomain> processor(Collection<Parameter> parameters) {
+        Collection<UriFieldDomain> result = Lists.newLinkedList();
         for (Parameter parameter : parameters) {
-            BodyFieldDomain field = new BodyFieldDomain();
+            UriFieldDomain field = new UriFieldDomain();
             AnnotationExpr pathVariable = parameter.getAnnotationByName("PathVariable").get();
             String name = null;
-            boolean nullable = false;
+            boolean required = false;
             if (pathVariable.isSingleMemberAnnotationExpr()) {
                 name = pathVariable.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
             }
@@ -45,7 +45,7 @@ public class PathVariableProcessor {
                 for (MemberValuePair pair : normal.getPairs()) {
                     String pairName = pair.getNameAsString();
                     if ("required".equals(pairName)) {
-                        nullable = !pair.getValue().asBooleanLiteralExpr().getValue();
+                        required = pair.getValue().asBooleanLiteralExpr().getValue();
                     }
                     if (StringUtils.equalsAny(pairName, "name", "value")) {
                         name = pair.getValue().asStringLiteralExpr().getValue();
@@ -55,7 +55,7 @@ public class PathVariableProcessor {
             if (pathVariable.isMarkerAnnotationExpr() || name == null) {
                 name = parameter.getNameAsString();
             }
-            field.fieldName(name).nullable(nullable);
+            field.fieldName(name).required(required);
 
             FieldJsonType jsonType;
             NumberFormatType numberFormat = null;

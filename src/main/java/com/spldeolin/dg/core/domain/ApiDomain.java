@@ -20,9 +20,9 @@ public class ApiDomain {
 
     private String description;
 
-    private Collection<BodyFieldDomain> pathVariableFields;
+    private Collection<UriFieldDomain> pathVariableFields;
 
-    private Collection<BodyFieldDomain> requestParamFields;
+    private Collection<UriFieldDomain> requestParamFields;
 
     private BodyType requestBodyType;
 

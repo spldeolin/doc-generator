@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.domain.BodyFieldDomain;
+import com.spldeolin.dg.core.domain.UriFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.util.Strings;
@@ -30,13 +31,13 @@ public class RequestParamProcessor {
 
     private static final JsonSchemaGenerator jsg = new JsonSchemaGenerator(new ObjectMapper());
 
-    public Collection<BodyFieldDomain> processor(Collection<Parameter> parameters) {
-        Collection<BodyFieldDomain> result = Lists.newLinkedList();
+    public Collection<UriFieldDomain> processor(Collection<Parameter> parameters) {
+        Collection<UriFieldDomain> result = Lists.newLinkedList();
         for (Parameter parameter : parameters) {
-            BodyFieldDomain field = new BodyFieldDomain();
+            UriFieldDomain field = new UriFieldDomain();
             AnnotationExpr requestParam = parameter.getAnnotationByName("RequestParam").get();
             String name = null;
-            boolean nullable = false;
+            boolean required = false;
             if (requestParam.isSingleMemberAnnotationExpr()) {
                 name = requestParam.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().asString();
             }
@@ -45,7 +46,7 @@ public class RequestParamProcessor {
                 for (MemberValuePair pair : normal.getPairs()) {
                     String pairName = pair.getNameAsString();
                     if ("required".equals(pairName)) {
-                        nullable = !pair.getValue().asBooleanLiteralExpr().getValue();
+                        required = pair.getValue().asBooleanLiteralExpr().getValue();
                     }
                     if (StringUtils.equalsAny(pairName, "name", "value")) {
                         name = pair.getValue().asStringLiteralExpr().getValue();
@@ -55,7 +56,7 @@ public class RequestParamProcessor {
             if (requestParam.isMarkerAnnotationExpr() || name == null) {
                 name = parameter.getNameAsString();
             }
-            field.fieldName(name).nullable(nullable);
+            field.fieldName(name).required(required);
 
             FieldJsonType jsonType;
             NumberFormatType numberFormat = null;
@@ -89,6 +90,7 @@ public class RequestParamProcessor {
             field.jsonType(jsonType).numberFormat(numberFormat);
 
             field.validators(new ValidatorProcessor().process(parameter));
+            result.add(field);
         }
         return result;
     }
