@@ -6,32 +6,27 @@ import java.util.Map;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.ast.exception.ParentAbsentException;
 import com.spldeolin.dg.ast.exception.QualifierAbsentException;
-import lombok.Data;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Deolin 2019-12-06
  */
 @Log4j2
-@Data
 public class FieldContainer {
 
-    private static final int EXPECTED = 28000;
-
+    @Getter
     private Path path;
 
+    @Getter
     private Collection<FieldDeclaration> all = Lists.newLinkedList();
 
-    private Map<String, FieldDeclaration> byFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
-
-    // 存在这种情况 private int a, b = 1, c;
-    private Map<String, VariableDeclarator> varByFieldVarQualifier = Maps.newHashMapWithExpectedSize(EXPECTED);
+    private Map<String, FieldDeclaration> byVariableQualifier;
 
     private static Map<Path, FieldContainer> instances = Maps.newConcurrentMap();
 
@@ -49,33 +44,32 @@ public class FieldContainer {
         long start = System.currentTimeMillis();
         this.path = path;
         coidContainer.getByQualifier()
-                .forEach((classQualifier, coid) -> coid.findAll(FieldDeclaration.class).forEach(field -> {
-                    all.add(field);
+                .forEach((classQualifier, coid) -> all.addAll(coid.findAll(FieldDeclaration.class)));
 
-                    field.getVariables().forEach(variable -> {
-                        Node parent = field.getParentNode().orElseThrow(ParentAbsentException::new);
-                        if (!(parent instanceof TypeDeclaration)) {
-                            // 例如这个field在一个匿名内部类中，那么parent就是ObjectCreationExpr..
-                            // 这些field往往不会是handler的参数或返回值
-                            return;
-                        }
-
-                        String fieldVarQulifier = Joiner.on(".")
-                                .join(((TypeDeclaration<?>) parent).getFullyQualifiedName()
-                                        .orElseThrow(QualifierAbsentException::new), variable.getNameAsString());
-
-                        byFieldVarQualifier.put(fieldVarQulifier, field);
-                        varByFieldVarQualifier.put(fieldVarQulifier, variable);
-                    });
-                }));
-
-        log.info("FieldContainer构建完毕，共从[{}]解析到[{}]个Field，耗时[{}]毫秒", path, all.size(),
+        log.info("(Summary) Collected {} FieldDeclaration from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
                 System.currentTimeMillis() - start);
+    }
 
-        if (EXPECTED < all.size() + 100) {
-            log.warn("FieldContainer.EXPECTED[{}]过小，可能会引发扩容降低性能，建议扩大这个值。（FieldContainer.all[{}]）", EXPECTED,
-                    all.size());
+    public Map<String, FieldDeclaration> getByVariableQualifier() {
+        if (byVariableQualifier == null) {
+            byVariableQualifier = Maps.newHashMapWithExpectedSize(all.size());
+            all.forEach(field -> {
+                field.getVariables().forEach(variable -> {
+                    Node parent = field.getParentNode().orElseThrow(ParentAbsentException::new);
+                    if (!(parent instanceof TypeDeclaration)) {
+                        // 例如这个field在一个匿名内部类中，那么parent就是ObjectCreationExpr..
+                        // 由于是在匿名类中，所有没有全限定名
+                        return;
+                    }
+
+                    String fieldVarQulifier = Joiner.on(".").join(((TypeDeclaration<?>) parent).getFullyQualifiedName()
+                            .orElseThrow(QualifierAbsentException::new), variable.getNameAsString());
+
+                    byVariableQualifier.put(fieldVarQulifier, field);
+                });
+            });
         }
+        return byVariableQualifier;
     }
 
 }

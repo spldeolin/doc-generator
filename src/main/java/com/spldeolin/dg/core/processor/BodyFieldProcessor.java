@@ -13,6 +13,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.container.FieldContainer;
+import com.spldeolin.dg.ast.container.FieldVariableContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;
@@ -33,10 +34,11 @@ public class BodyFieldProcessor {
         api.responseBodyFieldsFlatly(pair.getRight());
     }
 
-    private Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> parseZeroFloorFields(ObjectSchema zeroSchema) {
+    private Pair<Collection<BodyFieldDomain>, Collection<BodyFieldDomain>> parseZeroFloorFields(
+            ObjectSchema zeroSchema) {
         List<BodyFieldDomain> flatList = Lists.newArrayList();
-        Collection<BodyFieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new BodyFieldDomain(), flatList)
-                .fields();
+        Collection<BodyFieldDomain> zeroFloorFields = parseFieldTypes(zeroSchema, false, new BodyFieldDomain(),
+                flatList).fields();
         zeroFloorFields.forEach(fieldDto -> fieldDto.parentField(null));
 
         return Pair.of(zeroFloorFields, flatList);
@@ -56,7 +58,7 @@ public class BodyFieldProcessor {
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
             FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.PROJECT_PATH)
-                    .getByFieldVarQualifier().get(fieldVarQualifier);
+                    .getByVariableQualifier().get(fieldVarQualifier);
             if (fieldDeclaration == null) {
                 /*
                 被JsonSchema认为是个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
@@ -69,8 +71,7 @@ public class BodyFieldProcessor {
             childFieldDto.fieldName(childFieldName);
 
             String comment = Javadocs.extractFirstLine(
-                    FieldContainer.getInstance(Conf.PROJECT_PATH).getByFieldVarQualifier()
-                            .get(fieldVarQualifier));
+                    FieldContainer.getInstance(Conf.PROJECT_PATH).getByVariableQualifier().get(fieldVarQualifier));
             childFieldDto.description(comment);
 
             childFieldDto.nullable(true);
@@ -112,7 +113,7 @@ public class BodyFieldProcessor {
             }
 
             if (childFieldDto.jsonType() == FieldJsonType.number) {
-                String javaType = FieldContainer.getInstance(Conf.PROJECT_PATH).getVarByFieldVarQualifier()
+                String javaType = FieldVariableContainer.getInstance(Conf.PROJECT_PATH).getByQualifier()
                         .get(fieldVarQualifier).getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }

@@ -42,7 +42,7 @@ public class InterfaceContainer {
         cuContainer.getAll().forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream()
                 .filter(ClassOrInterfaceDeclaration::isInterface).forEach(iinterface -> all.add(iinterface)));
 
-        log.info("InterfaceContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(),
+        log.info("(Summary) Collected {} interface COID from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
                 System.currentTimeMillis() - start);
     }
 

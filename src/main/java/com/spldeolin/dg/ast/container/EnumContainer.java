@@ -41,7 +41,7 @@ public class EnumContainer {
         this.path = path;
         cuContainer.getAll().forEach(cu -> all.addAll(cu.findAll(EnumDeclaration.class)));
 
-        log.info("EnumContainer构建完毕，共从[{}]解析到[{}]个EnumDeclaration，耗时[{}]毫秒", path, all.size(),
+        log.info("(Summary) Collected {} EnumDeclaration from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
                 System.currentTimeMillis() - start);
     }
 

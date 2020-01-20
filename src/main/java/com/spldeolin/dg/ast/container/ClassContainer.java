@@ -43,7 +43,8 @@ public class ClassContainer {
                 cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
                         .forEach(classDeclaration -> all.add(classDeclaration)));
 
-        log.info("CoidContainer构建完毕，共从[{}]解析到[{}]个Coid，耗时[{}]毫秒", path, all.size(), System.currentTimeMillis() - start);
+        log.info("(Summary) Collected {} class COID from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
+                System.currentTimeMillis() - start);
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
