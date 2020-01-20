@@ -21,6 +21,8 @@ import com.spldeolin.dg.Conf;
 import lombok.extern.log4j.Log4j2;
 
 /**
+ * web app war or Spring Boot fat jar classloader.
+ *
  * @author Deolin 2019-12-27
  */
 @Log4j2
@@ -74,7 +76,7 @@ public class WarOrFatJarClassLoader {
                 }
             }
         }
-        log.info("decompressJarToTempDir=[{}]", tempDir);
+        log.info("Decompressed [{}] to [{}]", "../" + Conf.PROJECT_PATH.relativize(Conf.WAR_OR_FAT_JAR_PATH), tempDir);
         return tempDir;
     }
 
