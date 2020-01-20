@@ -12,7 +12,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
-import com.spldeolin.dg.core.container.FieldContainer;
+import com.spldeolin.dg.ast.container.FieldContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.FieldJsonType;

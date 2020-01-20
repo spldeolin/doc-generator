@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.container;
+package com.spldeolin.dg.ast.container;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -10,8 +10,8 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.dg.core.exception.ParentAbsentException;
-import com.spldeolin.dg.core.exception.QualifierAbsentException;
+import com.spldeolin.dg.ast.exception.ParentAbsentException;
+import com.spldeolin.dg.ast.exception.QualifierAbsentException;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 

@@ -3,8 +3,8 @@ package com.spldeolin.dg;
 import java.util.Collection;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.convert.rap.RapConverter;
-import com.spldeolin.dg.core.container.ClassContainer;
+import com.spldeolin.dg.view.rap.RapConverter;
+import com.spldeolin.dg.ast.container.ClassContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.processor.ApiProcessor;
 import com.spldeolin.dg.core.processor.HandlerProcessor;
@@ -35,7 +35,7 @@ public class Boot {
         Collection<ApiDomain> apis = Lists.newLinkedList();
         handlerEntries.forEach(entry -> apis.add(new ApiProcessor(entry).process()));
 
-        // convert
+        // convert to view
         String result = new RapConverter().convert(apis);
         log.info(result);
     }

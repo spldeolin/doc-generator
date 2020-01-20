@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.container;
+package com.spldeolin.dg.ast.container;
 
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -13,8 +13,8 @@ import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.spldeolin.dg.core.classloader.ClassLoaderCollectionStrategy;
-import com.spldeolin.dg.core.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.dg.ast.classloader.ClassLoaderCollectionStrategy;
+import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
 import lombok.Getter;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;

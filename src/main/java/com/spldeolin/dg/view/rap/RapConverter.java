@@ -1,4 +1,4 @@
-package com.spldeolin.dg.convert.rap;
+package com.spldeolin.dg.view.rap;
 
 import java.util.Collection;
 import java.util.List;

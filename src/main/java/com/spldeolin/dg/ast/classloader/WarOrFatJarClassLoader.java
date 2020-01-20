@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.classloader;
+package com.spldeolin.dg.ast.classloader;
 
 import java.io.File;
 import java.io.IOException;

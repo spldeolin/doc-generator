@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.exception;
+package com.spldeolin.dg.ast.exception;
 
 /**
  * @author Deolin 2019-12-20

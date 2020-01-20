@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.classloader;
+package com.spldeolin.dg.ast.classloader;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.SKIP_SUBTREE;

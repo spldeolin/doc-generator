@@ -1,4 +1,4 @@
-package com.spldeolin.dg.core.container;
+package com.spldeolin.dg.ast.container;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -6,7 +6,7 @@ import java.util.Map;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.spldeolin.dg.core.exception.QualifierAbsentException;
+import com.spldeolin.dg.ast.exception.QualifierAbsentException;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
