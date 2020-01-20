@@ -3,8 +3,6 @@ package com.spldeolin.dg.ast.container;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.ProjectRoot;
@@ -13,7 +11,6 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -31,12 +28,8 @@ public class CuContainer {
 
     private CuContainer(Path path) {
         long start = System.currentTimeMillis();
-        List<Report> reports = Lists.newLinkedList();
-        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all, reports));
-
-        Collections.sort(reports);
-        reports.forEach(log::info);
-        log.info("(Summary) Collected {} CU from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
+        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all));
+        log.info("(Summary) Parsed and collected {} CU from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
                 System.currentTimeMillis() - start);
     }
 
@@ -47,7 +40,7 @@ public class CuContainer {
         return projectRoot.getSourceRoots();
     }
 
-    private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all, Collection<Report> reports) {
+    private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all) {
         long start = System.currentTimeMillis();
         int count = 0;
         for (ParseResult<CompilationUnit> parseResult : sourceRoot.tryToParseParallelized()) {
@@ -60,30 +53,9 @@ public class CuContainer {
         }
 
         if (count > 0) {
-            reports.add(new Report("../" + Conf.PROJECT_PATH.relativize(sourceRoot.getRoot()), count,
-                    System.currentTimeMillis() - start));
+            log.info("Parsed and collected {} CU from [{}] elapsing {}ms.", count,
+                    "../" + Conf.PROJECT_PATH.relativize(sourceRoot.getRoot()), System.currentTimeMillis() - start);
         }
-    }
-
-    @AllArgsConstructor
-    private static class Report implements Comparable<Report> {
-
-        private String relativePath;
-
-        private Integer count;
-
-        private Long elapsed;
-
-        @Override
-        public int compareTo(Report that) {
-            return that.elapsed.compareTo(this.elapsed);
-        }
-
-        @Override
-        public String toString() {
-            return "Collected " + count + " CU from [" + relativePath + "] elapsing " + elapsed + "ms.";
-        }
-
     }
 
 }
