@@ -91,7 +91,7 @@ public class HandlerProcessor {
                         entry.pathVariables(pathVariables);
 
                         result.add(entry);
-                        log.debug("hanlder : {}",
+                        log.info("hanlder {} collected.",
                                 shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
                     });
         });
