@@ -1,6 +1,5 @@
 package com.spldeolin.dg.ast.container;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.Node;
@@ -21,32 +20,16 @@ import lombok.extern.log4j.Log4j2;
 public class FieldVariableContainer {
 
     @Getter
-    private final Path path;
-
-    @Getter
     private Collection<VariableDeclarator> all = Lists.newLinkedList();
 
     private Map<String, VariableDeclarator> byQualifier;
 
-    private static Map<Path, FieldVariableContainer> instances = Maps.newConcurrentMap();
+    @Getter
+    private static final FieldVariableContainer instance = new FieldVariableContainer();
 
-    public static FieldVariableContainer getInstance(Path path) {
-        FieldVariableContainer result = instances.get(path);
-        if (result == null) {
-            result = new FieldVariableContainer(path);
-            instances.put(path, result);
-        }
-        return result;
-    }
-
-    private FieldVariableContainer(Path path) {
-        FieldContainer fieldContainer = FieldContainer.getInstance(path);
-        long start = System.currentTimeMillis();
-        this.path = path;
-        fieldContainer.getAll().forEach(cu -> all.addAll(cu.findAll(VariableDeclarator.class)));
-
-        log.info("(Summary) Collected {} field VariableDeclarator from [{}] elapsing {}ms.", all.size(),
-                path.toAbsolutePath(), System.currentTimeMillis() - start);
+    private FieldVariableContainer() {
+        FieldContainer.getInstance().getAll().forEach(cu -> all.addAll(cu.findAll(VariableDeclarator.class)));
+        log.info("(Summary) Collected {} field VariableDeclarator.", all.size());
     }
 
     public Map<String, VariableDeclarator> getByQualifier() {

@@ -68,7 +68,7 @@ public class BodyProcessor {
 
     private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
-        ClassOrInterfaceDeclaration coid = ClassContainer.getInstance(Conf.PROJECT_PATH).getByQualifier()
+        ClassOrInterfaceDeclaration coid = ClassContainer.getInstance().getByQualifier()
                 .get(describe);
 
         JsonSchema jsonSchema;

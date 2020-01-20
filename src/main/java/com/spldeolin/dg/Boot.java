@@ -23,7 +23,7 @@ public class Boot {
 
         // collect
         Collection<HandlerProcessResult> handlerEntries = new HandlerProcessor()
-                .process(ClassContainer.getInstance(Conf.PROJECT_PATH).getAll(), new DefaultHandlerFilter() {
+                .process(ClassContainer.getInstance().getAll(), new DefaultHandlerFilter() {
                     @Override
                     public boolean filter(ClassOrInterfaceDeclaration controller) {
                         return true;

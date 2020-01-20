@@ -26,7 +26,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.container.EnumContainer;
 import com.spldeolin.dg.core.domain.ValidatorDomain;
 import com.spldeolin.dg.core.util.Javadocs;
@@ -57,8 +56,7 @@ public class ValidatorProcessor {
                 if (nameOf(pair, "enumType")) {
                     ResolvedType resolvedType = pair.getValue().calculateResolvedType();
                     String qualifier = resolvedType.asReferenceType().getTypeParametersMap().get(0).b.describe();
-                    EnumDeclaration enumDeclaration = EnumContainer.getInstance(Conf.PROJECT_PATH)
-                            .getByEnumQualifier().get(qualifier);
+                    EnumDeclaration enumDeclaration = EnumContainer.getInstance().getByQualifier().get(qualifier);
 
                     Collection<String> parts = Lists.newLinkedList();
                     try {

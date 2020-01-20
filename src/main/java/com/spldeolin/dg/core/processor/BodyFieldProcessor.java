@@ -11,7 +11,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.container.FieldContainer;
 import com.spldeolin.dg.ast.container.FieldVariableContainer;
 import com.spldeolin.dg.core.domain.ApiDomain;
@@ -57,8 +56,8 @@ public class BodyFieldProcessor {
             BodyFieldDomain childFieldDto = new BodyFieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-            FieldDeclaration fieldDeclaration = FieldContainer.getInstance(Conf.PROJECT_PATH)
-                    .getByVariableQualifier().get(fieldVarQualifier);
+            FieldDeclaration fieldDeclaration = FieldContainer.getInstance().getByVariableQualifier()
+                    .get(fieldVarQualifier);
             if (fieldDeclaration == null) {
                 /*
                 被JsonSchema认为是个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
@@ -70,8 +69,8 @@ public class BodyFieldProcessor {
 
             childFieldDto.fieldName(childFieldName);
 
-            String comment = Javadocs.extractFirstLine(
-                    FieldContainer.getInstance(Conf.PROJECT_PATH).getByVariableQualifier().get(fieldVarQualifier));
+            String comment = Javadocs
+                    .extractFirstLine(FieldContainer.getInstance().getByVariableQualifier().get(fieldVarQualifier));
             childFieldDto.description(comment);
 
             childFieldDto.nullable(true);
@@ -113,8 +112,8 @@ public class BodyFieldProcessor {
             }
 
             if (childFieldDto.jsonType() == FieldJsonType.number) {
-                String javaType = FieldVariableContainer.getInstance(Conf.PROJECT_PATH).getByQualifier()
-                        .get(fieldVarQualifier).getTypeAsString();
+                String javaType = FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier)
+                        .getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
 

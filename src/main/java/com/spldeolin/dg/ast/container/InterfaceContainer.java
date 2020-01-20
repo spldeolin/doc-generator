@@ -1,6 +1,5 @@
 package com.spldeolin.dg.ast.container;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -17,33 +16,17 @@ import lombok.extern.log4j.Log4j2;
 public class InterfaceContainer {
 
     @Getter
-    private final Path path;
-
-    @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
     private Map<String, ClassOrInterfaceDeclaration> byQualifier;
 
-    private static Map<Path, InterfaceContainer> instances = Maps.newConcurrentMap();
+    @Getter
+    private static InterfaceContainer instance = new InterfaceContainer();
 
-    public static InterfaceContainer getInstance(Path path) {
-        InterfaceContainer result = instances.get(path);
-        if (result == null) {
-            result = new InterfaceContainer(path);
-            instances.put(path, result);
-        }
-        return result;
-    }
-
-    private InterfaceContainer(Path path) {
-        CuContainer cuContainer = CuContainer.getInstance(path);
-        long start = System.currentTimeMillis();
-        this.path = path;
-        cuContainer.getAll().forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream()
+    private InterfaceContainer() {
+        CuContainer.getInstance().getAll().forEach(cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream()
                 .filter(ClassOrInterfaceDeclaration::isInterface).forEach(iinterface -> all.add(iinterface)));
-
-        log.info("(Summary) Collected {} interface COID from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
-                System.currentTimeMillis() - start);
+        log.info("(Summary) Collected {} interface COID.", all.size());
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {

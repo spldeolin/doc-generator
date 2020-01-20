@@ -5,13 +5,11 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
@@ -26,25 +24,13 @@ import lombok.extern.log4j.Log4j2;
 public class CuContainer {
 
     @Getter
-    private Path path;
-
-    @Getter
     private Collection<CompilationUnit> all = Lists.newLinkedList();
 
-    private static Map<Path, CuContainer> instances = Maps.newConcurrentMap();
-
-    public static CuContainer getInstance(Path path) {
-        CuContainer result = instances.get(path);
-        if (result == null) {
-            result = new CuContainer(path);
-            instances.put(path, result);
-        }
-        return result;
-    }
+    @Getter
+    private static final CuContainer instance = new CuContainer(Conf.PROJECT_PATH);
 
     private CuContainer(Path path) {
         long start = System.currentTimeMillis();
-        this.path = path;
         List<Report> reports = Lists.newLinkedList();
         this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all, reports));
 

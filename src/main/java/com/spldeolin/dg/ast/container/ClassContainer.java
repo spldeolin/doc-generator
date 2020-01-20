@@ -1,6 +1,5 @@
 package com.spldeolin.dg.ast.container;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -17,34 +16,18 @@ import lombok.extern.log4j.Log4j2;
 public class ClassContainer {
 
     @Getter
-    private final Path path;
-
-    @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
 
     private Map<String, ClassOrInterfaceDeclaration> byQualifier;
 
-    private static Map<Path, ClassContainer> instances = Maps.newConcurrentMap();
+    @Getter
+    private static final ClassContainer instance = new ClassContainer();
 
-    public static ClassContainer getInstance(Path path) {
-        ClassContainer result = instances.get(path);
-        if (result == null) {
-            result = new ClassContainer(path);
-            instances.put(path, result);
-        }
-        return result;
-    }
-
-    private ClassContainer(Path path) {
-        CuContainer cuContainer = CuContainer.getInstance(path);
-        long start = System.currentTimeMillis();
-        this.path = path;
-        cuContainer.getAll().forEach(
+    private ClassContainer() {
+        CuContainer.getInstance().getAll().forEach(
                 cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
                         .forEach(classDeclaration -> all.add(classDeclaration)));
-
-        log.info("(Summary) Collected {} class COID from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
-                System.currentTimeMillis() - start);
+        log.info("(Summary) Collected {} class COID.", all.size());
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {

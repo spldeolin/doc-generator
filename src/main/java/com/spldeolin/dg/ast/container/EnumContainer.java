@@ -1,6 +1,5 @@
 package com.spldeolin.dg.ast.container;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -17,42 +16,26 @@ import lombok.extern.log4j.Log4j2;
 public class EnumContainer {
 
     @Getter
-    private Path path;
-
-    @Getter
     private Collection<EnumDeclaration> all = Lists.newLinkedList();
 
-    private Map<String, EnumDeclaration> byEnumQualifier;
+    private Map<String, EnumDeclaration> byQualifier;
 
-    private static Map<Path, EnumContainer> instances = Maps.newConcurrentMap();
+    @Getter
+    private static final EnumContainer instance = new EnumContainer();
 
-    public static EnumContainer getInstance(Path path) {
-        EnumContainer result = instances.get(path);
-        if (result == null) {
-            result = new EnumContainer(path);
-            instances.put(path, result);
-        }
-        return result;
+    private EnumContainer() {
+        CuContainer.getInstance().getAll().forEach(cu -> all.addAll(cu.findAll(EnumDeclaration.class)));
+        log.info("(Summary) Collected {} EnumDeclaration.", all.size());
     }
 
-    private EnumContainer(Path path) {
-        CuContainer cuContainer = CuContainer.getInstance(path);
-        long start = System.currentTimeMillis();
-        this.path = path;
-        cuContainer.getAll().forEach(cu -> all.addAll(cu.findAll(EnumDeclaration.class)));
-
-        log.info("(Summary) Collected {} EnumDeclaration from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
-                System.currentTimeMillis() - start);
-    }
-
-    public Map<String, EnumDeclaration> getByEnumQualifier() {
-        if (byEnumQualifier == null) {
-            byEnumQualifier = Maps.newHashMapWithExpectedSize(all.size());
-            all.forEach(enumDeclaration -> byEnumQualifier
+    public Map<String, EnumDeclaration> getByQualifier() {
+        if (byQualifier == null) {
+            byQualifier = Maps.newHashMapWithExpectedSize(all.size());
+            all.forEach(enumDeclaration -> byQualifier
                     .put(enumDeclaration.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
                             enumDeclaration));
         }
-        return byEnumQualifier;
+        return byQualifier;
     }
 
 }

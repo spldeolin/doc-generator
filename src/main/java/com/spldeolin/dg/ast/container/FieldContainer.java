@@ -1,6 +1,5 @@
 package com.spldeolin.dg.ast.container;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.Node;
@@ -21,33 +20,17 @@ import lombok.extern.log4j.Log4j2;
 public class FieldContainer {
 
     @Getter
-    private Path path;
-
-    @Getter
     private Collection<FieldDeclaration> all = Lists.newLinkedList();
 
     private Map<String, FieldDeclaration> byVariableQualifier;
 
-    private static Map<Path, FieldContainer> instances = Maps.newConcurrentMap();
+    @Getter
+    private static final FieldContainer instance = new FieldContainer();
 
-    public static FieldContainer getInstance(Path path) {
-        FieldContainer result = instances.get(path);
-        if (result == null) {
-            result = new FieldContainer(path);
-            instances.put(path, result);
-        }
-        return result;
-    }
-
-    private FieldContainer(Path path) {
-        ClassContainer coidContainer = ClassContainer.getInstance(path);
-        long start = System.currentTimeMillis();
-        this.path = path;
-        coidContainer.getByQualifier()
+    private FieldContainer() {
+        ClassContainer.getInstance().getByQualifier()
                 .forEach((classQualifier, coid) -> all.addAll(coid.findAll(FieldDeclaration.class)));
-
-        log.info("(Summary) Collected {} FieldDeclaration from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
-                System.currentTimeMillis() - start);
+        log.info("(Summary) Collected {} FieldDeclaration.", all.size());
     }
 
     public Map<String, FieldDeclaration> getByVariableQualifier() {
