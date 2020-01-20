@@ -3,16 +3,16 @@ package com.spldeolin.dg.ast.container;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
 import lombok.Getter;
@@ -31,8 +31,6 @@ public class CuContainer {
     @Getter
     private Collection<CompilationUnit> all = Lists.newLinkedList();
 
-    private Collection<Report> reports = Sets.newTreeSet();
-
     private static Map<Path, CuContainer> instances = Maps.newConcurrentMap();
 
     public static CuContainer getInstance(Path path) {
@@ -47,12 +45,13 @@ public class CuContainer {
     private CuContainer(Path path) {
         long start = System.currentTimeMillis();
         this.path = path;
+        List<Report> reports = Lists.newLinkedList();
+        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all, reports));
 
-        this.listSoruceRoots(path).forEach(sourceRoot -> this.parseCus(sourceRoot, all));
-
-        log.info("CompilationUnitContainer构建完毕，共从[{}]解析到[{}]个CompilationUnit，耗时[{}]毫秒", path, all.size(),
+        Collections.sort(reports);
+        reports.forEach(log::info);
+        log.info("(Summary) Collected {} CU from [{}] elapsing {}ms.", all.size(), path.toAbsolutePath(),
                 System.currentTimeMillis() - start);
-        reports.forEach(report -> log.info("\t[{}]模块耗时[{}]毫秒", report.getPath(), report.getElapsed()));
     }
 
     private Collection<SourceRoot> listSoruceRoots(Path path) {
@@ -62,31 +61,41 @@ public class CuContainer {
         return projectRoot.getSourceRoots();
     }
 
-    private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all) {
+    private void parseCus(SourceRoot sourceRoot, Collection<CompilationUnit> all, Collection<Report> reports) {
         long start = System.currentTimeMillis();
-        List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParseParallelized();
-        for (ParseResult<CompilationUnit> parseResult : parseResults) {
+        int count = 0;
+        for (ParseResult<CompilationUnit> parseResult : sourceRoot.tryToParseParallelized()) {
             if (parseResult.isSuccessful()) {
                 parseResult.getResult().ifPresent(all::add);
+                count++;
             } else {
                 log.warn("无法正确被解析，跳过[{}]", parseResult.getProblems());
             }
         }
-        List<String> pathParts = Lists.newArrayList(
-                sourceRoot.getRoot().toString().split(Pattern.quote(System.getProperty("file.separator"))));
-        reports.add(new Report(pathParts.get(pathParts.size() - 4), System.currentTimeMillis() - start));
+
+        if (count > 0) {
+            reports.add(new Report("../" + Conf.PROJECT_PATH.toUri().relativize(sourceRoot.getRoot().toUri()).getPath(),
+                    count, System.currentTimeMillis() - start));
+        }
     }
 
     @Value
     private static class Report implements Comparable<Report> {
 
-        private String path;
+        private String relativePath;
+
+        private Integer count;
 
         private Long elapsed;
 
         @Override
         public int compareTo(Report that) {
             return that.getElapsed().compareTo(this.getElapsed());
+        }
+
+        @Override
+        public String toString() {
+            return "Collected " + count + " CU from [" + relativePath + "] elapsing " + elapsed + "ms.";
         }
 
     }
