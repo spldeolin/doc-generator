@@ -74,8 +74,8 @@ public class CuContainer {
         }
 
         if (count > 0) {
-            reports.add(new Report("../" + Conf.PROJECT_PATH.toUri().relativize(sourceRoot.getRoot().toUri()).getPath(),
-                    count, System.currentTimeMillis() - start));
+            reports.add(new Report("../" + Conf.PROJECT_PATH.relativize(sourceRoot.getRoot()), count,
+                    System.currentTimeMillis() - start));
         }
     }
 
