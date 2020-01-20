@@ -15,8 +15,8 @@ import com.google.common.collect.Maps;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.ClassLoaderCollectionStrategy;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Value;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -79,7 +79,7 @@ public class CuContainer {
         }
     }
 
-    @Value
+    @AllArgsConstructor
     private static class Report implements Comparable<Report> {
 
         private String relativePath;
@@ -90,7 +90,7 @@ public class CuContainer {
 
         @Override
         public int compareTo(Report that) {
-            return that.getElapsed().compareTo(this.getElapsed());
+            return that.elapsed.compareTo(this.elapsed);
         }
 
         @Override
