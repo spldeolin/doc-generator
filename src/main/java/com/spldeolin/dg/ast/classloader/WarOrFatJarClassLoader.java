@@ -51,8 +51,8 @@ public class WarOrFatJarClassLoader {
                     "classpathex").toUri().toURL());
 
         } catch (IOException e) {
-            log.error(e);
-            System.exit(0);
+            log.error("something wasn't right here.", e);
+            System.exit(-1);
         }
         classLoader = new URLClassLoader(urls.toArray(new URL[0]));
     }
