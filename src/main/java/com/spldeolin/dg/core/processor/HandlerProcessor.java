@@ -34,7 +34,7 @@ public class HandlerProcessor {
             HandlerFilter handlerFilter, ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
-        log.info("handler processing...");
+        log.info("Handler processing...");
         classes.stream().filter(clazz -> isFilteredController(clazz, handlerFilter)).forEach(controller -> {
 
             // reflect controller
@@ -97,7 +97,7 @@ public class HandlerProcessor {
 //                                shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
                     });
         });
-        log.info("handler process complete.");
+        log.info("Handler process complete. {} handlers has collected.", result.size());
         return result;
     }
 
