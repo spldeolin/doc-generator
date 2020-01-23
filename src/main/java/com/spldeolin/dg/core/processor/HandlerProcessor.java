@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.google.common.base.MoreObjects;
@@ -114,15 +115,17 @@ public class HandlerProcessor {
         }
 
         // is controller
+        if (hasNoneKindOfController(clazz) && hasNoneKindOfRequestMapping(clazz)) {
+            return false;
+        }
         for (AnnotationExpr anno : clazz.getAnnotations()) {
-            ResolvedAnnotationDeclaration resolvedAnno;
             try {
-                resolvedAnno = anno.resolve();
+                ResolvedAnnotationDeclaration resolvedAnno = anno.resolve();
+                if (isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno)) {
+                    return true;
+                }
             } catch (UnsolvedSymbolException e) {
-                continue;
-            }
-            if (isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno)) {
-                return true;
+                log.warn(e);
             }
         }
         return false;
@@ -135,24 +138,37 @@ public class HandlerProcessor {
         }
 
         // is handler
+        if (hasNoneKindOfRequestMapping(method)) {
+            return false;
+        }
         for (AnnotationExpr anno : method.getAnnotations()) {
-            ResolvedAnnotationDeclaration resolveAnno;
             try {
-                resolveAnno = anno.resolve();
+                ResolvedAnnotationDeclaration resolveAnno = anno.resolve();
+                if (isKindOfRequestMapping(resolveAnno)) {
+                    return true;
+                }
             } catch (UnsolvedSymbolException e) {
                 log.warn(e);
-                continue;
-            }
-            if (isKindOfRequestMapping(resolveAnno)) {
-                return true;
             }
         }
         return false;
     }
 
+    private boolean hasNoneKindOfController(ClassOrInterfaceDeclaration clazz) {
+        return !clazz.getAnnotationByName("Controller").isPresent() && !clazz.getAnnotationByName("RestController")
+                .isPresent();
+    }
+
     private boolean isKindOfController(ResolvedAnnotationDeclaration resolvedAnno) {
         return QualifierConstants.CONTROLLER.equals(resolvedAnno.getId()) || resolvedAnno
                 .hasDirectlyAnnotation(QualifierConstants.CONTROLLER);
+    }
+
+    private boolean hasNoneKindOfRequestMapping(NodeWithAnnotations<?> node) {
+        return !node.getAnnotationByName("RequestMapping").isPresent() && !node.getAnnotationByName("DeleteMapping")
+                .isPresent() && !node.getAnnotationByName("GetMapping").isPresent() && !node
+                .getAnnotationByName("PatchMapping").isPresent() && !node.getAnnotationByName("PostMapping").isPresent()
+                && !node.getAnnotationByName("PutMapping").isPresent();
     }
 
     private boolean isKindOfRequestMapping(ResolvedAnnotationDeclaration resolvedAnno) {
