@@ -93,8 +93,6 @@ public class HandlerProcessor {
                         entry.pathVariables(pathVariables);
 
                         result.add(entry);
-//                        log.info("hanlder {} collected.",
-//                                shortestQualifiedSignature.substring(0, shortestQualifiedSignature.lastIndexOf('(')));
                     });
         });
         log.info("Handler process complete. {} handlers has collected.", result.size());
