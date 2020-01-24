@@ -12,8 +12,6 @@ a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generato
 
 - a sample project
 
-- war package
-
 
 
 ## DONE
@@ -25,6 +23,8 @@ a *Spring Web MVC* oriented, *Java Parser* (JP) based, web API document generato
 - url, e.g.: `/user?userName=`
 
 - body, e.g.: `@RequestBody String itemName`
+
+- war package
 
 
 
