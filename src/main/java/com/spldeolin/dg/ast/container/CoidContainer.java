@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Deolin 2019-12-06
  */
 @Log4j2
-public class ClassContainer {
+public class CoidContainer {
 
     @Getter
     private Collection<ClassOrInterfaceDeclaration> all = Lists.newLinkedList();
@@ -21,12 +21,10 @@ public class ClassContainer {
     private Map<String, ClassOrInterfaceDeclaration> byQualifier;
 
     @Getter
-    private static final ClassContainer instance = new ClassContainer();
+    private static final CoidContainer instance = new CoidContainer();
 
-    private ClassContainer() {
-        CuContainer.getInstance().getAll().forEach(
-                cu -> cu.findAll(ClassOrInterfaceDeclaration.class).stream().filter(one -> !one.isInterface())
-                        .forEach(classDeclaration -> all.add(classDeclaration)));
+    private CoidContainer() {
+        CuContainer.getInstance().getAll().forEach(cu -> all.addAll(cu.findAll(ClassOrInterfaceDeclaration.class)));
         log.info("(Summary) Collected {} class COID.", all.size());
     }
 

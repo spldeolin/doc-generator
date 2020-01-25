@@ -15,7 +15,7 @@ import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
-import com.spldeolin.dg.ast.container.ClassContainer;
+import com.spldeolin.dg.ast.container.CoidContainer;
 import com.spldeolin.dg.core.enums.FieldJsonType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.processor.result.BodyProcessResult;
@@ -68,7 +68,7 @@ public class BodyProcessor {
 
     private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
-        ClassOrInterfaceDeclaration coid = ClassContainer.getInstance().getByQualifier()
+        ClassOrInterfaceDeclaration coid = CoidContainer.getInstance().getByQualifier()
                 .get(describe);
 
         JsonSchema jsonSchema;

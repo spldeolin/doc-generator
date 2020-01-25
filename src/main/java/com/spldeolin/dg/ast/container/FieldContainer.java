@@ -28,7 +28,7 @@ public class FieldContainer {
     private static final FieldContainer instance = new FieldContainer();
 
     private FieldContainer() {
-        ClassContainer.getInstance().getByQualifier()
+        CoidContainer.getInstance().getByQualifier()
                 .forEach((classQualifier, coid) -> all.addAll(coid.findAll(FieldDeclaration.class)));
         log.info("(Summary) Collected {} FieldDeclaration.", all.size());
     }

@@ -16,6 +16,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
+import com.spldeolin.dg.ast.container.CoidContainer;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
@@ -30,12 +31,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HandlerProcessor {
 
-    public Collection<HandlerProcessResult> process(Collection<ClassOrInterfaceDeclaration> classes,
-            HandlerFilter handlerFilter, ResponseBodyTypeParser hanlderResultTypeParser) {
+    public Collection<HandlerProcessResult> process(HandlerFilter handlerFilter,
+            ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
         log.info("Handler processing...");
-        classes.stream().filter(clazz -> isFilteredController(clazz, handlerFilter)).forEach(controller -> {
+        Collection<ClassOrInterfaceDeclaration> coids = CoidContainer.getInstance().getAll();
+        coids.stream().filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
 
             // reflect controller
             Class<?> reflectController;
@@ -106,17 +108,17 @@ public class HandlerProcessor {
         return declaredMethods;
     }
 
-    private boolean isFilteredController(ClassOrInterfaceDeclaration clazz, HandlerFilter handlerFilter) {
+    private boolean isFilteredController(ClassOrInterfaceDeclaration coid, HandlerFilter handlerFilter) {
         // is filtered
-        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(clazz)) {
+        if (!MoreObjects.firstNonNull(handlerFilter, new DefaultHandlerFilter()).filter(coid)) {
             return false;
         }
 
         // is controller
-        if (hasNoneKindOfController(clazz) && hasNoneKindOfRequestMapping(clazz)) {
+        if (hasNoneKindOfController(coid) && hasNoneKindOfRequestMapping(coid)) {
             return false;
         }
-        for (AnnotationExpr anno : clazz.getAnnotations()) {
+        for (AnnotationExpr anno : coid.getAnnotations()) {
             try {
                 ResolvedAnnotationDeclaration resolvedAnno = anno.resolve();
                 if (isKindOfController(resolvedAnno) || isKindOfRequestMapping(resolvedAnno)) {
