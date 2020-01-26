@@ -20,9 +20,10 @@ import com.google.common.collect.Lists;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.domain.UriFieldDomain;
-import com.spldeolin.dg.core.enums.FieldJsonType;
+import com.spldeolin.dg.core.enums.FieldType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.enums.StringFormatType;
+import com.spldeolin.dg.core.util.ResolvedTypes;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.extern.log4j.Log4j2;
 
@@ -61,7 +62,7 @@ public class RequestParamProcessor {
             }
             field.fieldName(name).required(required);
 
-            FieldJsonType jsonType;
+            FieldType jsonType;
             NumberFormatType numberFormat = null;
             StringBuilder stringFormat = new StringBuilder();
             ResolvedType type = parameter.getType().resolve();
@@ -69,7 +70,7 @@ public class RequestParamProcessor {
             JsonSchema jsonSchema = generateSchema(describe);
             if (jsonSchema != null && jsonSchema.isValueTypeSchema()) {
                 if (jsonSchema.isStringSchema()) {
-                    jsonType = FieldJsonType.string;
+                    jsonType = FieldType.string;
                     parameter.getAnnotationByClass(DateTimeFormat.class)
                             .ifPresent(dateTimeFormat -> dateTimeFormat.ifNormalAnnotationExpr(normal -> {
                                 normal.getPairs().forEach(pair -> {
@@ -83,7 +84,7 @@ public class RequestParamProcessor {
                     }
 
                 } else if (jsonSchema.isNumberSchema()) {
-                    jsonType = FieldJsonType.number;
+                    jsonType = FieldType.number;
 
                     if (!jsonSchema.isIntegerSchema()) {
                         numberFormat = NumberFormatType.f1oat;
@@ -95,10 +96,12 @@ public class RequestParamProcessor {
                         numberFormat = NumberFormatType.inT;
                     }
                 } else if (jsonSchema.isBooleanSchema()) {
-                    jsonType = FieldJsonType.bool;
+                    jsonType = FieldType.bool;
                 } else {
                     throw new RuntimeException("impossible unless bug");
                 }
+            } else if (ResolvedTypes.isOrLike(type, QualifierConstants.MULTIPART_FILE)) {
+                jsonType = FieldType.file;
             } else {
                 log.warn("暂不支持解析ValueSchema以外的@RequestParam [{}]", parameter);
                 continue;

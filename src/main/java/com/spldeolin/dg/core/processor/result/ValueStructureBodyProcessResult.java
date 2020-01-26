@@ -1,6 +1,6 @@
 package com.spldeolin.dg.core.processor.result;
 
-import com.spldeolin.dg.core.enums.FieldJsonType;
+import com.spldeolin.dg.core.enums.FieldType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,7 +21,7 @@ public class ValueStructureBodyProcessResult extends BodyProcessResult {
     /**
      * struct=val时有效
      */
-    private FieldJsonType valueStructureJsonType;
+    private FieldType valueStructureJsonType;
 
     /**
      * struct=val时有效

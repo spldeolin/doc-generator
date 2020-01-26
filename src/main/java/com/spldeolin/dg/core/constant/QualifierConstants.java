@@ -31,4 +31,6 @@ public interface QualifierConstants {
 
     String PATH_VARIABLE = "org.springframework.web.bind.annotation.PathVariable";
 
+    String MULTIPART_FILE = "org.springframework.web.multipart.MultipartFile";
+
 }

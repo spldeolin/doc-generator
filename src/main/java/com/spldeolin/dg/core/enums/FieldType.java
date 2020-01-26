@@ -8,7 +8,7 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum FieldJsonType {
+public enum FieldType {
 
     string("string"),
 
@@ -24,7 +24,9 @@ public enum FieldJsonType {
 
     booleanArray("booleanArray"),
 
-    objectArray("objectArray");
+    objectArray("objectArray"),
+
+    file("file");
 
     private String value;
 

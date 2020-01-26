@@ -1,7 +1,7 @@
 package com.spldeolin.dg.core.domain;
 
 import java.util.Collection;
-import com.spldeolin.dg.core.enums.FieldJsonType;
+import com.spldeolin.dg.core.enums.FieldType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -16,11 +16,11 @@ public class UriFieldDomain {
     private String fieldName;
 
     /**
-     * @see FieldJsonType
+     * @see FieldType
      * @see ApiDomain#pathVariableFields() string, number, boolean
      * @see ApiDomain#requestParamFields() string, number, boolean
      */
-    private FieldJsonType jsonType;
+    private FieldType jsonType;
 
     private String stringFormat;
 

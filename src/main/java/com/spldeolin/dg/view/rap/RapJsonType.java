@@ -1,6 +1,6 @@
 package com.spldeolin.dg.view.rap;
 
-import com.spldeolin.dg.core.enums.FieldJsonType;
+import com.spldeolin.dg.core.enums.FieldType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -29,7 +29,7 @@ public enum RapJsonType {
 
     private String name;
 
-    public static RapJsonType convert(FieldJsonType typeName) {
+    public static RapJsonType convert(FieldType typeName) {
         switch (typeName) {
             case string:
                 return STRING;
