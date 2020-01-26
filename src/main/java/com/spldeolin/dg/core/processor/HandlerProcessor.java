@@ -35,7 +35,6 @@ public class HandlerProcessor {
             ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
-        log.info("Handler processing...");
         Collection<ClassOrInterfaceDeclaration> coids = CoidContainer.getInstance().getAll();
         coids.stream().filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
 
@@ -97,7 +96,7 @@ public class HandlerProcessor {
                         result.add(entry);
                     });
         });
-        log.info("Handler process complete. {} handlers has collected.", result.size());
+        log.info("(Summary) {} handlers collected.", result.size());
         return result;
     }
 

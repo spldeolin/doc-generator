@@ -25,7 +25,7 @@ public class CoidContainer {
 
     private CoidContainer() {
         CuContainer.getInstance().getAll().forEach(cu -> all.addAll(cu.findAll(ClassOrInterfaceDeclaration.class)));
-        log.info("(Summary) Collected {} class COID.", all.size());
+        log.info("(Summary) Collected {} COID.", all.size());
     }
 
     public Map<String, ClassOrInterfaceDeclaration> getByQualifier() {
