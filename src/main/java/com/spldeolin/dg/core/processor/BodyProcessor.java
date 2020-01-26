@@ -14,8 +14,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
-import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.ast.container.CoidContainer;
+import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.enums.FieldType;
 import com.spldeolin.dg.core.enums.NumberFormatType;
 import com.spldeolin.dg.core.processor.result.BodyProcessResult;
@@ -23,6 +23,7 @@ import com.spldeolin.dg.core.processor.result.ChaosStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.KeyValueStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.ValueStructureBodyProcessResult;
 import com.spldeolin.dg.core.processor.result.VoidStructureBodyProcessResult;
+import com.spldeolin.dg.core.util.ResolvedTypes;
 import com.spldeolin.dg.core.util.Strings;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -68,8 +69,7 @@ public class BodyProcessor {
 
     private BodyProcessResult tryProcessNonArrayLikeType(ResolvedType type) {
         String describe = type.describe();
-        ClassOrInterfaceDeclaration coid = CoidContainer.getInstance().getByQualifier()
-                .get(describe);
+        ClassOrInterfaceDeclaration coid = CoidContainer.getInstance().getByQualifier().get(describe);
 
         JsonSchema jsonSchema;
         if (coid == null) {
@@ -127,11 +127,10 @@ public class BodyProcessor {
     private boolean isJucAndElementTypeExplicit(ResolvedType type) {
         if (type.isReferenceType()) {
             ResolvedReferenceType referenceType = type.asReferenceType();
-            if (referenceType.getAllInterfacesAncestors().stream()
-                    .anyMatch(ancestor -> QualifierConstants.COLLECTION.equals(ancestor.getId()))) {
-                if (referenceType.getTypeParametersMap().size() == 1) {
-                    return true;
-                }
+            // is J.U.C
+            if (ResolvedTypes.isOrLike(referenceType, QualifierConstants.COLLECTION)) {
+                // is element type explicit or not
+                return referenceType.getTypeParametersMap().size() == 1;
             }
         }
         return false;
