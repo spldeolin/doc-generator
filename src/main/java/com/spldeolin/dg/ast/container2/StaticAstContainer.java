@@ -21,39 +21,39 @@ public class StaticAstContainer {
 
     private static Map<Path, AstContainer> fromCustomPath = Maps.newHashMap();
 
-    public Path getPath() {
+    public static Path getPath() {
         return fromConfigPath.getPath();
     }
 
-    public Collection<CompilationUnit> getCompilationUnits() {
+    public static Collection<CompilationUnit> getCompilationUnits() {
         return fromConfigPath.getCompilationUnits();
     }
 
-    public Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
+    public static Collection<ClassOrInterfaceDeclaration> getClassOrInterfaceDeclarations() {
         return fromConfigPath.getClassOrInterfaceDeclarations();
     }
 
-    public ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {
+    public static ClassOrInterfaceDeclaration getClassOrInterfaceDeclaration(String qualifier) {
         return fromConfigPath.getClassOrInterfaceDeclaration(qualifier);
     }
 
-    public Collection<EnumDeclaration> getEnumDeclarations() {
+    public static Collection<EnumDeclaration> getEnumDeclarations() {
         return fromConfigPath.getEnumDeclarations();
     }
 
-    public EnumDeclaration getEnumDeclaration(String qualifier) {
+    public static EnumDeclaration getEnumDeclaration(String qualifier) {
         return fromConfigPath.getEnumDeclaration(qualifier);
     }
 
-    public Collection<VariableDeclarator> getFieldVariableDeclarators() {
+    public static Collection<VariableDeclarator> getFieldVariableDeclarators() {
         return fromConfigPath.getFieldVariableDeclarators();
     }
 
-    public VariableDeclarator getFieldVariableDeclarator(String qualifier) {
+    public static VariableDeclarator getFieldVariableDeclarator(String qualifier) {
         return fromConfigPath.getFieldVariableDeclarator(qualifier);
     }
 
-    public AstContainer getAstContainerByCustomPath(Path path) {
+    public static AstContainer getAstContainerByCustomPath(Path path) {
         AstContainer container = fromCustomPath.get(path);
         if (container == null) {
             container = new AstContainer(path);
