@@ -12,7 +12,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.ast.container.FieldVariableContainer;
+import com.spldeolin.dg.ast.container2.StaticAstContainer;
 import com.spldeolin.dg.ast.exception.FieldAbsentException;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.BodyFieldDomain;
@@ -58,7 +58,8 @@ public class BodyFieldProcessor {
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
 
-            VariableDeclarator fieldVar = FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier);
+            VariableDeclarator fieldVar = StaticAstContainer.getFieldVariableDeclarator(fieldVarQualifier);
+//                    FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier);
             if (fieldVar == null) {
                 /*
                 被JsonSchema认为有这个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：

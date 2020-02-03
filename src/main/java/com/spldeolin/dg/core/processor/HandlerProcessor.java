@@ -16,7 +16,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
-import com.spldeolin.dg.ast.container.CoidContainer;
+import com.spldeolin.dg.ast.container2.StaticAstContainer;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
@@ -35,7 +35,8 @@ public class HandlerProcessor {
             ResponseBodyTypeParser hanlderResultTypeParser) {
         Collection<HandlerProcessResult> result = Lists.newLinkedList();
 
-        Collection<ClassOrInterfaceDeclaration> coids = CoidContainer.getInstance().getAll();
+        Collection<ClassOrInterfaceDeclaration> coids = StaticAstContainer.getClassOrInterfaceDeclarations();
+//                CoidContainer.getInstance().getAll();
         coids.stream().filter(coid -> isFilteredController(coid, handlerFilter)).forEach(controller -> {
 
             // reflect controller

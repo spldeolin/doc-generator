@@ -51,7 +51,7 @@ class CompilationUnitCollector {
         }
 
         if (count > 0) {
-            log.info("Parsed and collected {} CompilationUnit from [{}] elapsing {}ms.", count,
+            log.info("(Detail) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", count,
                     "../" + Conf.PROJECT_PATH.relativize(sourceRoot.getRoot()), System.currentTimeMillis() - start);
         }
     }
