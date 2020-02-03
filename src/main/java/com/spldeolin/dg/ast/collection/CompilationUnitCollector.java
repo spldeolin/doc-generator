@@ -1,10 +1,10 @@
 package com.spldeolin.dg.ast.collection;
 
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.utils.CollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.collect.Lists;
@@ -22,18 +22,18 @@ import lombok.extern.log4j.Log4j2;
 class CompilationUnitCollector {
 
     Collection<CompilationUnit> collect(Path path) {
-        Collection<CompilationUnit> result = Lists.newLinkedList();
         long start = System.currentTimeMillis();
-        collectSoruceRoots(path).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
+        Collection<CompilationUnit> result = Lists.newLinkedList();
+        CollectionStrategy strategy = new ClassLoaderCollectionStrategy(WarOrFatJarClassLoader.classLoader);
+        collectSoruceRoots(path, strategy).forEach(sourceRoot -> parseSourceRoot(sourceRoot, result));
         log.info("(Summary) {} CompilationUnit has parsed and collected from [{}] elapsing {}ms.", result.size(),
                 path.toAbsolutePath(), System.currentTimeMillis() - start);
         return result;
     }
 
 
-    private Collection<SourceRoot> collectSoruceRoots(Path path) {
-        URLClassLoader classloader = WarOrFatJarClassLoader.classLoader;
-        ProjectRoot projectRoot = new ClassLoaderCollectionStrategy(classloader).collect(path);
+    private Collection<SourceRoot> collectSoruceRoots(Path path, CollectionStrategy collectionStrategy) {
+        ProjectRoot projectRoot = collectionStrategy.collect(path);
         projectRoot.addSourceRoot(path);
         return projectRoot.getSourceRoots();
     }
@@ -46,7 +46,7 @@ class CompilationUnitCollector {
                 parseResult.getResult().ifPresent(all::add);
                 count++;
             } else {
-                log.warn("无法正确被解析，跳过[{}]", parseResult.getProblems());
+                log.warn("Parse with problem, ignore and continue. [{}]", parseResult.getProblems());
             }
         }
 

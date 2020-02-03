@@ -10,9 +10,11 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.spldeolin.dg.ast.exception.CuAbsentException;
 import com.spldeolin.dg.ast.exception.FieldAbsentException;
 import com.spldeolin.dg.ast.exception.ParentAbsentException;
 import com.spldeolin.dg.ast.exception.QualifierAbsentException;
+import com.spldeolin.dg.ast.exception.StroageAbsentException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -68,6 +70,14 @@ class FieldVariableDeclaratorCollector {
         String fieldVarQulifier = Joiner.on(".")
                 .join(((TypeDeclaration<?>) parent).getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
                         var.getNameAsString());
+
+        if (map.get(fieldVarQulifier) != null) {
+            // 多module的maven项目中，这样的不规范情况是可能发生的
+            log.warn("Qualifier [{}] is not unique, overwrite collected VariableDeclarator parsed form storage [{}].",
+                    fieldVarQulifier,
+                    map.get(fieldVarQulifier).findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
+                            .orElseThrow(StroageAbsentException::new).getPath());
+        }
         map.put(fieldVarQulifier, var);
     }
 

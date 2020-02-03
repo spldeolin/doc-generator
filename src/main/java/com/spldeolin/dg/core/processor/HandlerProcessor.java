@@ -97,7 +97,7 @@ public class HandlerProcessor {
                         result.add(entry);
                     });
         });
-        log.info("(Summary) {} handlers collected.", result.size());
+        log.info("(Summary) {} Spring MVC handlers has collected.", result.size());
         return result;
     }
 

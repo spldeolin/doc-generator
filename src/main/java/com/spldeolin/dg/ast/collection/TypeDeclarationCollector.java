@@ -2,12 +2,13 @@ package com.spldeolin.dg.ast.collection;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.spldeolin.dg.ast.exception.CuAbsentException;
 import com.spldeolin.dg.ast.exception.QualifierAbsentException;
+import com.spldeolin.dg.ast.exception.StroageAbsentException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -52,12 +53,15 @@ class TypeDeclarationCollector<T extends TypeDeclaration<?>> {
 
     private void putAll(Collection<T> coids, Map<String, T> map) {
         for (T coid : coids) {
-            Optional<String> qualifier = coid.getFullyQualifiedName();
-            if (qualifier.isPresent()) {
-                map.put(qualifier.get(), coid);
-            } else {
-                throw new QualifierAbsentException();
+            String qualifier = coid.getFullyQualifiedName().orElseThrow(QualifierAbsentException::new);
+            if (map.get(qualifier) != null) {
+                // 多module的maven项目中，这样的不规范情况是可能发生的
+                log.warn("Qualifier [{}] is not unique, overwrite collected {} parsed form storage [{}].", qualifier,
+                        type.getSimpleName(),
+                        map.get(qualifier).findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
+                                .orElseThrow(StroageAbsentException::new).getPath());
             }
+            map.put(qualifier, coid);
         }
     }
 
