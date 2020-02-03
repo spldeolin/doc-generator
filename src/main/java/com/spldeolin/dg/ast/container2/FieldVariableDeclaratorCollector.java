@@ -1,0 +1,74 @@
+package com.spldeolin.dg.ast.container2;
+
+import java.util.Collection;
+import java.util.Map;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.spldeolin.dg.ast.exception.FieldAbsentException;
+import com.spldeolin.dg.ast.exception.ParentAbsentException;
+import com.spldeolin.dg.ast.exception.QualifierAbsentException;
+import lombok.extern.log4j.Log4j2;
+
+/**
+ * FieldDeclaration对象下VariableDeclarator对象的收集器
+ *
+ * @author Deolin 2020-02-03
+ */
+@Log4j2
+class FieldVariableDeclaratorCollector {
+
+    Collection<VariableDeclarator> collectIntoCollection(Collection<CompilationUnit> cus) {
+        Collection<VariableDeclarator> result = Lists.newLinkedList();
+        for (CompilationUnit cu : cus) {
+            for (FieldDeclaration field : cu.findAll(FieldDeclaration.class)) {
+                result.addAll(field.getVariables());
+            }
+        }
+        log.info("(Summary) {} VariableDeclarator in field has collected into Collection.", result.size());
+        return result;
+    }
+
+    Map<String, VariableDeclarator> collectIntoMapByCompilationUnit(Collection<CompilationUnit> cus) {
+        Map<String, VariableDeclarator> result = Maps.newHashMap();
+        for (CompilationUnit cu : cus) {
+            for (FieldDeclaration field : cu.findAll(FieldDeclaration.class)) {
+                for (VariableDeclarator var : field.getVariables()) {
+                    put(field, var, result);
+                }
+            }
+        }
+        log.info("(Summary) {} VariableDeclarator in field has collected into Map.", result.size());
+        return result;
+    }
+
+    Map<String, VariableDeclarator> collectIntoMapByCollectedOnes(Collection<VariableDeclarator> fieldVars) {
+        Map<String, VariableDeclarator> result = Maps.newHashMapWithExpectedSize(fieldVars.size());
+        for (VariableDeclarator var : fieldVars) {
+            FieldDeclaration field = var.findAncestor(FieldDeclaration.class).orElseThrow(FieldAbsentException::new);
+            put(field, var, result);
+        }
+        log.info("(Summary) {} VariableDeclarator in field has collected into Map.", result.size());
+        return result;
+    }
+
+    private void put(FieldDeclaration field, VariableDeclarator var, Map<String, VariableDeclarator> map) {
+        Node parent = field.getParentNode().orElseThrow(ParentAbsentException::new);
+        if (!(parent instanceof TypeDeclaration)) {
+            // 例如这个field在一个匿名内部类中，那么parent就是ObjectCreationExpr..
+            // 由于是在匿名类中，所有没有全限定名，无法通过byQuailfier的方式获取到，自然也不用收集
+            return;
+        }
+
+        String fieldVarQulifier = Joiner.on(".")
+                .join(((TypeDeclaration<?>) parent).getFullyQualifiedName().orElseThrow(QualifierAbsentException::new),
+                        var.getNameAsString());
+        map.put(fieldVarQulifier, var);
+    }
+
+}
