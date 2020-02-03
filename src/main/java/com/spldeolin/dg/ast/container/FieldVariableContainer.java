@@ -3,6 +3,7 @@ package com.spldeolin.dg.ast.container;
 import java.util.Collection;
 import java.util.Map;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.base.Joiner;
@@ -28,7 +29,8 @@ public class FieldVariableContainer {
     private static final FieldVariableContainer instance = new FieldVariableContainer();
 
     private FieldVariableContainer() {
-        FieldContainer.getInstance().getAll().forEach(cu -> all.addAll(cu.findAll(VariableDeclarator.class)));
+        CuContainer.getInstance().getAll()
+                .forEach(cu -> cu.findAll(FieldDeclaration.class).forEach(field -> all.addAll(field.getVariables())));
         log.info("(Summary) Collected {} field VariableDeclarator.", all.size());
     }
 

@@ -10,9 +10,10 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ValueTypeSchema;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.ast.container.FieldContainer;
 import com.spldeolin.dg.ast.container.FieldVariableContainer;
+import com.spldeolin.dg.ast.exception.FieldAbsentException;
 import com.spldeolin.dg.core.domain.ApiDomain;
 import com.spldeolin.dg.core.domain.BodyFieldDomain;
 import com.spldeolin.dg.core.enums.FieldType;
@@ -56,31 +57,30 @@ public class BodyFieldProcessor {
             BodyFieldDomain childFieldDto = new BodyFieldDomain();
             String fieldVarQualifier =
                     StringUtils.removeStart(schema.getId(), "urn:jsonschema:").replace(':', '.') + "." + childFieldName;
-            FieldDeclaration fieldDeclaration = FieldContainer.getInstance().getByVariableQualifier()
-                    .get(fieldVarQualifier);
-            if (fieldDeclaration == null) {
+
+            VariableDeclarator fieldVar = FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier);
+            if (fieldVar == null) {
                 /*
-                被JsonSchema认为是个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
-                    com.nebulapaas.base.po.PagePO.offset
+                被JsonSchema认为有这个field，但不存在field时，会出现这种fieldDeclaration=null的情况，目前已知的有：
+                    类中有getMyField方法，但没有myField字段
                 忽略它们即可
                  */
                 return;
             }
 
-            childFieldDto.fieldName(childFieldName);
+            FieldDeclaration field = fieldVar.findAncestor(FieldDeclaration.class)
+                    .orElseThrow(FieldAbsentException::new);
 
-            String comment = Javadocs
-                    .extractFirstLine(FieldContainer.getInstance().getByVariableQualifier().get(fieldVarQualifier));
-            childFieldDto.description(comment);
+            childFieldDto.fieldName(childFieldName);
+            childFieldDto.description(Javadocs.extractFirstLine(field));
 
             childFieldDto.nullable(true);
-            if (fieldDeclaration.getAnnotationByName("NotNull").isPresent() || fieldDeclaration
-                    .getAnnotationByName("NotEmpty").isPresent() || fieldDeclaration.getAnnotationByName("NotBlank")
-                    .isPresent()) {
+            if (field.getAnnotationByName("NotNull").isPresent() || field.getAnnotationByName("NotEmpty").isPresent()
+                    || field.getAnnotationByName("NotBlank").isPresent()) {
                 childFieldDto.nullable(false);
             }
 
-            childFieldDto.validators(new ValidatorProcessor().process(fieldDeclaration));
+            childFieldDto.validators(new ValidatorProcessor().process(field));
 
             if (childSchema.isValueTypeSchema()) {
                 childFieldDto.jsonType(calcValueDataType(childSchema.asValueTypeSchema(), false));
@@ -112,14 +112,13 @@ public class BodyFieldProcessor {
             }
 
             if (childFieldDto.jsonType() == FieldType.number) {
-                String javaType = FieldVariableContainer.getInstance().getByQualifier().get(fieldVarQualifier)
-                        .getTypeAsString();
+                String javaType = fieldVar.getTypeAsString();
                 childFieldDto.numberFormat(calcNumberFormat(javaType));
             }
 
             if (childFieldDto.jsonType() == FieldType.string) {
                 childFieldDto.stringFormat(StringFormatType.normal.getValue());
-                fieldDeclaration.getAnnotationByClass(JsonFormat.class)
+                field.getAnnotationByClass(JsonFormat.class)
                         .ifPresent(jsonFormat -> jsonFormat.asNormalAnnotationExpr().getPairs().forEach(pair -> {
                             if (pair.getNameAsString().equals("pattern")) {
                                 childFieldDto.stringFormat(
