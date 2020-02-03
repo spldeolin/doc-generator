@@ -14,7 +14,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.collect.Iterables;
 import com.spldeolin.dg.Conf;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
-import com.spldeolin.dg.ast.container2.StaticAstContainer;
+import com.spldeolin.dg.ast.collection.StaticAstContainer;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.enums.FieldType;
 import com.spldeolin.dg.core.enums.NumberFormatType;

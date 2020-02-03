@@ -1,4 +1,4 @@
-package com.spldeolin.dg.ast.container2;
+package com.spldeolin.dg.ast.collection;
 
 import java.util.Collection;
 import java.util.Map;

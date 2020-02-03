@@ -26,7 +26,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.spldeolin.dg.ast.container2.StaticAstContainer;
+import com.spldeolin.dg.ast.collection.StaticAstContainer;
 import com.spldeolin.dg.core.domain.ValidatorDomain;
 import com.spldeolin.dg.core.util.Javadocs;
 import lombok.extern.log4j.Log4j2;

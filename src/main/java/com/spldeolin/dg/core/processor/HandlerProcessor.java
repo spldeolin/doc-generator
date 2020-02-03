@@ -16,7 +16,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.spldeolin.dg.ast.classloader.WarOrFatJarClassLoader;
-import com.spldeolin.dg.ast.container2.StaticAstContainer;
+import com.spldeolin.dg.ast.collection.StaticAstContainer;
 import com.spldeolin.dg.core.constant.QualifierConstants;
 import com.spldeolin.dg.core.processor.result.HandlerProcessResult;
 import com.spldeolin.dg.core.strategy.DefaultHandlerFilter;
