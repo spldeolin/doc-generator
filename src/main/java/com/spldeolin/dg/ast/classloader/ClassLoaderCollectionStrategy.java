@@ -11,6 +11,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -33,7 +34,8 @@ public class ClassLoaderCollectionStrategy implements CollectionStrategy {
     public ClassLoaderCollectionStrategy(ClassLoader classLoader) {
         typeSolver = new CombinedTypeSolver(new ClassLoaderTypeSolver(classLoader));
         typeSolver.add(new ReflectionTypeSolver(false));
-        parserConfiguration = new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
+        parserConfiguration = StaticJavaParser.getConfiguration();
+        parserConfiguration.setSymbolResolver(new JavaSymbolSolver(typeSolver));
     }
 
     @Override
