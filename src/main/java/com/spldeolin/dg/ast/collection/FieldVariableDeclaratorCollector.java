@@ -14,7 +14,7 @@ import com.spldeolin.dg.ast.exception.CuAbsentException;
 import com.spldeolin.dg.ast.exception.FieldAbsentException;
 import com.spldeolin.dg.ast.exception.ParentAbsentException;
 import com.spldeolin.dg.ast.exception.QualifierAbsentException;
-import com.spldeolin.dg.ast.exception.StroageAbsentException;
+import com.spldeolin.dg.ast.exception.StorageAbsentException;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -76,7 +76,7 @@ class FieldVariableDeclaratorCollector {
             log.warn("Qualifier [{}] is not unique, overwrite collected VariableDeclarator parsed form storage [{}].",
                     fieldVarQulifier,
                     map.get(fieldVarQulifier).findCompilationUnit().orElseThrow(CuAbsentException::new).getStorage()
-                            .orElseThrow(StroageAbsentException::new).getPath());
+                            .orElseThrow(StorageAbsentException::new).getPath());
         }
         map.put(fieldVarQulifier, var);
     }
