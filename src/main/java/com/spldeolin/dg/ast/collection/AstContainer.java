@@ -7,14 +7,12 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * 存放抽象语法树节点的容器
  *
  * @author Deolin 2020-02-03
  */
-@Log4j2
 public class AstContainer {
 
     private Path path;
